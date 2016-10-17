@@ -16,14 +16,14 @@ This docker image is part of the **[devilbox](https://github.com/cytopia/devilbo
 
 ## Usage
 
-**Serve static files**
+**1. Serve static files**
 
 Mount your local directort `~/my-host-www` into the docker and server those files.
 ```bash
 $ docker run -i -p 80:80 -v ~/my-host-www:/var/www/html -t cytopia/nginx-stable
 ```
 
-**Start with PHP-FPM**
+**2. Server PHP files with PHP-FPM**
 
 Note, for this to work, the `~/my-host-www` dir must be mounted into the nginx docker as well as into the php-fpm docker.
 ```bash
@@ -41,7 +41,7 @@ $ docker run -i \
     -t cytopia/nginx-stable
 ```
 
-**Fully functional LEMP stack**
+**3. Fully functional LEMP stack**
 
 Same as above, but also add a MySQL docker and link it into Nginx.
 ```bash
@@ -49,7 +49,7 @@ Same as above, but also add a MySQL docker and link it into Nginx.
 # Make sure to
 #   1. Set the socket dir, which will be needed by the PHP-FPM docker.
 #   2. Mount the socket dir to the host, as it needs to be mounted by PHP-FPM
-$ docker run -i \
+$ docker run -d \
     -p 3306 \
     -v ~/tmp/host-mysql-sock:/tmp/docker-mysql-sock \
     -e MYSQL_SOCKET_DIR=/tmp/docker-mysql-sock \
@@ -90,9 +90,17 @@ $ docker run -i \
     -t cytopia/nginx-stable
 ```
 
-**Feature-rich pre-configured docker-compose setup**
+**4. Ultimate pre-configured docker-compose setup**
 
-Have a look at the **[devilbox](https://github.com/cytopia/devilbox) for a fully-customizable docker-compose variant.
+Have a look at the **[devilbox](https://github.com/cytopia/devilbox)** for a fully-customizable docker-compose variant.
+
+It offers pre-configured mass virtual hosts and an intranet.
+
+It allows any of the following combinations:
+
+* PHP 5.4, PHP 5.5, PHP 5.6, PHP 7.0 and PHP 7.1
+* MySQL 5.5, MySQL 5.6, MySQL 5.7, MariaDB 5 and MariaDB 10
+* Apache 2.2, Apache 2.4, Nginx stable and Nginx mainline
 
 
 ## Options
