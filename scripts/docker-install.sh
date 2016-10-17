@@ -229,11 +229,8 @@ run "yum -y remove \
 
 
 
-
-
-
 ###
-### Configure Apache
+### Configure Nginx
 ###
 ### (Remove all custom config)
 ###
@@ -246,11 +243,6 @@ else
 	run "rm -rf /etc/nginx/conf.d/*"
 fi
 
-if [ ! -d "/etc/nginx/server.d/" ]; then
-	run "mkdir -p /etc/nginx/server.d/"
-else
-	run "rm -rf /etc/nginx/server.d/*"
-fi
 
 # Add Base Configuration
 {
@@ -284,11 +276,9 @@ fi
 	echo "    access_log    /var/log/nginx/access.log  main;";
 	echo;
 	echo;
-	echo "    # Custom http overwrite includes";
+	echo "    # Custom includes";
 	echo "    include       /etc/nginx/conf.d/*.conf;";
 	echo;
-	echo "    # Custom server overwrite includes";
-	echo "    include       /etc/nginx/server.d/*.conf;";
 	echo "}";
 	echo;
 } > "${HTTPD_CONF}"
@@ -308,7 +298,7 @@ fi
 	echo "# Good for sending frequent small bursts of data in real time.";
 	echo "tcp_nodelay   on;";
 	echo;
-} > "/etc/nginx/conf.d/http.conf"
+} > "/etc/nginx/conf.d/http-defaults.conf"
 
 # Add Default vhost Configuration
 {
@@ -336,7 +326,7 @@ fi
 	echo "}";
 	echo;
 
-} > "/etc/nginx/server.d/localhost.conf"
+} > "/etc/nginx/conf.d/localhost.conf"
 
 
 

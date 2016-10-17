@@ -5,6 +5,8 @@
 ###
 DEBUG_COMMANDS=0
 
+HTTPD_CONF="/etc/nginx/nginx.conf"
+
 
 
 ###
@@ -119,6 +121,26 @@ else
 	fi
 fi
 log "info" "Docker date set to: $(date)"
+
+
+###
+### Adjust number of CPU cores to worker_processes
+###
+CPU="$( getconf _NPROCESSORS_ONLN )"
+run "sed -i'' 's/^worker_processes.*$/worker_processes ${CPU};/g' ${HTTPD_CONF}"
+
+
+
+###
+### Add new Nginx configuration dir
+###
+if ! set | grep '^CUSTOM_HTTPD_CONF_DIR='  >/dev/null 2>&1; then
+	log "info" "\$CUSTOM_HTTPD_CONF_DIR not set. No custom include directory added."
+else
+	# Tell nginx to use the following instead of its default /etc/httpd/conf.d
+	log "info" "Adding custom include directory: ${CUSTOM_HTTPD_CONF_DIR}"
+	runsu "sed -i'' 's|/etc/nginx/conf.d|${CUSTOM_HTTPD_CONF_DIR}|g' ${HTTPD_CONF}"
+fi
 
 
 

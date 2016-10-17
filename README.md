@@ -38,7 +38,7 @@ $ docker run -i -t cytopia/nginx-stable
 |----------|------|-------------|
 | DEBUG_COMPOSE_ENTRYPOINT | bool | Show shell commands executed during start.<br/>Value: `0` or `1` |
 | TIMEZONE | string | Set docker OS timezone.<br/>(Example: `Europe/Berlin`) |
-
+| CUSTOM_HTTPD_CONF_DIR | string | Specify a directory inside the docker where Nginx should look for additional config files (`*.conf`).<br/><br/>This will overwrite the default virtual host.<br/><br/>Make sure to mount this directory from your host into the docker. |
 
 ### Default mount points
 
