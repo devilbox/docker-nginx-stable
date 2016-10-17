@@ -132,6 +132,53 @@ run "sed -i'' 's/^worker_processes.*$/worker_processes ${CPU};/g' ${HTTPD_CONF}"
 
 
 ###
+### Prepare PHP-FPM
+###
+if ! set | grep '^PHP_FPM_ENABLE=' >/dev/null 2>&1; then
+	log "info" "\$PHP_FPM_ENABLE not set. PHP-FPM support disabled."
+else
+	if [ "${PHP_FPM_ENABLE}" = "1" ]; then
+
+		# PHP-FPM address
+		if ! set | grep '^PHP_FPM_SERVER_ADDR=' >/dev/null 2>&1; then
+			log "err" "PHP-FPM enabled, but \$PHP_FPM_SERVER_ADDR not set."
+			exit 1
+		fi
+		if [ "${PHP_FPM_SERVER_ADDR}" = "" ]; then
+			log "err" "PHP-FPM enabled, but \$PHP_FPM_SERVER_ADDR is empty."
+			exit 1
+		fi
+
+		# PHP-FPM port
+		if ! set | grep '^PHP_FPM_SERVER_PORT=' >/dev/null 2>&1; then
+			log "err" "PHP-FPM enabled, but \$PHP_FPM_SERVER_PORT not set."
+			exit 1
+		fi
+		if [ "${PHP_FPM_SERVER_PORT}" = "" ]; then
+			log "err" "PHP-FPM enabled, but \$PHP_FPM_SERVER_PORT is empty."
+			exit 1
+		fi
+
+		NGINX_VHOST_CONF="/etc/nginx/conf.d/localhost.conf"
+
+		if [ ! -f "${NGINX_VHOST_CONF}" ]; then
+			log "info" "${NGINX_VHOST_CONF} not available."
+			log "info" "You probably have mounted your custom configuration into: /etc/nginx/conf.d"
+			log "info" "Unable to setup PHP-FPM to the default virtualhost."
+
+		else
+			# Enable
+			log "info" "Enabling PHP-FPM at: ${PHP_FPM_SERVER_ADDR}:${PHP_FPM_SERVER_PORT}"
+			runsu "sed -i'' 's|#__PHP_FPM__||g' ${NGINX_VHOST_CONF}"
+			runsu "sed -i'' 's|__PHP_FPM_ADDR__|${PHP_FPM_SERVER_ADDR}|g' ${NGINX_VHOST_CONF}"
+			runsu "sed -i'' 's|__PHP_FPM_PORT__|${PHP_FPM_SERVER_PORT}|g' ${NGINX_VHOST_CONF}"
+		fi
+
+	fi
+fi
+
+
+###
 ### Add new Nginx configuration dir
 ###
 if ! set | grep '^CUSTOM_HTTPD_CONF_DIR='  >/dev/null 2>&1; then

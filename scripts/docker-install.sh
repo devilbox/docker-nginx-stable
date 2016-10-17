@@ -307,26 +307,65 @@ fi
 	echo "    server_name _;";
 	echo;
 
-	echo "    access_log  /var/log/nginx/localhost.access.log  main;";
+	echo "    root        /var/www/html;";
+	echo "    index       index.html index.htm index.php;";
 	echo;
 
-	echo "    location / {";
-	echo "        root  html;";
-	echo "        index index.html index.htm;";
-	echo "    }";
+	echo "    access_log  /var/log/nginx/localhost-access.log main;";
+	echo "    error_log	  /var/log/nginx/localhost-error.log warn;";
+	echo;
+
+	# PHP-FPM Section
+	# '#__PHP_FPM__' will be replaced within the entrypoint
+	# if ENABLE_PHP_FPM is set tot true.
+	echo "    # Front-controller pattern as recommended by the nginx docs";
+	echo "    #__PHP_FPM__location / {";
+	echo "    #__PHP_FPM__    try_files \$uri \$uri/ /index.php;";
+	echo "    #__PHP_FPM__}";
+	echo;
+	echo "    # Front-controller pattern as recommended by the nginx docs";
+	echo "    #__PHP_FPM__location ~ \.php?\$ {";
+	echo "    #__PHP_FPM__    try_files \$uri = 404;";
+	echo "    #__PHP_FPM__    include fastcgi_params;";
+	echo "    #__PHP_FPM__    fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;";
+	echo "    #__PHP_FPM__    fastcgi_split_path_info ^(.+\.php)(.*)\$;";
+	echo "    #__PHP_FPM__    fastcgi_pass __PHP_FPM_ADDR__:__PHP_FPM_PORT__;";
+	echo "    #__PHP_FPM__    fastcgi_index index.php;";
+	echo "    #__PHP_FPM__    fastcgi_intercept_errors on;";
+	echo "    #__PHP_FPM__}";
 	echo;
 
 	echo "    # deny access to .htaccess files, if Apache's document root";
 	echo "    # concurs with nginx's one";
 	echo "    location ~ /\.ht {";
-	echo "            deny  all;";
+	echo "        deny  all;";
 	echo "    }";
+	echo;
+
+	echo "    # disallow access to git configs path";
+	echo "    location ~ /\.git {";
+	echo "        deny all;";
+	echo "    }";
+
 	echo;
 
 	echo "}";
 	echo;
 
 } > "/etc/nginx/conf.d/localhost.conf"
+
+
+# Add test Page
+if [ ! -d "/var/www/html" ]; then
+	run "mkdir -p /var/www/html"
+else
+	run "rm -rf /var/www/html/*"
+fi
+run "echo '<?php phpversion(); ?>' > /var/www/html/index.php"
+run "echo 'It works' > /var/www/html/index.html"
+run "chown -R ${MY_USER}:${MY_GROUP} /var/www/html"
+
+
 
 
 
