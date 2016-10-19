@@ -1,0 +1,20 @@
+language: python
+python:
+  - 2.7
+
+services:
+  - docker
+
+install:
+  - docker build -t cytopia/nginx-stable .
+  - docker run -d -p 127.0.0.1:80:80 --name nginx-stable cytopia/nginx-stable
+
+#before_script:
+#  - pip install -r requirements.txt
+#  - pip install mock
+#  - pip install requests
+#  - pip install feedparser
+
+script:
+  - docker ps | grep -q nginx-stable
+  #- python tests.py
