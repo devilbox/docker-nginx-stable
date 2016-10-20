@@ -14,7 +14,7 @@ services:
 ###
 env:
   global:
-    - MY_DOCKER_NAME="my_httpd_docker"
+    - MY_DOCKER_NAME="my-httpd-docker"
     - MYSQL_SOCKET_DIR=/tmp/mysql
 
 
@@ -55,7 +55,10 @@ script:
   ##
   ## 01.) Test plain docker
   ##
-  - docker run -p 127.0.0.1:80:80 --name ${MY_DOCKER_NAME} cytopia/${MY_DOCKER_NAME} &
+  - docker run
+      -p 127.0.0.1:80:80
+      -e DEBUG_COMPOSE_ENTRYPOINT=1
+      --name ${MY_DOCKER_NAME} cytopia/${MY_DOCKER_NAME} &
   - sleep 5
 
   - docker ps
@@ -71,7 +74,11 @@ script:
   ##
   ## 02.) Test docker with external mounted directory
   ##
-  - docker run -p 127.0.0.1:80:80 -v ~/www:/var/www/html --name ${MY_DOCKER_NAME} cytopia/${MY_DOCKER_NAME} &
+  - docker run
+      -p 127.0.0.1:80:80
+      -v ~/www:/var/www/html
+      -e DEBUG_COMPOSE_ENTRYPOINT=1
+      --name ${MY_DOCKER_NAME} cytopia/${MY_DOCKER_NAME} &
   - sleep 5
 
   - docker ps
@@ -92,12 +99,14 @@ script:
   - docker run
       -p 9000:9000
       -v ~/www:/var/www/html
+      -e DEBUG_COMPOSE_ENTRYPOINT=1
       --name php cytopia/php-fpm-5.6
   - sleep 5
 
   - docker run
       -p 127.0.0.1:80:80
       -v ~/www:/var/www/html
+      -e DEBUG_COMPOSE_ENTRYPOINT=1
       -e PHP_FPM_ENABLE=1
       -e PHP_FPM_SERVER_ADDR=php
       -e PHP_FPM_SERVER_PORT=9000
@@ -128,6 +137,7 @@ script:
   - docker run
       -p 3306:3306
       -v ~/tmp/host-mysql-sock:${MYSQL_SOCKET_DIR}
+      -e DEBUG_COMPOSE_ENTRYPOINT=1
       -e MYSQL_SOCKET_DIR=${MYSQL_SOCKET_DIR}
       -e MYSQL_ROOT_PASSWORD=
       --network=my_bridge
@@ -139,6 +149,7 @@ script:
       -p 9000:9000
       -v ~/www:/var/www/html
       -v ~/tmp/host-mysql-sock:${MYSQL_SOCKET_DIR}
+      -e DEBUG_COMPOSE_ENTRYPOINT=1
       -e FORWARD_MYSQL_PORT_TO_LOCALHOST=1
       -e MYSQL_REMOTE_ADDR=mysql
       -e MYSQL_REMOTE_PORT=3306
@@ -154,6 +165,7 @@ script:
   - docker run
       -p 127.0.0.1:80:80
       -v ~/www:/var/www/html
+      -e DEBUG_COMPOSE_ENTRYPOINT=1
       -e PHP_FPM_ENABLE=1
       -e PHP_FPM_SERVER_ADDR=php
       -e PHP_FPM_SERVER_PORT=9000
