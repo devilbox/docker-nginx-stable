@@ -12,30 +12,6 @@ HTTPD_CONF="/etc/nginx/nginx.conf"
 ###
 ### Functions
 ###
-run() {
-	_cmd="${1}"
-	_debug="0"
-
-	_red="\033[0;31m"
-	_green="\033[0;32m"
-	_reset="\033[0m"
-	_user="$(whoami)"
-
-
-	# If 2nd argument is set and enabled, allow debug command
-	if [ "${#}" = "2" ]; then
-		if [ "${2}" = "1" ]; then
-			_debug="1"
-		fi
-	fi
-
-
-	if [ "${DEBUG_COMMANDS}" = "1" ] || [ "${_debug}" = "1" ]; then
-		printf "${_red}%s \$ ${_green}${_cmd}${_reset}\n" "${_user}"
-	fi
-	sh -c "LANG=C LC_ALL=C ${_cmd}"
-}
-
 runsu() {
 	_cmd="${1}"
 	_debug="0"
@@ -126,7 +102,7 @@ log "info" "Docker date set to: $(date)"
 ### Adjust number of CPU cores to worker_processes
 ###
 CPU="$( getconf _NPROCESSORS_ONLN )"
-run "sed -i'' 's/^worker_processes.*$/worker_processes ${CPU};/g' ${HTTPD_CONF}"
+runsu "sed -i'' 's/^worker_processes.*$/worker_processes ${CPU};/g' ${HTTPD_CONF}"
 
 
 
