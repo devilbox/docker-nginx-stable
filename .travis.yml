@@ -14,7 +14,7 @@ services:
 ###
 env:
   global:
-    - MY_DOCKER_NAME="nginx-stable"
+    - MY_DOCKER_NAME="my_httpd_docker"
     - MYSQL_SOCKET_DIR=/tmp/mysql
 
 
@@ -55,9 +55,10 @@ script:
   ##
   ## 01.) Test plain docker
   ##
-  - docker run -d -p 127.0.0.1:80:80 --name ${MY_DOCKER_NAME} cytopia/${MY_DOCKER_NAME}
-  - docker ps
+  - docker run -p 127.0.0.1:80:80 --name ${MY_DOCKER_NAME} cytopia/${MY_DOCKER_NAME} &
   - sleep 5
+
+  - docker ps
 
   - curl localhost
   - curl localhost | grep 'It works'
@@ -70,9 +71,10 @@ script:
   ##
   ## 02.) Test docker with external mounted directory
   ##
-  - docker run -d -p 127.0.0.1:80:80 -v ~/www:/var/www/html --name ${MY_DOCKER_NAME} cytopia/${MY_DOCKER_NAME}
-  - docker ps
+  - docker run -p 127.0.0.1:80:80 -v ~/www:/var/www/html --name ${MY_DOCKER_NAME} cytopia/${MY_DOCKER_NAME} &
   - sleep 5
+
+  - docker ps
 
   - curl localhost
   - curl localhost | grep 'Static Html'
@@ -87,20 +89,23 @@ script:
   ##
   ## 03.) Test docker with external mounted directory and PHP-FPM support
   ##
-  - docker run -d
+  - docker run
       -p 9000:9000
       -v ~/www:/var/www/html
       --name php cytopia/php-fpm-5.6
+  - sleep 5
+
   - docker run
-      -d -p 127.0.0.1:80:80
+      -p 127.0.0.1:80:80
       -v ~/www:/var/www/html
       -e PHP_FPM_ENABLE=1
       -e PHP_FPM_SERVER_ADDR=php
       -e PHP_FPM_SERVER_PORT=9000
       --link php:php
       --name ${MY_DOCKER_NAME} cytopia/${MY_DOCKER_NAME}
-  - docker ps
   - sleep 5
+
+  - docker ps
 
   - curl localhost
   - curl localhost | grep 'Static Html'
