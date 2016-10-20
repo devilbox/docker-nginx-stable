@@ -21,8 +21,6 @@ HTTPD_CONF="/etc/nginx/nginx.conf"
 
 
 
-
-
 MY_USER="apache"
 MY_GROUP="apache"
 MY_UID="48"

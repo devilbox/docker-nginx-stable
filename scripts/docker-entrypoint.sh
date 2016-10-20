@@ -113,7 +113,6 @@ else
 		log "info" "Setting docker timezone to: ${TIMEZONE}"
 		runsu "rm /etc/localtime"
 		runsu "ln -s /usr/share/zoneinfo/${TIMEZONE} /etc/localtime"
-
 	else
 		log "err" "Invalid timezone for \$TIMEZONE."
 		log "err" "\$TIMEZONE: '${TIMEZONE}' does not exist."
@@ -177,6 +176,7 @@ else
 
 	fi
 fi
+
 
 
 ###
