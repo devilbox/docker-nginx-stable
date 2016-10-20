@@ -4,9 +4,9 @@
 NGINX_VERSION="stable"
 
 if [ "${NGINX_VERSION}" = "stable" ]; then
-	_extract="head -1"
+	_extract="Stable version"
 elif [ "${NGINX_VERSION}" = "mainline" ]; then
-	_extract="tail -1"
+	_extract="Mainline version"
 else
 	echo "Invalid nginx version"
 	exit 1
@@ -102,7 +102,8 @@ run "yum -y install \
 
 
 # Get Nginx version (stable or mainline)
-DL_URL="$( curl -q https://www.nginx.com/resources/wiki/start/topics/tutorials/install/ | grep -oE 'http[s]*://nginx.org/download/nginx-.*tar.gz' | eval ${_extract} )"
+DL_URL="https://nginx.org/$( curl -q https://nginx.org/en/download.html | grep -oE "${_extract}.*href=\".*\.tar\.gz\"" | sed 's|<a|<a\n|g' | grep -oE '/download/nginx-[.0-9]+\.tar\.gz' | head -1
+ )"
 VERSION="$( echo "${DL_URL}" | grep -oE 'nginx-.*' | sed 's/.tar.gz//g' )"
 
 run "curl -SL -o /tmp/${VERSION}.tar.gz ${DL_URL} --retry 999 --retry-max-time 0 -C -"
