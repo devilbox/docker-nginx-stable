@@ -46,6 +46,16 @@ install:
   - echo "<?php error_reporting(-1); ini_set('display_errors', 1); if (mysqli_connect(gethostbyname('mysql'), 'root', '')) { echo 'YES'; } else { echo 'NO ' . mysqli_connect_error(); }" > ~/www/mysql_ip.php
 
 
+###
+### Disable auto-started daemons
+###
+before_script:
+
+  # Disable services enabled by default
+  # http://docs.travis-ci.com/user/database-setup/#MySQL
+  - sudo /etc/init.d/mysql stop
+  - sudo /etc/init.d/postgresql stop
+
 
 ###
 ### Test
@@ -83,7 +93,6 @@ script:
 
   - docker stop "$( docker ps | grep  "${MY_DOCKER_NAME}" | awk '{print $1}' )"
   - docker rm "${MY_DOCKER_NAME}"
-
 
 
   ##
@@ -125,7 +134,6 @@ script:
 
   - docker stop "$( docker ps | grep  "${MY_DOCKER_NAME}" | awk '{print $1}' )"
   - docker rm "${MY_DOCKER_NAME}"
-
 
 
   ##
@@ -192,7 +200,6 @@ script:
   - docker stop "$( docker ps | grep  "${MY_DOCKER_NAME}" | awk '{print $1}' )"
   - docker rm "php"
   - docker rm "${MY_DOCKER_NAME}"
-
 
 
   ##
