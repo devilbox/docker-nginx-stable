@@ -89,35 +89,21 @@ $ docker run -i \
 Same as above, but also add a MySQL docker and link it into Nginx.
 ```bash
 # Start the MySQL docker
-# Make sure to
-#   1. Set the socket dir, which will be needed by the PHP-FPM docker.
-#   2. Mount the socket dir to the host, as it needs to be mounted by PHP-FPM
 $ docker run -d \
     -p 3306:3306 \
-    -v ~/tmp/host-mysql-sock:/tmp/docker-mysql-sock \
-    -e MYSQL_SOCKET_DIR=/tmp/docker-mysql-sock \
     -e MYSQL_ROOT_PASSWORD=my-secret-pw \
     --name mysql \
     -t cytopia/mysql-5.5
 
 # Start the PHP-FPM docker, mounting the same diectory.
 # Also make sure to
-#   1. mount the MySQL socket to local disk within the PHP-FPM docker
-#      in order to be able to use `localhost` for mysql connections from
-#      withing the php docker.
-#   2. forward the remote MySQL port 3306 to 127.0.0.1:3306 within the
-#      PHP-FPM docker in order to be able to use `127.0.0.1` for mysq
-#      connections from within the php docker.
+#   forward the remote MySQL port 3306 to 127.0.0.1:3306 within the
+#   PHP-FPM docker in order to be able to use `127.0.0.1` for mysql
+#   connections from within the php docker.
 $ docker run -d \
     -p 9000:9000 \
     -v ~/my-host-www:/var/www/html \
-    -v ~/tmp/host-mysql-sock:/tmp/docker-mysql-sock \
-    -e FORWARD_MYSQL_PORT_TO_LOCALHOST=1 \
-    -e MYSQL_REMOTE_ADDR=mysql \
-    -e MYSQL_REMOTE_PORT=3306 \
-    -e MYSQL_LOCAL_PORT=3306 \
-    -e MOUNT_MYSQL_SOCKET_TO_LOCALDISK=1 \
-    -e MYSQL_SOCKET_PATH=/tmp/docker-mysql-sock/mysqld.sock \
+    -e FORWARD_PORTS_TO_LOCALHOST=3306:mysql:3306 \
     --name php \
     cytopia/php-fpm-5.6
 
@@ -141,7 +127,7 @@ It offers pre-configured mass virtual hosts and an intranet.
 
 It allows any of the following combinations:
 
-* PHP 5.4, PHP 5.5, PHP 5.6, PHP 7.0 and PHP 7.1
+* PHP 5.4, PHP 5.5, PHP 5.6, PHP 7.0, PHP 7.1 and HHVM
 * MySQL 5.5, MySQL 5.6, MySQL 5.7, MariaDB 5 and MariaDB 10
 * Apache 2.2, Apache 2.4, Nginx stable and Nginx mainline
 * And more to come...
