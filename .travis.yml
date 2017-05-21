@@ -15,7 +15,6 @@ services:
 env:
   global:
     - MY_DOCKER_NAME="my-httpd-docker"
-    - MYSQL_SOCKET_DIR=/tmp/mysql
 
 
 ###
@@ -40,7 +39,6 @@ install:
   # Add html and php files
   - echo "Static Html" > ~/www/index.html
   - echo "<?php echo 'Helo world'; ?>" > ~/www/index.php
-  - echo "<?php error_reporting(-1); ini_set('display_errors', 1); if (mysqli_connect('localhost', 'root', '')) { echo 'YES'; } else { echo 'NO ' . mysqli_connect_error(); }" > ~/www/mysql_loc.php
   - echo "<?php error_reporting(-1); ini_set('display_errors', 1); if (mysqli_connect('127.0.0.1', 'root', '')) { echo 'YES'; } else { echo 'NO ' . mysqli_connect_error(); }" > ~/www/mysql_127.php
   - echo "<?php error_reporting(-1); ini_set('display_errors', 1); if (mysqli_connect('mysql', 'root', ''))     { echo 'YES'; } else { echo 'NO ' . mysqli_connect_error(); }" > ~/www/mysql_rem.php
   - echo "<?php error_reporting(-1); ini_set('display_errors', 1); if (mysqli_connect(gethostbyname('mysql'), 'root', '')) { echo 'YES'; } else { echo 'NO ' . mysqli_connect_error(); }" > ~/www/mysql_ip.php
@@ -55,6 +53,8 @@ before_script:
   # http://docs.travis-ci.com/user/database-setup/#MySQL
   - sudo /etc/init.d/mysql stop || true
   - sudo /etc/init.d/postgresql stop || true
+  - sudo service mysql stop || true
+  - sudo service postgresql stop || true
 
 
 ###
@@ -209,9 +209,7 @@ script:
   # MySQL
   - docker run
       -p 3306:3306
-      -v ~/tmp/host-mysql-sock:${MYSQL_SOCKET_DIR}
       -e DEBUG_COMPOSE_ENTRYPOINT=1
-      -e MYSQL_SOCKET_DIR=${MYSQL_SOCKET_DIR}
       -e MYSQL_ROOT_PASSWORD=
       --network=my_bridge
       --name mysql cytopia/mysql-5.5 &
@@ -220,14 +218,8 @@ script:
   - docker run
       -p 9000:9000
       -v ~/www:/var/www/html
-      -v ~/tmp/host-mysql-sock:${MYSQL_SOCKET_DIR}
       -e DEBUG_COMPOSE_ENTRYPOINT=1
-      -e FORWARD_MYSQL_PORT_TO_LOCALHOST=1
-      -e MYSQL_REMOTE_ADDR=mysql
-      -e MYSQL_REMOTE_PORT=3306
-      -e MYSQL_LOCAL_PORT=3306
-      -e MOUNT_MYSQL_SOCKET_TO_LOCALDISK=1
-      -e MYSQL_SOCKET_PATH=${MYSQL_SOCKET_DIR}/mysqld.sock
+      -e "FORWARD_PORTS_TO_LOCALHOST=3306:mysql:3306"
       --network=my_bridge
       --link mysql
       --name php cytopia/php-fpm-5.6 &
@@ -265,12 +257,10 @@ script:
   - curl http://localhost/index.php
   - curl http://localhost/index.php | grep -q '<?php' && false || true
 
-  - curl http://localhost/mysql_loc.php
   - curl http://localhost/mysql_127.php
   - curl http://localhost/mysql_rem.php
   - curl http://localhost/mysql_ip.php
 
-  - curl http://localhost/mysql_loc.php | grep 'YES'
   - curl http://localhost/mysql_127.php | grep 'YES'
   - curl http://localhost/mysql_rem.php | grep 'YES'
   - curl http://localhost/mysql_ip.php | grep 'YES'
@@ -293,8 +283,6 @@ script:
   # MySQL
   - docker run
       -p 3306:3306
-      -v ~/tmp/host-mysql-sock:${MYSQL_SOCKET_DIR}
-      -e MYSQL_SOCKET_DIR=${MYSQL_SOCKET_DIR}
       -e MYSQL_ROOT_PASSWORD=
       --network=my_bridge
       --name mysql cytopia/mysql-5.5 &
@@ -303,13 +291,7 @@ script:
   - docker run
       -p 9000:9000
       -v ~/www:/var/www/html
-      -v ~/tmp/host-mysql-sock:${MYSQL_SOCKET_DIR}
-      -e FORWARD_MYSQL_PORT_TO_LOCALHOST=1
-      -e MYSQL_REMOTE_ADDR=mysql
-      -e MYSQL_REMOTE_PORT=3306
-      -e MYSQL_LOCAL_PORT=3306
-      -e MOUNT_MYSQL_SOCKET_TO_LOCALDISK=1
-      -e MYSQL_SOCKET_PATH=${MYSQL_SOCKET_DIR}/mysqld.sock
+      -e "FORWARD_PORTS_TO_LOCALHOST=3306:mysql:3306"
       --network=my_bridge
       --link mysql
       --name php cytopia/php-fpm-5.6 &
@@ -346,12 +328,10 @@ script:
   - curl http://localhost/index.php
   - curl http://localhost/index.php | grep -q '<?php' && false || true
 
-  - curl http://localhost/mysql_loc.php
   - curl http://localhost/mysql_127.php
   - curl http://localhost/mysql_rem.php
   - curl http://localhost/mysql_ip.php
 
-  - curl http://localhost/mysql_loc.php | grep 'YES'
   - curl http://localhost/mysql_127.php | grep 'YES'
   - curl http://localhost/mysql_rem.php | grep 'YES'
   - curl http://localhost/mysql_ip.php | grep 'YES'
