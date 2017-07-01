@@ -1,6 +1,6 @@
 # Nginx stable Docker
 
-<small>**Latest build:** 2017-05-21</small>
+<small>**Latest build:** 2017-06-30</small>
 
 [![Build Status](https://travis-ci.org/cytopia/docker-nginx-stable.svg?branch=master)](https://travis-ci.org/cytopia/docker-nginx-stable) [![](https://images.microbadger.com/badges/version/cytopia/nginx-stable.svg)](https://microbadger.com/images/cytopia/nginx-stable "nginx-stable") [![](https://images.microbadger.com/badges/image/cytopia/nginx-stable.svg)](https://microbadger.com/images/cytopia/nginx-stable "nginx-stable") [![](https://images.microbadger.com/badges/license/cytopia/nginx-stable.svg)](https://microbadger.com/images/cytopia/nginx-stable "nginx-stable")
 
