@@ -1,6 +1,6 @@
 # Nginx stable Docker
 
-<small>**Latest build:** 2017-06-30</small>
+<small>**Latest build:** 2017-08-30</small>
 
 [![Build Status](https://travis-ci.org/cytopia/docker-nginx-stable.svg?branch=master)](https://travis-ci.org/cytopia/docker-nginx-stable) [![](https://images.microbadger.com/badges/version/cytopia/nginx-stable.svg)](https://microbadger.com/images/cytopia/nginx-stable "nginx-stable") [![](https://images.microbadger.com/badges/image/cytopia/nginx-stable.svg)](https://microbadger.com/images/cytopia/nginx-stable "nginx-stable") [![](https://images.microbadger.com/badges/license/cytopia/nginx-stable.svg)](https://microbadger.com/images/cytopia/nginx-stable "nginx-stable")
 
@@ -135,7 +135,7 @@ It allows any of the following combinations:
 ## Version
 
 ```
-nginx version: nginx/1.12.0
+nginx version: nginx/1.12.1
 built by gcc 4.8.5 20150623 (Red Hat 4.8.5-11) (GCC)
 built with OpenSSL 1.0.1e-fips 11 Feb 2013
 TLS SNI support enabled
