@@ -133,6 +133,8 @@ This Docker container adds a lot of injectables in order to customize it to your
 | MAIN_VHOST_DISABLE  | bool   | `0`     | By default there is a standard (catch-all) vhost configured to accept requests served from `/var/www/default/htdocs`. If you want to disable it, set the value to `1`.<br/><strong>Note:</strong>The `htdocs` dir name can be changed with `MAIN_VHOST_DOCROOT`. See below. |
 | MAIN_VHOST_DOCROOT  | string | `htdocs`| This is the directory name appended to `/var/www/default/` from which the default virtual host will serve its files.<br/><strong>Default:</strong><br/>`/var/www/default/htdocs`<br/><strong>Example:</strong><br/>`MAIN_VHOST_DOCROOT=www`<br/>Doc root: `/var/www/default/www` | 
 | MAIN_VHOST_TPL      | string | `cfg`   | Directory within th default vhost base path (`/var/www/default`) to look for templates to overwrite virtual host settings. See [vhost-gen](https://github.com/devilbox/vhost-gen/tree/master/etc/templates) for available template files.<br/><strong>Resulting default path:</strong><br/>`/var/www/default/cfg` |
+| MAIN_VHOST_STATUS_ENABLE | bool | `0`  | Enable httpd status page. |
+| MAIN_VHOST_STATUS_ALIAS  | string | `/httpd-status` | Set the alias under which the httpd server should serve its status page. |
 
 ##### Optional environmental variables (mass vhosts)
 

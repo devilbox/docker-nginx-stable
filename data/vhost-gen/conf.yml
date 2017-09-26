@@ -125,4 +125,4 @@ vhost:
   # Enable server status on the following alias
   server_status:
     enable: no
-    alias: /status-status
+    alias: /httpd-status

@@ -124,5 +124,5 @@ vhost:
     - alias: '/\.ht.*'
   # Enable server status on the following alias
   server_status:
-    enable: yes
-    alias: /status-status
+    enable: __ENABLE_STATUS__
+    alias: __STATUS_ALIAS__

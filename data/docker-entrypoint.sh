@@ -207,9 +207,9 @@ _RUNTIME_MAIN_VHOST_ENABLE=1
 if ! set | grep '^MAIN_VHOST_DISABLE=' >/dev/null 2>&1; then
 	log "info" "\$MAIN_VHOST_DISABLE not set. Not disabling the default vhost."
 else
-	if [ "${MAIN_VHOST_DISABLE}" -eq "0" ]; then
+	if [ "${MAIN_VHOST_DISABLE}" = "0" ]; then
 		log "info" "\$MAIN_VHOST_DISABLE set to 0. Not disabling the default vhost."
-	elif [ "${MAIN_VHOST_DISABLE}" -eq "1" ]; then
+	elif [ "${MAIN_VHOST_DISABLE}" = "1" ]; then
 		log "info" "\$MAIN_VHOST_DISABLE set to 1. Disabling the default vhost."
 		_RUNTIME_MAIN_VHOST_ENABLE=0
 	else
@@ -243,6 +243,35 @@ else
 fi
 
 
+###
+### Set main vhost status page
+###
+_RUNTIME_MAIN_VHOST_STATUS_ENABLE=0
+if ! set | grep '^MAIN_VHOST_STATUS_ENABLE=' >/dev/null 2>&1; then
+	log "info" "\$MAIN_VHOST_STATUS_ENABLE not specified. Disabling httpd status."
+else
+	if [ "${MAIN_VHOST_STATUS_ENABLE}" = "0" ]; then
+		log "info" "\$MAIN_VHOST_STATUS_ENABLE set to 0. Disabling httpd status."
+	elif [ "${MAIN_VHOST_STATUS_ENABLE}" = "1" ]; then
+		log "info" "\$MAIN_VHOST_STATUS_ENABLE set to 1. Enabling httpd status."
+		_RUNTIME_MAIN_VHOST_STATUS_ENABLE="${MAIN_VHOST_STATUS_ENABLE}"
+	else
+		log "err" "\$MAIN_VHOST_STATUS_ENABLE is set to  ${MAIN_VHOST_STATUS_ENABLE}, but must be 0 or 1."
+		exit 1
+	fi
+fi
+
+if [ "${_RUNTIME_MAIN_VHOST_STATUS_ENABLE}" -eq "1" ]; then
+	_RUNTIME_MAIN_VHOST_STATUS_ALIAS="/httpd-status"
+	if ! set | grep '^MAIN_VHOST_STATUS_ALIAS=' >/dev/null 2>&1; then
+		log "info" "\$MAIN_VHOST_STATUS_ALIAS not specified. Keeping default: ${_RUNTIME_MAIN_VHOST_STATUS_ALIAS}."
+	else
+		log "info" "Setting httpd status page to: '\$MAIN_VHOST_STATUS_ALIAS'"
+		_RUNTIME_MAIN_VHOST_STATUS_ALIAS="${MAIN_VHOST_STATUS_ALIAS}"
+	fi
+fi
+
+
 
 ################################################################################
 # MASS VHOST INJECTABLES
@@ -255,9 +284,9 @@ _RUNTIME_MASS_VHOST_ENABLE=0
 if ! set | grep '^MASS_VHOST_ENABLE=' >/dev/null 2>&1; then
 	log "info" "\$MASS_VHOST_ENABLE not set. Disabbling mass vhosts."
 else
-	if [ "${MASS_VHOST_ENABLE}" -eq "0" ]; then
+	if [ "${MASS_VHOST_ENABLE}" = "0" ]; then
 		log "info" "\$MASS_VHOST_ENABLE set to 0. Disabling mass vhosts."
-	elif [ "${MASS_VHOST_ENABLE}" -eq "1" ]; then
+	elif [ "${MASS_VHOST_ENABLE}" = "1" ]; then
 		log "info" "\$MASS_VHOST_ENABLE set to 1. Enabling mass vhosts."
 		_RUNTIME_MASS_VHOST_ENABLE=1
 	else
@@ -315,9 +344,9 @@ _RUNTIME_PHP_FPM_ENABLE=0
 if ! set | grep '^PHP_FPM_ENABLE=' >/dev/null 2>&1; then
 	log "info" "\$PHP_FPM_ENABLE not set. Not enabling PHP-FPM."
 else
-	if [ "${PHP_FPM_ENABLE}" -eq "0" ]; then
+	if [ "${PHP_FPM_ENABLE}" = "0" ]; then
 		log "info" "\$PHP_FPM_ENABLE set to 0. Not enabling PHP-FPM."
-	elif [ "${PHP_FPM_ENABLE}" -eq "1" ]; then
+	elif [ "${PHP_FPM_ENABLE}" = "1" ]; then
 		log "info" "\$PHP_FPM_ENABLE set to 1. Enabling PHP-FPM."
 		_RUNTIME_PHP_FPM_ENABLE=1
 
@@ -416,6 +445,16 @@ fi
 ### Main vhost
 ###
 if [ "${_RUNTIME_MAIN_VHOST_ENABLE}" -eq "1" ]; then
+
+	# Enable status page?
+	if [ "${_RUNTIME_MAIN_VHOST_STATUS_ENABLE}" -eq "1" ]; then
+		run "sed -i'' 's/__ENABLE_STATUS__/yes/g' /etc/vhost-gen/main.yml"
+		run "sed -i'' 's|__STATUS_ALIAS__|${_RUNTIME_MAIN_VHOST_STATUS_ALIAS}|g' /etc/vhost-gen/main.yml"
+	else
+		run "sed -i'' 's/__ENABLE_STATUS__/yes/g' /etc/vhost-gen/main.yml"
+	fi
+
+	# Debug creation?
 	if [ "${DEBUG_COMMANDS}" -gt "0" ]; then
 		_verb="-v"
 	else
