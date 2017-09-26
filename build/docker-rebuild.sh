@@ -42,6 +42,13 @@ DATE="$( date '+%Y-%m-%d' )"
 
 
 ###
+### Update Base
+###
+MY_BASE="$( grep 'FROM[[:space:]].*:.*' "${CWD}/Dockerfile" | sed 's/FROM\s*//g' )"
+run "docker pull ${MY_BASE}"
+
+
+###
 ### Build
 ###
 
