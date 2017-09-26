@@ -77,7 +77,7 @@ COPY ./data/docker-entrypoint.sh /docker-entrypoint.sh
 ###
 ### Ports
 ###
-EXPOSE 9000
+EXPOSE 80
 
 
 ###
