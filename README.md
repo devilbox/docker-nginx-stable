@@ -148,10 +148,11 @@ This Docker container adds a lot of injectables in order to customize it to your
 
 #### Available mount points
 
-| Docker            | Description |
-|-------------------|-------------|
-| /var/www/default  | Nginx default virtual host base path (contains by default `htdocs/` and `cfg/` |
-| /shared/httpd     | Nginx mass virtual host root directory |
+| Docker              | Description |
+|---------------------|-------------|
+| /etc/nginx-stable.d | Mount this directory to add outside configuration files (`*.conf`) to nginx |
+| /var/www/default    | Nginx default virtual host base path (contains by default `htdocs/` and `cfg/` |
+| /shared/httpd       | Nginx mass virtual host root directory |
 
 
 #### Default ports
