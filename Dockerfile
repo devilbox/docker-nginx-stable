@@ -60,6 +60,7 @@ RUN set -x \
 	&& rm -rf /etc/nginx/conf.d/* \
 	&& mkdir -p /etc/nginx-stable.d \
 	&& mkdir -p /etc/nginx/custom.d \
+	&& mkdir -p /var/www/default/htdocs \
 	&& mkdir -p /shared/httpd \
 	&& chmod 0775 /shared/httpd \
 	&& chown nginx:nginx /shared/httpd
