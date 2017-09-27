@@ -460,7 +460,7 @@ if [ "${_RUNTIME_MAIN_VHOST_ENABLE}" -eq "1" ]; then
 	else
 		_verb=""
 	fi
-	run "vhost_gen.py -n _ -p /var/www/default/${_RUNTIME_MAIN_VHOST_DOCROOT} -c /etc/vhost-gen/main.yml -o /var/www/default/${_RUNTIME_MAIN_VHOST_TPL} ${_verb} -s"
+	run "vhost_gen.py -n localhost -p /var/www/default/${_RUNTIME_MAIN_VHOST_DOCROOT} -c /etc/vhost-gen/main.yml -o /var/www/default/${_RUNTIME_MAIN_VHOST_TPL} ${_verb} -d -s"
 fi
 
 

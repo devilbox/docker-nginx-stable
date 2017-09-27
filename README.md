@@ -18,7 +18,7 @@ Find me on **[Docker Hub](https://hub.docker.com/r/cytopia/nginx-stable)**:
 
 [![cytopia/nginx-stable](http://dockeri.co/image/cytopia/nginx-stable)](https://hub.docker.com/r/cytopia/nginx-stable/)
 
-<small>**Latest build:** 2017-09-26</small>
+<small>**Latest build:** 2017-09-27</small>
 
 ----
 

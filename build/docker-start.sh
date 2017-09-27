@@ -42,4 +42,8 @@ NAME="$( grep 'image=".*"' "${CWD}/Dockerfile" | sed 's/^[[:space:]]*//g' | awk 
 ###
 ### Run
 ###
-run "docker run -i -t cytopia/${NAME}"
+_args=""
+if [ "${#}" != "0" ]; then
+	_args="${*}"
+fi
+run "docker run -it ${_args} cytopia/${NAME}"
