@@ -21,9 +21,9 @@ LABEL \
 RUN set -x \
 	&& apt-get update \
 	&& apt-get install --no-install-recommends --no-install-suggests -y \
-		supervisor \
-		python-yaml \
 		make \
+		python-yaml \
+		supervisor \
 		wget \
 	&& rm -rf /var/lib/apt/lists/* \
 	&& apt-get purge -y --auto-remove
@@ -35,7 +35,7 @@ RUN set -x \
 	&& cd vhost-gen-master \
 	&& make install \
 	&& cd .. \
-	&& rm -rf vhost_gen*
+	&& rm -rf vhost*gen*
 
 # watcherd
 RUN set -x \
@@ -46,8 +46,8 @@ RUN set -x \
 RUN set -x \
 	&& apt-get update \
 	&& apt-get remove -y \
-		wget \
 		make \
+		wget \
 	&& rm -rf /var/lib/apt/lists/* \
 	&& apt-get purge -y --auto-remove
 
