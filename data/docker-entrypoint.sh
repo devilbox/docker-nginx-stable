@@ -266,7 +266,7 @@ if [ "${_RUNTIME_MAIN_VHOST_STATUS_ENABLE}" -eq "1" ]; then
 	if ! set | grep '^MAIN_VHOST_STATUS_ALIAS=' >/dev/null 2>&1; then
 		log "info" "\$MAIN_VHOST_STATUS_ALIAS not specified. Keeping default: ${_RUNTIME_MAIN_VHOST_STATUS_ALIAS}."
 	else
-		log "info" "Setting httpd status page to: '\$MAIN_VHOST_STATUS_ALIAS'"
+		log "info" "Setting httpd status page to: '${MAIN_VHOST_STATUS_ALIAS}'"
 		_RUNTIME_MAIN_VHOST_STATUS_ALIAS="${MAIN_VHOST_STATUS_ALIAS}"
 	fi
 fi

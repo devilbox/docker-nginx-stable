@@ -18,7 +18,7 @@ Find me on **[Docker Hub](https://hub.docker.com/r/cytopia/nginx-stable)**:
 
 [![cytopia/nginx-stable](http://dockeri.co/image/cytopia/nginx-stable)](https://hub.docker.com/r/cytopia/nginx-stable/)
 
-<small>**Latest build:** 2017-09-27</small>
+<small>**Latest build:** 2017-09-28</small>
 
 ----
 
@@ -120,7 +120,7 @@ This Docker container adds a lot of injectables in order to customize it to your
 | DEBUG_RUNTIME       | bool   | `0`     | Be verbose during runtime.<br/>Value: `0` or `1` |
 | DOCKER_LOGS         | bool   | `0`     | When set to `1` will redirect error and access logs to Docker logs (`stderr` and `stdout`) instead of file inside container.<br/>Value: `0` or `1` |
 | TIMEZONE            | string | `UTC`   | Set docker OS timezone.<br/>(Example: `Europe/Berlin`) |
-| NEW_UID             | int    | `101`   | Assign the default nginx user a new UID. This is useful if you you mount your document root and want to match the file permissions to the one of your local user. Set it to your host users uid (see `id` for your uid). |
+| NEW_UID             | int    | `101`   | Assign the default Nginx user a new UID. This is useful if you you mount your document root and want to match the file permissions to the one of your local user. Set it to your host users uid (see `id` for your uid). |
 | NEW_GID             | int    | `101`   | This is useful if you you mount your document root and want to match the file permissions to the one of your local user group. Set it to your host user groups gid (see `id` for your gid). |
 | PHP_FPM_ENABLE      | bool   | `0`     | Enable PHP-FPM for the default vhost and the mass virtual hosts. |
 | PHP_FPM_SERVER_ADDR | string | ``      | IP address or hostname of remote PHP-FPM server.<br/><strong>Required when enabling PHP.</strong> |
@@ -150,7 +150,7 @@ This Docker container adds a lot of injectables in order to customize it to your
 
 | Docker              | Description |
 |---------------------|-------------|
-| /etc/nginx-stable.d | Mount this directory to add outside configuration files (`*.conf`) to nginx |
+| /etc/httpd-custom.d | Mount this directory to add outside configuration files (`*.conf`) to Nginx |
 | /var/www/default    | Nginx default virtual host base path (contains by default `htdocs/` and `cfg/` |
 | /shared/httpd       | Nginx mass virtual host root directory |
 
@@ -175,7 +175,7 @@ $ docker run -d -p 80:80 -v ~/my-host-www:/var/www/default -t cytopia/nginx-stab
 
 #### 2. Serve PHP files with PHP-FPM
 
-Note, for this to work, the `~/my-host-www` dir must be mounted into the nginx docker as well as into the php-fpm docker.
+Note, for this to work, the `~/my-host-www` dir must be mounted into the Nginx Docker as well as into the php-fpm docker.
 
 You can also attach other PHP-FPM version: [PHP-FPM 5.4](https://github.com/cytopia/docker-php-fpm-5.4), [PHP-FPM 5.5](https://github.com/cytopia/docker-php-fpm-5.5), [PHP-FPM 5.6](https://github.com/cytopia/docker-php-fpm-5.6), [PHP-FPM 7.0](https://github.com/cytopia/docker-php-fpm-7.0) or [PHP-FPM 7.1](https://github.com/cytopia/docker-php-fpm-7.1)
 
@@ -185,7 +185,7 @@ Each PHP-FPM docker also has the option to enable Xdebug and more, see their res
 # Start the PHP-FPM docker, mounting the same diectory
 $ docker run -d -p 9000 -v ~/my-host-www:/var/www/default --name php cytopia/php-fpm-5.6
 
-# Start the Nginx docker, linking it to the PHP-FPM docker
+# Start the Nginx Docker, linking it to the PHP-FPM docker
 $ docker run -d \
     -p 80:80 \
     -v ~/my-host-www:/var/www/default \
@@ -219,7 +219,7 @@ $ docker run -d \
     --name php \
     cytopia/php-fpm-5.6
 
-# Start the Nginx docker, linking it to the PHP-FPM docker
+# Start the Nginx Docker, linking it to the PHP-FPM docker
 $ docker run -d \
     -p 80:80 \
     -v ~/my-host-www:/var/www/default \

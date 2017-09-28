@@ -51,7 +51,7 @@ server: nginx
 # Where to store the generated configuration files.
 # This must be a directory the web server will read
 # configuration files from.
-conf_dir: /etc/nginx/custom.d
+conf_dir: /etc/httpd/vhost.d
 
 # Vhost definition
 vhost:

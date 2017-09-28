@@ -10,7 +10,7 @@ LABEL \
 	image="nginx-stable" \
 	vendor="cytopia" \
 	license="MIT" \
-	build-date="2017-09-27"
+	build-date="2017-09-28"
 
 
 ###
@@ -20,6 +20,7 @@ LABEL \
 # required packages
 RUN set -x \
 	&& apt-get update \
+	&& apt-get upgrade -y \
 	&& apt-get install --no-install-recommends --no-install-suggests -y \
 		make \
 		python-yaml \
@@ -48,18 +49,19 @@ RUN set -x \
 	&& apt-get remove -y \
 		make \
 		wget \
+	&& apt-get autoremove -y \
 	&& rm -rf /var/lib/apt/lists/* \
 	&& apt-get purge -y --auto-remove
 
 # Add custom config directive to httpd server
 RUN set -x \
-	&& sed -i'' 's|^\s*include.*conf\.d/.*|    include /etc/nginx-stable.d/*.conf;\n    include /etc/nginx/conf.d/*.conf;\n    include /etc/nginx/custom.d/*.conf;\n|g' /etc/nginx/nginx.conf
+	&& sed -i'' 's|^\s*include.*conf\.d/.*|    include /etc/httpd-custom.d/*.conf;\n    include /etc/httpd/conf.d/*.conf;\n    include /etc/httpd/vhost.d/*.conf;\n|g' /etc/nginx/nginx.conf
 
 # create directories
 RUN set -x \
-	&& rm -rf /etc/nginx/conf.d/* \
-	&& mkdir -p /etc/nginx-stable.d \
-	&& mkdir -p /etc/nginx/custom.d \
+	&& mkdir -p /etc/httpd-custom.d \
+	&& mkdir -p /etc/httpd/conf.d \
+	&& mkdir -p /etc/httpd/vhost.d \
 	&& mkdir -p /var/www/default/htdocs \
 	&& mkdir -p /shared/httpd \
 	&& chmod 0775 /shared/httpd \

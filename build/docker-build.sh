@@ -63,10 +63,9 @@ run "docker build -t cytopia/${NAME} ${CWD}"
 ###
 ### Retrieve information afterwards and Update README.md
 ###
-docker run -d --name my_tmp_${NAME} -t cytopia/${NAME}
+docker run -d --rm --name my_tmp_${NAME} -t cytopia/${NAME}
 INFO="$( docker exec my_tmp_${NAME} nginx -V 2>&1 | grep -E '^(nginx|built|TLS)' )"
-docker stop "$(docker ps | grep "my_tmp_${NAME}" | awk '{print $1}')"
-docker rm "my_tmp_${NAME}"
+docker stop "$(docker ps | grep "my_tmp_${NAME}" | awk '{print $1}')" > /dev/null
 
 INFO="$( echo "${INFO}" | sed 's/\s$//g' )"        # remove trailing space
 echo "${INFO}"
