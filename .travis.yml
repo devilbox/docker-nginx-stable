@@ -5,6 +5,12 @@ sudo: required
 
 
 ###
+### Language
+###
+language: python
+
+
+###
 ### Add services
 ###
 services:
@@ -12,28 +18,83 @@ services:
 
 
 ###
-### Global variables
+### Build Matrix definition
 ###
 env:
-  - S1=0
-  - S1=1
+  global:
+    - IMAGE=devilbox/nginx-stable
+    # travis encrypt DOCKER_USERNAME=user
+    # travis encrypt DOCKER_PASSWORD=pass
+    # Must be regenerated when repository name/owner changes
+    - secure: "bMj1ln7Ip3DznFHElfL8s6CIyedB0XH5oJeb6DJ2Afqxj8EvJFMm/5ESI3ZeKXD3M1/vBUB6TNqhaO/pEkmN5N+gggSwO9Y0JIA5v481kvl9hOuZNCiS17WM32zUmSpHWjfkRYTQLKi6nIorQGjjcbW4JeypRrYdz+ty/MP+XYULanc9ssi4DCwIhnvOB3+kBM+TooZpqGWtPRusMQL1DQP+Eh7K794kgvL3HLBE9buIwWjSsrw+r1+hKSH9n+XT1dqUkn9qxVKvQ02K4/ETPTQ/jFcBIXER8P3Uw2RhbES+OzMvTI5AXu5on8egEjMhyAmlGM88GO09cfBn2/5E7cMuT2gvHIWND/58cNAyjLuXLuVyHTZxnXTuPmQUh62Trz0JDR6/fHEow8Bgx5e7boeKxiDW0dOodKNjoBlDqJuY97hdQVC8r0HxWLSZMg099gVf/++Za44lpsFOlWO37NG7BpGNohVOWzKLPoxF9kW2SCXelmMeus67TPBBM04BtmvtviUZUspNeeP1utatens3DV6I0V48EOtP12e3+C6b6at0WUSt5HVC5AFYxjqzDhNYU+tkIjmJBs8/etHxoTSnqzPtVYaxZriu5awz/nOAieEXqWDGiFEcjNWbWzg9CwcUjaCO46OpChgD0dBPWtJ7AbxH3VeDjz7eeunTgwo="
+    - secure: "BJw58eb5AbOZc/Jk7IfEY7GCc2iLh+RCCt3UqN/SY7Q1We9cx5OS6Tmxq/Kyb+aWYefMxJiKPVz1btki5enq/BzlQsQSfJZCY/qqt6SRqpU+sfzKIUsMhnpw6AA2i6Cf/5OkJK3iGJNEbSQ69a1u+X+nrIj7h/U/Q0qU55mbOJ7y2mAu4qs1qIVSyUIIMQKE+vW4NiYQHFFZAjsgPKQnNJvvLZzD8GSMS2UZLfIP5iA9p5Je20fadUvNNPWLOIOrd+RKCfWgxTSSwBlbLLNA0sBVPnN9YaxxSH1vJL/D/IknIVTCH36qhHWgYu/QOazBj5zCZcxXwBDSqP+kt3Q8BmIzaogEc/WCT9dUcoq4EqCbuCV9Ma/d9vjxOI54pYKt4xiEO4OunNDxeJ9Hrc6WFfdJNG84JHjoM9pbEYXYKo4y6cXDckEzDkNKTRnpJW5DvJN1liwwHJeKxpFpyiWdbiSWIjtQPT6DR/3v9aKRSzagKho7Y6syLjqL/ggjE6xbFokmW4tTEzBHnZU6jyBkqgU6igSfRkeCC1hL78sTCYhH+ASH6dtcgtncZUoBrH62gnZF2IkaBB2LAFsKrUAxwL2J2EbwyxVbAaUGq6cB17H9oB7qFFMAANgLcuaxo9htPbiiw+QYUd3LEeQOuwRuj1d1noFcW/yHpd9ODHNrLyU="
+  matrix:
+    - TEST=0
+    - TEST=1
 
 
 ###
-### Disable auto-started daemons
+### Stage definitions
 ###
-before_script:
-
-  # Disable services enabled by default
-  # http://docs.travis-ci.com/user/database-setup/#MySQL
-  - sudo /etc/init.d/mysql stop || true
-  - sudo /etc/init.d/postgresql stop || true
-  - sudo service mysql stop || true
-  - sudo service postgresql stop || true
+stages:
+  - test
+  - deploy
 
 
 ###
-### Test
+### Global for all stages
 ###
+install:
+  # Get newer docker version
+  - max=100; i=0; while [ $i -lt $max ]; do if sudo apt-get update; then break; else i=$((i+1)); fi done
+  - max=100; i=0; while [ $i -lt $max ]; do if sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce; then break; else i=$((i+1)); fi done
+  - docker version
 script:
-  - .ci/start-ci.sh "${S1}"
+  - .ci/start-ci.sh "${TEST}" "${IMAGE}"
+
+
+###
+### Job definitions
+###
+jobs:
+  include:
+    # Final deploy stage
+    - stage: deploy
+      env: TEST=
+      before_script:
+        - if [ "${TRAVIS_PULL_REQUEST}" == "false" ]; then
+            if [ -n "${TRAVIS_TAG}" ]; then
+              docker build --no-cache=true -t "${IMAGE}:${TRAVIS_TAG}" . &&
+              docker images;
+            elif [ "${TRAVIS_BRANCH}" == "master" ]; then
+              docker build --no-cache=true -t "${IMAGE}:latest" . &&
+              docker images;
+            elif [[ ${TRAVIS_BRANCH} =~ ^(release[/-][.0-9]+)$ ]]; then
+              docker build --no-cache=true -t "${IMAGE}:${TRAVIS_BRANCH}" . &&
+              docker images;
+            else
+              echo "Skipping branch ${TRAVIS_BRANCH}";
+            fi
+          fi
+      script:
+        # Push to docker hub on success
+        - if [ "${TRAVIS_PULL_REQUEST}" == "false" ]; then
+            if [ -n "${TRAVIS_TAG}" ]; then
+              docker login --username "$DOCKER_USERNAME" --password "$DOCKER_PASSWORD" &&
+              echo "Pushing ${IMAGE}:${TRAVIS_TAG}" &&
+              docker push "${IMAGE}:${TRAVIS_TAG}" &&
+              docker tag "${IMAGE}:${TRAVIS_TAG}" "${IMAGE}:latest" &&
+              echo "Pushing ${IMAGE}:latest" &&
+              docker push "${IMAGE}:latest";
+            elif [ "${TRAVIS_BRANCH}" == "master" ]; then
+              docker login --username "$DOCKER_USERNAME" --password "$DOCKER_PASSWORD" &&
+              echo "Pushing ${IMAGE}:latest" &&
+              docker push "${IMAGE}:latest";
+            elif [[ ${TRAVIS_BRANCH} =~ ^(release[/-][.0-9]+)$ ]]; then
+              docker login --username "$DOCKER_USERNAME" --password "$DOCKER_PASSWORD" &&
+              echo "Pushing ${IMAGE}:${TRAVIS_BRANCH}" &&
+              docker push "${IMAGE}:${TRAVIS_BRANCH}";
+            else
+              echo "Skipping branch ${TRAVIS_BRANCH}";
+            fi
+          fi
