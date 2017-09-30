@@ -21,7 +21,7 @@ CWD="$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
 RAND_DIR="$( mktemp -d )"
 RAND_NAME1="$( get_random_name )"
 RAND_NAME2="$( get_random_name )"
-echo "<?php echo 'hello world php';" > "${RAND_DIR}/index.php"
+run "echo \"<?php echo 'hello world php';\" > ${RAND_DIR}/index.php"
 
 
 ###
@@ -57,7 +57,7 @@ run "docker run -d --rm \
 ###
 ### Tests
 ###
-sleep 5
+run "sleep 5"
 run "docker ps"
 run "docker logs ${RAND_NAME1}"
 run "docker logs ${RAND_NAME2}"

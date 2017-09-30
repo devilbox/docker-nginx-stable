@@ -20,7 +20,7 @@ CWD="$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
 ###
 RAND_DIR="$( mktemp -d )"
 RAND_NAME="$( get_random_name )"
-echo "hello world" > "${RAND_DIR}/index.html"
+run "echo \"hello world\" > ${RAND_DIR}/index.html"
 
 
 ###
@@ -45,7 +45,7 @@ run "docker run -d --rm \
 ###
 ### Tests
 ###
-sleep 5
+run "sleep 5"
 run "docker ps"
 run "docker logs ${RAND_NAME}"
 run "curl localhost"
