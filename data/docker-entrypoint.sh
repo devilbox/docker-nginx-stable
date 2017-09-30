@@ -451,7 +451,7 @@ if [ "${_RUNTIME_MAIN_VHOST_ENABLE}" -eq "1" ]; then
 		run "sed -i'' 's/__ENABLE_STATUS__/yes/g' /etc/vhost-gen/main.yml"
 		run "sed -i'' 's|__STATUS_ALIAS__|${_RUNTIME_MAIN_VHOST_STATUS_ALIAS}|g' /etc/vhost-gen/main.yml"
 	else
-		run "sed -i'' 's/__ENABLE_STATUS__/yes/g' /etc/vhost-gen/main.yml"
+		run "sed -i'' 's/__ENABLE_STATUS__/no/g' /etc/vhost-gen/main.yml"
 	fi
 
 	# Debug creation?
