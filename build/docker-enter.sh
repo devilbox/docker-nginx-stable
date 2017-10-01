@@ -32,15 +32,24 @@ if [ ! -f "${CWD}/Dockerfile" ]; then
 	exit 1
 fi
 
-# Get docker Name
+# Test Docker name
 if ! grep -q 'image=".*"' "${CWD}/Dockerfile" > /dev/null 2>&1; then
 	echo "No 'image' LABEL found"
 	exit
 fi
+
+# Test Docker vendor
+if ! grep -q 'vendor=".*"' "${CWD}/Dockerfile" > /dev/null 2>&1; then
+	echo "No 'vendor' LABEL found"
+	exit
+fi
+
+# Retrieve values
 NAME="$( grep 'image=".*"' "${CWD}/Dockerfile" | sed 's/^[[:space:]]*//g' | awk -F'"' '{print $2}' )"
+VEND="$( grep -Eo 'vendor="(.*)"' "${CWD}/Dockerfile" | awk -F'"' '{print $2}' )"
 
 
 ###
 ### Enter
 ###
-run "docker run -i --entrypoint /bin/bash -t cytopia/${NAME}"
+run "docker run -i --entrypoint /bin/bash -t ${VEND}/${NAME}"

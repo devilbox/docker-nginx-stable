@@ -8,9 +8,9 @@ MAINTAINER "cytopia" <cytopia@everythingcli.org>
 LABEL \
 	name="cytopia's Nginx Image" \
 	image="nginx-stable" \
-	vendor="cytopia" \
+	vendor="devilbox" \
 	license="MIT" \
-	build-date="2017-09-30"
+	build-date="2017-10-01"
 
 
 ###

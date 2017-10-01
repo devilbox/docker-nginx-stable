@@ -32,17 +32,24 @@ if [ ! -f "${CWD}/Dockerfile" ]; then
 	exit 1
 fi
 
-# Get docker Name
+# Test Docker name
 if ! grep -q 'image=".*"' "${CWD}/Dockerfile" > /dev/null 2>&1; then
 	echo "No 'image' LABEL found"
 	exit
 fi
 
-# Make sure exactly 1 container is running
+# Test Docker vendor
+if ! grep -q 'vendor=".*"' "${CWD}/Dockerfile" > /dev/null 2>&1; then
+	echo "No 'vendor' LABEL found"
+	exit
+fi
+
+# Retrieve values
 NAME="$( grep 'image=".*"' "${CWD}/Dockerfile" | sed 's/^[[:space:]]*//g' | awk -F'"' '{print $2}' )"
-COUNT="$( docker ps | grep -c "cytopia/${NAME}" || true)"
+VEND="$( grep -Eo 'vendor="(.*)"' "${CWD}/Dockerfile" | awk -F'"' '{print $2}' )"
+COUNT="$( docker ps | grep -c "${VEND}/${NAME}" || true)"
 if [ "${COUNT}" != "1" ]; then
-	echo "${COUNT} 'cytopia/${NAME}' container running. Unable to attach."
+	echo "${COUNT} '${VEND}/${NAME}' container running. Unable to attach."
 	exit 1
 fi
 
@@ -50,7 +57,7 @@ fi
 ###
 ### Attach
 ###
-DID="$(docker ps | grep "cytopia/${NAME}" | awk '{print $1}')"
+DID="$(docker ps | grep "${VEND}/${NAME}" | awk '{print $1}')"
 
-echo "Attaching to: cytopia/${NAME}"
+echo "Attaching to: ${VEND}/${NAME}"
 run "docker exec -it ${DID} env TERM=xterm /bin/bash -l"

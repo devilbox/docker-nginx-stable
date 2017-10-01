@@ -32,12 +32,21 @@ if [ ! -f "${CWD}/Dockerfile" ]; then
 	exit 1
 fi
 
-# Get docker Name
+# Test Docker name
 if ! grep -q 'image=".*"' "${CWD}/Dockerfile" > /dev/null 2>&1; then
 	echo "No 'image' LABEL found"
 	exit
 fi
+
+# Test Docker vendor
+if ! grep -q 'vendor=".*"' "${CWD}/Dockerfile" > /dev/null 2>&1; then
+	echo "No 'vendor' LABEL found"
+	exit
+fi
+
+# Retrieve values
 NAME="$( grep 'image=".*"' "${CWD}/Dockerfile" | sed 's/^[[:space:]]*//g' | awk -F'"' '{print $2}' )"
+VEND="$( grep -Eo 'vendor="(.*)"' "${CWD}/Dockerfile" | awk -F'"' '{print $2}' )"
 DATE="$( date '+%Y-%m-%d' )"
 
 
@@ -53,18 +62,17 @@ run "docker pull ${MY_BASE}"
 ###
 
 # Update build date
-run "sed -i'' 's/<small>\*\*Latest\sbuild.*/<small>**Latest build:** ${DATE}<\/small>/g' ${CWD}/README.md"
 run "sed -i'' 's/build-date=\".*\"/build-date=\"${DATE}\"/g' ${CWD}/Dockerfile"
 
 # Build Docker
-run "docker build --no-cache -t cytopia/${NAME} ${CWD}"
+run "docker build --no-cache -t ${VEND}/${NAME} ${CWD}"
 
 
 ###
 ### Retrieve information afterwards and Update README.md
 ###
-docker run -d --rm --name my_tmp_${NAME} -t cytopia/${NAME}
-INFO="$( docker exec my_tmp_${NAME} nginx -V 2>&1 | grep -E '^(nginx|built|TLS)' )"
+docker run -d --rm --name my_tmp_${NAME} -t ${VEND}/${NAME}
+INFO="$( docker exec my_tmp_${NAME} httpd -V | grep -E '^Server.*(version|built|Module|loaded|MPM)' )"
 docker stop "$(docker ps | grep "my_tmp_${NAME}" | awk '{print $1}')" > /dev/null
 
 INFO="$( echo "${INFO}" | sed 's/\s$//g' )"        # remove trailing space
