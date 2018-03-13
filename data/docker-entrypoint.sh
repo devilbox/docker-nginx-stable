@@ -468,7 +468,7 @@ fi
 ### Mass vhost (watcher config setup)
 ###
 if [ "${_RUNTIME_MASS_VHOST_ENABLE}" -eq "1" ]; then
-	run "sed -i'' 's/__DOCROOT_SUFFIX__/${_RUNTIME_MASS_VHOST_DOCROOT}/g' /etc/vhost-gen/conf.yml"
+	run "sed -i'' 's|__DOCROOT_SUFFIX__|${_RUNTIME_MASS_VHOST_DOCROOT}|g' /etc/vhost-gen/conf.yml"
 	run "sed -i'' 's/__TLD__/${_RUNTIME_MASS_VHOST_TLD}/g' /etc/vhost-gen/conf.yml"
 fi
 
@@ -487,7 +487,7 @@ if [ "${_RUNTIME_MASS_VHOST_ENABLE}" -eq "1" ]; then
 	else
 		_verb=""
 	fi
-	run "sed -i'' 's/__MASS_VHOST_TPL__/${_RUNTIME_MASS_VHOST_TPL}/g' /etc/supervisord.conf"
+	run "sed -i'' 's|__MASS_VHOST_TPL__|${_RUNTIME_MASS_VHOST_TPL}|g' /etc/supervisord.conf"
 	run "sed -i'' 's/__VERBOSE__/${_verb}/g' /etc/supervisord.conf"
 	exec /usr/bin/supervisord -c /etc/supervisord.conf
 else
