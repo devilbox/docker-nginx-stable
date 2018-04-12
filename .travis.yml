@@ -81,19 +81,17 @@ jobs:
       script:
         # Push to docker hub on success
         - if [ "${TRAVIS_PULL_REQUEST}" == "false" ]; then
+            echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin &&
             if [ -n "${TRAVIS_TAG}" ]; then
-              docker login --username "$DOCKER_USERNAME" --password "$DOCKER_PASSWORD" &&
               echo "Pushing ${IMAGE}:${TRAVIS_TAG}" &&
               docker push "${IMAGE}:${TRAVIS_TAG}" &&
               docker tag "${IMAGE}:${TRAVIS_TAG}" "${IMAGE}:latest" &&
               echo "Pushing ${IMAGE}:latest" &&
               docker push "${IMAGE}:latest";
             elif [ "${TRAVIS_BRANCH}" == "master" ]; then
-              docker login --username "$DOCKER_USERNAME" --password "$DOCKER_PASSWORD" &&
               echo "Pushing ${IMAGE}:latest" &&
               docker push "${IMAGE}:latest";
             elif [[ ${TRAVIS_BRANCH} =~ ^(release[/-][.0-9]+)$ ]]; then
-              docker login --username "$DOCKER_USERNAME" --password "$DOCKER_PASSWORD" &&
               echo "Pushing ${IMAGE}:${TRAVIS_BRANCH}" &&
               docker push "${IMAGE}:${TRAVIS_BRANCH}";
             else
