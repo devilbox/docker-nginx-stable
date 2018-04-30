@@ -17,6 +17,16 @@ VHOST_NAME="${2}"
 CA_KEY="${3}"
 CA_CRT="${4}"
 VERBOSE="${5}"
+shift; shift; shift; shift; shift;
+
+# Get additional domain names
+echo "${@}"
+i=3
+CUST_ALT=
+for domain in "${@}"; do
+    CUST_ALT="${CUST_ALT},DNS.${i}:${domain}"
+	i="$((i+1))"
+done
 
 
 ###
@@ -34,7 +44,7 @@ L=Berlin
 O=Devilbox
 OU=Devilbox
 CN="*.${VHOST_NAME}"
-ALT="DNS.1:${VHOST_NAME},DNS.2:*.${VHOST_NAME}"
+ALT="DNS.1:${VHOST_NAME},DNS.2:*.${VHOST_NAME}${CUST_ALT}"
 
 
 ###

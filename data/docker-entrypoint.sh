@@ -162,7 +162,11 @@ if [ "${MAIN_VHOST_ENABLE}" -eq "1" ]; then
 		if [ ! -d "/etc/httpd/cert/main" ]; then
 			run "mkdir -p /etc/httpd/cert/main" "${DEBUG_LEVEL}"
 		fi
-		run "create-cert.sh '/etc/httpd/cert/main' 'localhost' '${CA_KEY}' '${CA_CRT}' '${DEBUG_RUNTIME}'" "${DEBUG_LEVEL}"
+		# Allow:
+		#  + localhost
+		#  + devilbox
+		#  + devilbox.TLD
+		run "create-cert.sh '/etc/httpd/cert/main' 'localhost' '${CA_KEY}' '${CA_CRT}' '${DEBUG_RUNTIME}' 'devilbox' 'devilbox${MASS_VHOST_TLD}'" "${DEBUG_LEVEL}"
 	fi
 	run "vhost_gen.py -n localhost -p /var/www/default/${MAIN_VHOST_DOCROOT} -c /etc/vhost-gen/main.yml -o /var/www/default/${MAIN_VHOST_TPL} ${_verb} -d -s -m ${MAIN_VHOST_SSL_TYPE}" "${DEBUG_LEVEL}"
 fi
