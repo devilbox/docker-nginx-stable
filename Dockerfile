@@ -3,14 +3,19 @@ MAINTAINER "cytopia" <cytopia@everythingcli.org>
 
 
 ###
-### Labels
+### Build arguments
 ###
-LABEL \
-	name="cytopia's Nginx Image" \
-	image="nginx-stable" \
-	vendor="devilbox" \
-	license="MIT" \
-	build-date="2017-10-01"
+ARG VHOST_GEN_GIT_REF=VHG-022
+
+ENV BUILD_DEPS \
+	git \
+	make \
+	wget
+
+ENV RUN_DEPS \
+	ca-certificates \
+	python-yaml \
+	supervisor
 
 
 ###
@@ -22,36 +27,25 @@ RUN set -x \
 	&& apt-get update \
 	&& apt-get upgrade -y \
 	&& apt-get install --no-install-recommends --no-install-suggests -y \
-		make \
-		python-yaml \
-		supervisor \
-		wget \
-	&& rm -rf /var/lib/apt/lists/* \
-	&& apt-get purge -y --auto-remove
-
-# vhost-gen
-RUN set -x \
-	&& wget --no-check-certificate -O vhost_gen.tar.gz https://github.com/devilbox/vhost-gen/archive/master.tar.gz \
-	&& tar xfvz vhost_gen.tar.gz \
-	&& cd vhost-gen-master \
+		${BUILD_DEPS} \
+		${RUN_DEPS} \
+	\
+	# Install vhost-gen
+	&& git clone https://github.com/devilbox/vhost-gen \
+	&& cd vhost-gen \
+	&& git checkout "${VHOST_GEN_GIT_REF}" \
 	&& make install \
 	&& cd .. \
-	&& rm -rf vhost*gen*
-
-# watcherd
-RUN set -x \
+	&& rm -rf vhost*gen* \
+	\
+	# Install watcherd
 	&& wget --no-check-certificate -O /usr/bin/watcherd https://raw.githubusercontent.com/devilbox/watcherd/master/watcherd \
-	&& chmod +x /usr/bin/watcherd
-
-# cleanup
-RUN set -x \
-	&& apt-get update \
-	&& apt-get remove -y \
-		make \
-		wget \
-	&& apt-get autoremove -y \
-	&& rm -rf /var/lib/apt/lists/* \
-	&& apt-get purge -y --auto-remove
+	&& chmod +x /usr/bin/watcherd \
+	\
+	# Clean-up
+	&& apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $fetchDeps \
+		${BUILD_DEPS} \
+	&& rm -rf /var/lib/apt/lists/*
 
 # Add custom config directive to httpd server
 RUN set -x \
@@ -71,9 +65,12 @@ RUN set -x \
 ###
 ### Copy files
 ###
-COPY ./data/vhost-gen/conf.yml /etc/vhost-gen/conf.yml
 COPY ./data/vhost-gen/main.yml /etc/vhost-gen/main.yml
+COPY ./data/vhost-gen/mass.yml /etc/vhost-gen/mass.yml
+COPY ./data/create-cert.sh /usr/local/bin/create-cert.sh
+COPY ./data/create-vhost.sh /usr/local/bin/create-vhost.sh
 COPY ./data/supervisord.conf /etc/supervisord.conf
+COPY ./data/docker-entrypoint.d /docker-entrypoint.d
 COPY ./data/docker-entrypoint.sh /docker-entrypoint.sh
 
 
@@ -81,12 +78,14 @@ COPY ./data/docker-entrypoint.sh /docker-entrypoint.sh
 ### Ports
 ###
 EXPOSE 80
+EXPOSE 443
 
 
 ###
 ### Volumes
 ###
 VOLUME /shared/httpd
+VOLUME /ca
 
 
 ###
