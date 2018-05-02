@@ -15,7 +15,7 @@ set -o pipefail
 export_mass_vhost_enable() {
 	local varname="${1}"
 	local debug="${2}"
-	local value="1"
+	local value="0"
 
 	if ! env_set "${varname}"; then
 		log "info" "\$${varname} not set. Enabling default vhost." "${debug}"
@@ -63,9 +63,10 @@ export_mass_vhost_ssl_type() {
 				exit 1
 			fi
 		fi
-		# Ensure variable is exported
-		eval "export ${varname}=${value}"
 	fi
+
+	# Ensure variable is exported
+	eval "export ${varname}=${value}"
 }
 
 
@@ -91,9 +92,10 @@ export_mass_vhost_ssl_gen() {
 				exit 1
 			fi
 		fi
-		# Ensure variable is exported
-		eval "export ${varname}=${value}"
 	fi
+
+	# Ensure variable is exported
+	eval "export ${varname}=${value}"
 }
 
 
@@ -112,9 +114,10 @@ export_mass_vhost_tld() {
 			value="$( env_get "${varname}" )"
 			log "info" "Mass vhost: changing tld to: ${value}" "${debug}"
 		fi
-		# Ensure variable is exported
-		eval "export ${varname}=${value}"
 	fi
+
+	# Ensure variable is exported
+	eval "export ${varname}=${value}"
 }
 
 
@@ -133,9 +136,10 @@ export_mass_vhost_docroot() {
 			value="$( env_get "${varname}" )"
 			log "info" "Mass vhost: changing document root to: ${value}" "${debug}"
 		fi
-		# Ensure variable is exported
-		eval "export ${varname}=${value}"
 	fi
+
+	# Ensure variable is exported
+	eval "export ${varname}=${value}"
 }
 
 
@@ -154,7 +158,8 @@ export_mass_vhost_tpl() {
 			value="$( env_get "${varname}" )"
 			log "info" "Mass vhost: changing template dir to: ${value}" "${debug}"
 		fi
-		# Ensure variable is exported
-		eval "export ${varname}=${value}"
 	fi
+
+	# Ensure variable is exported
+	eval "export ${varname}=${value}"
 }

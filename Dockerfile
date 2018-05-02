@@ -6,6 +6,7 @@ MAINTAINER "cytopia" <cytopia@everythingcli.org>
 ### Build arguments
 ###
 ARG VHOST_GEN_GIT_REF=VHG-022
+ARG CERT_GEN_GIT_REF=release-0.2
 
 ENV BUILD_DEPS \
 	git \
@@ -16,6 +17,15 @@ ENV RUN_DEPS \
 	ca-certificates \
 	python-yaml \
 	supervisor
+
+
+###
+### Runtime arguments
+###
+ENV MY_USER=nginx
+ENV MY_GROUP=nginx
+ENV HTTPD_START="/usr/sbin/nginx"
+ENV HTTPD_RELOAD="nginx -s reload"
 
 
 ###
@@ -38,6 +48,12 @@ RUN set -x \
 	&& cd .. \
 	&& rm -rf vhost*gen* \
 	\
+	# Install cert-gen
+	&& wget --no-check-certificate -O /usr/bin/ca-gen https://raw.githubusercontent.com/devilbox/cert-gen/${CERT_GEN_GIT_REF}/bin/ca-gen \
+	&& wget --no-check-certificate -O /usr/bin/cert-gen https://raw.githubusercontent.com/devilbox/cert-gen/${CERT_GEN_GIT_REF}/bin/cert-gen \
+	&& chmod +x /usr/bin/ca-gen \
+	&& chmod +x /usr/bin/cert-gen \
+	\
 	# Install watcherd
 	&& wget --no-check-certificate -O /usr/bin/watcherd https://raw.githubusercontent.com/devilbox/watcherd/master/watcherd \
 	&& chmod +x /usr/bin/watcherd \
@@ -49,7 +65,8 @@ RUN set -x \
 
 # Add custom config directive to httpd server
 RUN set -x \
-	&& sed -i'' 's|^\s*include.*conf\.d/.*|    include /etc/httpd-custom.d/*.conf;\n    include /etc/httpd/conf.d/*.conf;\n    include /etc/httpd/vhost.d/*.conf;\n|g' /etc/nginx/nginx.conf
+	&& sed -i'' 's|^\s*include.*conf\.d/.*|    include /etc/httpd-custom.d/*.conf;\n    include /etc/httpd/conf.d/*.conf;\n    include /etc/httpd/vhost.d/*.conf;\n|g' /etc/nginx/nginx.conf \
+	&& echo "daemon off;" >> /etc/nginx/nginx.conf
 
 # create directories
 RUN set -x \
@@ -59,7 +76,7 @@ RUN set -x \
 	&& mkdir -p /var/www/default/htdocs \
 	&& mkdir -p /shared/httpd \
 	&& chmod 0775 /shared/httpd \
-	&& chown nginx:nginx /shared/httpd
+	&& chown ${MY_USER}:${MY_GROUP} /shared/httpd
 
 
 ###
@@ -67,9 +84,7 @@ RUN set -x \
 ###
 COPY ./data/vhost-gen/main.yml /etc/vhost-gen/main.yml
 COPY ./data/vhost-gen/mass.yml /etc/vhost-gen/mass.yml
-COPY ./data/create-cert.sh /usr/local/bin/create-cert.sh
 COPY ./data/create-vhost.sh /usr/local/bin/create-vhost.sh
-COPY ./data/supervisord.conf /etc/supervisord.conf
 COPY ./data/docker-entrypoint.d /docker-entrypoint.d
 COPY ./data/docker-entrypoint.sh /docker-entrypoint.sh
 

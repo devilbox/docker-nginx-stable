@@ -74,10 +74,6 @@ set_uid() {
 			if [ -d "${homedir}" ]; then
 				run "chown -R ${username} ${homedir}" "${debug}"
 			fi
-			if [ ! -d "/ca" ]; then
-				run "mkdir -p /ca" "${debug}"
-			fi
-			run "chown -R ${username} /ca" "${debug}"
 		fi
 	fi
 }
@@ -121,10 +117,6 @@ set_gid() {
 			if [ -d "${homedir}" ]; then
 				run "chown -R :${groupname} ${homedir}" "${debug}"
 			fi
-			if [ ! -d "/ca" ]; then
-				run "mkdir -p /ca" "${debug}"
-			fi
-			run "chown -R :${groupname} /ca" "${debug}"
 		fi
 	fi
 }

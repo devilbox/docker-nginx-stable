@@ -98,6 +98,32 @@ export_main_vhost_ssl_gen() {
 
 
 ###
+### Ensure MAIN_VHOST_SSL_CN is set (if needed)
+###
+export_main_vhost_ssl_cn() {
+	local varname="${1}"
+	local debug="${2}"
+	local value="localhost"
+
+	if [ "${MAIN_VHOST_ENABLE}" = "1" ]; then
+		if ! env_set "${varname}"; then
+			log "info" "\$${varname} not specified. Keeping default: ${value}" "${debug}"
+		else
+			value="$( env_get "${varname}" )"
+			if [ -z "${value}" ]; then
+				log "err" "\$${varname} set but empty. Cannot determine CN name for SSL certificate generation." "${debug}"
+				exit 1
+			else
+				log "info" "Main vhost: SSL CN: ${value}" "${debug}"
+			fi
+		fi
+		# Ensure variable is exported
+		eval "export ${varname}=${value}"
+	fi
+}
+
+
+###
 ### Ensure MAIN_VHOST_DOCROOT is set (if needed)
 ###
 export_main_vhost_docroot() {

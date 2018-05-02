@@ -8,8 +8,11 @@ set -o pipefail
 ### Globals
 ###
 
-MY_USER=nginx
-MY_GROUP=nginx
+# Set via Dockerfile
+# MY_USER
+# MY_GROUP
+# HTTPD_START
+# HTTPD_RELOAD
 
 # OpenSSL Certificate Authority file to generate
 CA_KEY=/ca/devilbox-ca.key
@@ -32,7 +35,7 @@ done
 
 
 #############################################################
-## Entry Point
+## Basic Settings
 #############################################################
 
 ###
@@ -58,48 +61,47 @@ set_gid "NEW_GID" "${MY_GROUP}" "${DEBUG_LEVEL}"
 set_timezone "TIMEZONE" "${DEBUG_LEVEL}"
 
 
-###
-### Ensure the following env variables are set and exported
-###
 
-# Docker Logs
+#############################################################
+## Variable exports
+#############################################################
+
+###
+### Ensure Docker_LOGS is exported
+###
 export_docker_logs "DOCKER_LOGS" "${DEBUG_LEVEL}"
 
-# PHP-FPM
+
+###
+### Ensure PHP-FPM variables are exported
+###
 export_php_fpm_enable "PHP_FPM_ENABLE" "${DEBUG_LEVEL}"
 export_php_fpm_server_addr "PHP_FPM_SERVER_ADDR" "${DEBUG_LEVEL}"
 export_php_fpm_server_port "PHP_FPM_SERVER_PORT" "${DEBUG_LEVEL}"
 
-# Main vhost
+
+###
+### Ensure MAIN_VHOST variables are exported
+###
 export_main_vhost_enable "MAIN_VHOST_ENABLE" "${DEBUG_LEVEL}"
 export_main_vhost_ssl_type "MAIN_VHOST_SSL_TYPE" "${DEBUG_LEVEL}"
 export_main_vhost_ssl_gen "MAIN_VHOST_SSL_GEN" "${DEBUG_LEVEL}"
+export_main_vhost_ssl_cn "MAIN_VHOST_SSL_CN" "${DEBUG_LEVEL}"
 export_main_vhost_docroot "MAIN_VHOST_DOCROOT" "${DEBUG_LEVEL}"
 export_main_vhost_tpl "MAIN_VHOST_TPL" "${DEBUG_LEVEL}"
 export_main_vhost_status_enable "MAIN_VHOST_STATUS_ENABLE" "${DEBUG_LEVEL}"
 export_main_vhost_status_alias "MAIN_VHOST_STATUS_ALIAS" "${DEBUG_LEVEL}"
 
-# Mass vhost
+
+###
+### Ensure MASS_VHOST variables are exported
+###
 export_mass_vhost_enable "MASS_VHOST_ENABLE" "${DEBUG_LEVEL}"
 export_mass_vhost_ssl_type "MASS_VHOST_SSL_TYPE" "${DEBUG_LEVEL}"
 export_mass_vhost_ssl_gen "MASS_VHOST_SSL_GEN" "${DEBUG_LEVEL}"
 export_mass_vhost_tld "MASS_VHOST_TLD" "${DEBUG_LEVEL}"
 export_mass_vhost_docroot "MASS_VHOST_DOCROOT" "${DEBUG_LEVEL}"
 export_mass_vhost_tpl "MASS_VHOST_TPL" "${DEBUG_LEVEL}"
-
-
-
-################################################################################
-# SETUP CONFIGURATION
-################################################################################
-
-###
-### Create Certificate Signing request
-###
-if [ ! -f "${CA_KEY}" ] || [ ! -f "${CA_CRT}" ]; then
-	run "openssl genrsa -out ${CA_KEY} 2048" "${DEBUG_LEVEL}"
-	run "openssl req -new -x509 -days 3650 -key ${CA_KEY} -subj '/C=DE/ST=Berlin/L=Berlin/O=Devilbox/OU=Devilbox/CN=Devilbox Root CA' -extensions v3_ca -out ${CA_CRT}" "${DEBUG_LEVEL}"
-fi
 
 
 ###
@@ -111,74 +113,93 @@ if [ "${MAIN_VHOST_ENABLE}" -eq "0" ] && [ "${MASS_VHOST_ENABLE}" -eq "0" ]; the
 fi
 
 
-###
-### vhost-gen
-###
-if [ "${PHP_FPM_ENABLE}" -eq "1" ]; then
-	run "sed -i'' 's/__PHP_ENABLE__/yes/g' /etc/vhost-gen/mass.yml" "${DEBUG_LEVEL}"
-	run "sed -i'' 's/__PHP_ENABLE__/yes/g' /etc/vhost-gen/main.yml" "${DEBUG_LEVEL}"
-	run "sed -i'' 's/__PHP_ADDR__/${PHP_FPM_SERVER_ADDR}/g' /etc/vhost-gen/mass.yml" "${DEBUG_LEVEL}"
-	run "sed -i'' 's/__PHP_ADDR__/${PHP_FPM_SERVER_ADDR}/g' /etc/vhost-gen/main.yml" "${DEBUG_LEVEL}"
-	run "sed -i'' 's/__PHP_PORT__/${PHP_FPM_SERVER_PORT}/g' /etc/vhost-gen/mass.yml" "${DEBUG_LEVEL}"
-	run "sed -i'' 's/__PHP_PORT__/${PHP_FPM_SERVER_PORT}/g' /etc/vhost-gen/main.yml" "${DEBUG_LEVEL}"
-else
-	run "sed -i'' 's/__PHP_ENABLE__/no/g' /etc/vhost-gen/mass.yml" "${DEBUG_LEVEL}"
-	run "sed -i'' 's/__PHP_ENABLE__/no/g' /etc/vhost-gen/main.yml" "${DEBUG_LEVEL}"
-fi
 
-if [ "${DOCKER_LOGS}" -eq "1" ]; then
-	run "sed -i'' 's/__DOCKER_LOGS_ERROR__/yes/g' /etc/vhost-gen/mass.yml" "${DEBUG_LEVEL}"
-	run "sed -i'' 's/__DOCKER_LOGS_ERROR__/yes/g' /etc/vhost-gen/main.yml" "${DEBUG_LEVEL}"
-	run "sed -i'' 's/__DOCKER_LOGS_ACCESS__/yes/g' /etc/vhost-gen/mass.yml" "${DEBUG_LEVEL}"
-	run "sed -i'' 's/__DOCKER_LOGS_ACCESS__/yes/g' /etc/vhost-gen/main.yml" "${DEBUG_LEVEL}"
-else
-	run "sed -i'' 's/__DOCKER_LOGS_ERROR__/no/g' /etc/vhost-gen/mass.yml" "${DEBUG_LEVEL}"
-	run "sed -i'' 's/__DOCKER_LOGS_ERROR__/no/g' /etc/vhost-gen/main.yml" "${DEBUG_LEVEL}"
-	run "sed -i'' 's/__DOCKER_LOGS_ACCESS__/no/g' /etc/vhost-gen/mass.yml" "${DEBUG_LEVEL}"
-	run "sed -i'' 's/__DOCKER_LOGS_ACCESS__/no/g' /etc/vhost-gen/main.yml" "${DEBUG_LEVEL}"
-fi
+#############################################################
+## vhost-gen Configuration
+#############################################################
+
+###
+### Enable and configure PHP-FPM
+###
+vhost_gen_php_fpm "${PHP_FPM_ENABLE}" "${PHP_FPM_SERVER_ADDR}" "${PHP_FPM_SERVER_PORT}" "/etc/vhost-gen/main.yml" "${DEBUG_LEVEL}"
+vhost_gen_php_fpm "${PHP_FPM_ENABLE}" "${PHP_FPM_SERVER_ADDR}" "${PHP_FPM_SERVER_PORT}" "/etc/vhost-gen/mass.yml" "${DEBUG_LEVEL}"
 
 
 ###
-### Main vhost
+### Configure Docker logs
 ###
-if [ "${MAIN_VHOST_ENABLE}" -eq "1" ]; then
-
-	# Enable status page?
-	if [ "${MAIN_VHOST_STATUS_ENABLE}" -eq "1" ]; then
-		run "sed -i'' 's/__ENABLE_STATUS__/yes/g' /etc/vhost-gen/main.yml" "${DEBUG_LEVEL}"
-		run "sed -i'' 's|__STATUS_ALIAS__|${MAIN_VHOST_STATUS_ALIAS}|g' /etc/vhost-gen/main.yml" "${DEBUG_LEVEL}"
-	else
-		run "sed -i'' 's/__ENABLE_STATUS__/no/g' /etc/vhost-gen/main.yml" "${DEBUG_LEVEL}"
-	fi
-
-	# Debug creation?
-	if [ "${DEBUG_RUNTIME}" -gt "0" ]; then
-		_verb="-v"
-	else
-		_verb=""
-	fi
-	if [ "${MAIN_VHOST_SSL_GEN}" = "1" ]; then
-		if [ ! -d "/etc/httpd/cert/main" ]; then
-			run "mkdir -p /etc/httpd/cert/main" "${DEBUG_LEVEL}"
-		fi
-		# Allow:
-		#  + localhost
-		#  + devilbox
-		#  + devilbox.TLD
-		run "create-cert.sh '/etc/httpd/cert/main' 'localhost' '${CA_KEY}' '${CA_CRT}' '${DEBUG_RUNTIME}' 'devilbox' 'devilbox${MASS_VHOST_TLD}'" "${DEBUG_LEVEL}"
-	fi
-	run "vhost_gen.py -n localhost -p /var/www/default/${MAIN_VHOST_DOCROOT} -c /etc/vhost-gen/main.yml -o /var/www/default/${MAIN_VHOST_TPL} ${_verb} -d -s -m ${MAIN_VHOST_SSL_TYPE}" "${DEBUG_LEVEL}"
-fi
+vhost_gen_docker_logs "${DOCKER_LOGS}" "/etc/vhost-gen/main.yml" "${DEBUG_LEVEL}"
+vhost_gen_docker_logs "${DOCKER_LOGS}" "/etc/vhost-gen/mass.yml" "${DEBUG_LEVEL}"
 
 
 ###
-### Mass vhost (watcher config setup)
+### Main vhost settings
 ###
-if [ "${MASS_VHOST_ENABLE}" -eq "1" ]; then
-	run "sed -i'' 's|__DOCROOT_SUFFIX__|${MASS_VHOST_DOCROOT}|g' /etc/vhost-gen/mass.yml" "${DEBUG_LEVEL}"
-	run "sed -i'' 's/__TLD__/${MASS_VHOST_TLD}/g' /etc/vhost-gen/mass.yml" "${DEBUG_LEVEL}"
-fi
+vhost_gen_main_vhost_httpd_status \
+	"${MAIN_VHOST_STATUS_ENABLE}" \
+	"${MAIN_VHOST_STATUS_ALIAS}" \
+	"/etc/vhost-gen/main.yml" \
+	"${DEBUG_LEVEL}"
+
+vhost_gen_generate_main_vhost \
+	"${MAIN_VHOST_ENABLE}" \
+	"/var/www/default/${MAIN_VHOST_DOCROOT}" \
+	"/etc/vhost-gen/main.yml" \
+	"/var/www/default/${MAIN_VHOST_TPL}" \
+	"${MAIN_VHOST_SSL_TYPE}" \
+	"${DEBUG_RUNTIME}" \
+	"${DEBUG_LEVEL}"
+
+
+###
+### Mass vhost settings
+###
+vhost_gen_mass_vhost_docroot \
+	"${MASS_VHOST_ENABLE}" \
+	"${MASS_VHOST_DOCROOT}" \
+	"/etc/vhost-gen/mass.yml" \
+	"${DEBUG_LEVEL}"
+
+vhost_gen_mass_vhost_tld \
+	"${MASS_VHOST_ENABLE}" \
+	"${MASS_VHOST_TLD}" \
+	"/etc/vhost-gen/mass.yml" \
+	"${DEBUG_LEVEL}"
+
+
+
+################################################################################
+# cert-getn Configuration
+################################################################################
+
+###
+### Create Certificate Signing request
+###
+cert_gen_generate_ca "${CA_KEY}" "${CA_CRT}" "${DEBUG_RUNTIME}" "${DEBUG_LEVEL}"
+
+
+###
+### Generate main vhost ssl certificate
+###
+cert_gen_generate_cert \
+	"${MAIN_VHOST_ENABLE}" \
+	"${MAIN_VHOST_SSL_TYPE}" \
+	"${CA_KEY}" \
+	"${CA_CRT}" \
+	"/etc/httpd/cert/main/localhost.key" \
+	"/etc/httpd/cert/main/localhost.csr" \
+	"/etc/httpd/cert/main/localhost.crt" \
+	"${MAIN_VHOST_SSL_CN}" \
+	"${DEBUG_RUNTIME}" \
+	"${DEBUG_LEVEL}"
+
+
+
+################################################################################
+# Fix directory permissions
+################################################################################
+
+fix_perm "NEW_UID" "NEW_GID" "/ca" "1" "${DEBUG_LEVEL}"
 
 
 
@@ -190,22 +211,25 @@ fi
 ### Supervisor or plain
 ###
 if [ "${MASS_VHOST_ENABLE}" -eq "1" ]; then
+
+	verbose=""
 	if [ "${DEBUG_RUNTIME}" -gt "0" ]; then
-		_verb="-v"
-	else
-		_verb=""
+		verbose="-v"
 	fi
-	if [ ! -d "/etc/httpd/cert/mass" ]; then
-		run "mkdir -p /etc/httpd/cert/mass" "${DEBUG_LEVEL}"
-	fi
-	run "sed -i'' 's|__MASS_VHOST_TPL__|${MASS_VHOST_TPL}|g' /etc/supervisord.conf" "${DEBUG_LEVEL}"
-	run "sed -i'' 's|__VERBOSE__|${_verb}|g'                 /etc/supervisord.conf" "${DEBUG_LEVEL}"
-	run "sed -i'' 's|__TLD__|${MASS_VHOST_TLD}|g'            /etc/supervisord.conf" "${DEBUG_LEVEL}"
-	run "sed -i'' 's|__CA_KEY__|${CA_KEY}|g'                 /etc/supervisord.conf" "${DEBUG_LEVEL}"
-	run "sed -i'' 's|__CA_CRT__|${CA_CRT}|g'                 /etc/supervisord.conf" "${DEBUG_LEVEL}"
+
+	# Create watcherd sub commands
+	watcherd_add="create-vhost.sh '%%p' '%%n' '${MASS_VHOST_TLD}' '%%p/${MASS_VHOST_TPL}/' '${CA_KEY}' '${CA_CRT}' '${verbose}' '1'"
+	watcherd_del="rm /etc/httpd/vhost.d/%%n.conf"
+	watcherd_tri="${HTTPD_RELOAD}"
+
+	supervisord_create \
+		"${HTTPD_START}" \
+		"watcherd -v -p /shared/httpd -a \"${watcherd_add}\" -d \"${watcherd_del}\" -t \"${watcherd_tri}\"" \
+		"/etc/supervisord.conf"
+
 	log "info" "Starting supervisord: $(supervisord -v)" "${DEBUG_LEVEL}"
 	exec /usr/bin/supervisord -c /etc/supervisord.conf
 else
-	log "info" "Starting Nginx: $(nginx -v 2>&1 | awk '{print $3}')" "${DEBUG_LEVEL}"
-	exec /usr/sbin/nginx -g 'daemon off;'
+	log "info" "Starting webserver" "${DEBUG_LEVEL}"
+	exec ${HTTPD_START}
 fi

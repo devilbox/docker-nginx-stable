@@ -57,6 +57,9 @@ export_php_fpm_server_addr() {
 		fi
 		log "info" "PHP-FPM: Server address: ${value}" "${debug}"
 	fi
+
+	# Ensure variable is exported
+	eval "export ${varname}=${value}"
 }
 
 
@@ -71,8 +74,6 @@ export_php_fpm_server_port() {
 	if [ "${PHP_FPM_ENABLE}" = "1" ]; then
 		if ! env_set "${varname}"; then
 			log "info" "\$${varname} not specified, keeping default: ${value}" "${debug}"
-			# Ensure variable is exported if not set
-			eval "export ${varname}=${value}"
 		else
 			value="$( env_get "${varname}" )"
 
@@ -91,4 +92,7 @@ export_php_fpm_server_port() {
 			log "info" "PHP-FPM: Server port: ${value}" "${debug}"
 		fi
 	fi
+
+	# Ensure variable is exported if not set
+	eval "export ${varname}=${value}"
 }

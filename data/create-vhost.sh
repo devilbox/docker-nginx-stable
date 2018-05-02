@@ -14,7 +14,16 @@ VERBOSE="${7}"
 GENERATE_SSL="${8}"
 
 if [ "${GENERATE_SSL}" = "1" ]; then
-	if ! create-cert.sh "/etc/httpd/cert/mass" "${VHOST_NAME}${VHOST_TLD}" "${CA_KEY}" "${CA_CRT}" "${VERBOSE}"; then
+	if [ ! -d "/etc/httpd/cert/mass" ]; then
+		mkdir -p "/etc/httpd/cert/mass"
+	fi
+	_email="admin@${VHOST_NAME}${VHOST_TLD}"
+	_domain="${VHOST_NAME}${VHOST_TLD}"
+	_domains="*.${VHOST_NAME}${VHOST_TLD}"
+	_out_key="/etc/httpd/cert/mass/${VHOST_NAME}${VHOST_TLD}.key"
+	_out_csr="/etc/httpd/cert/mass/${VHOST_NAME}${VHOST_TLD}.csr"
+	_out_crt="/etc/httpd/cert/mass/${VHOST_NAME}${VHOST_TLD}.crt"
+	if ! cert-gen -v -c DE -s Berlin -l Berlin -o Devilbox -u Devilbox -n "${_domain}" -e "${_email}" -a "${_domains}" "${CA_KEY}" "${CA_CRT}" "${_out_key}" "${_out_csr}" "${_out_crt}"; then
 		echo "[FAILED] Failed to add SSL certificate for ${VHOST_NAME}${VHOST_TLD}"
 		exit 1
 	fi
