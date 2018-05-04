@@ -5,7 +5,8 @@
 ### Globals
 ###
 CWD="$(cd -P -- "$(dirname -- "$0")" && pwd -P)/.."
-
+VEND=devilbox
+NAME=nginx-stable
 
 ###
 ### Funcs
@@ -32,23 +33,6 @@ if [ ! -f "${CWD}/Dockerfile" ]; then
 	exit 1
 fi
 
-# Test Docker name
-if ! grep -q 'image=".*"' "${CWD}/Dockerfile" > /dev/null 2>&1; then
-	echo "No 'image' LABEL found"
-	exit
-fi
-
-# Test Docker vendor
-if ! grep -q 'vendor=".*"' "${CWD}/Dockerfile" > /dev/null 2>&1; then
-	echo "No 'vendor' LABEL found"
-	exit
-fi
-
-# Retrieve values
-NAME="$( grep 'image=".*"' "${CWD}/Dockerfile" | sed 's/^[[:space:]]*//g' | awk -F'"' '{print $2}' )"
-VEND="$( grep -Eo 'vendor="(.*)"' "${CWD}/Dockerfile" | awk -F'"' '{print $2}' )"
-DATE="$( date '+%Y-%m-%d' )"
-
 
 ###
 ### Update Base
@@ -61,9 +45,6 @@ run "docker pull ${MY_BASE}"
 ### Build
 ###
 
-# Update build date
-run "sed -i'' 's/build-date=\".*\"/build-date=\"${DATE}\"/g' ${CWD}/Dockerfile"
-
 # Build Docker
 run "docker build --no-cache -t ${VEND}/${NAME} ${CWD}"
 
@@ -71,11 +52,10 @@ run "docker build --no-cache -t ${VEND}/${NAME} ${CWD}"
 ###
 ### Retrieve information afterwards and Update README.md
 ###
-docker run -d --rm --name my_tmp_${NAME} -t ${VEND}/${NAME}
-INFO="$( docker exec my_tmp_${NAME} httpd -V | grep -E '^Server.*(version|built|Module|loaded|MPM)' )"
-docker stop "$(docker ps | grep "my_tmp_${NAME}" | awk '{print $1}')" > /dev/null
+DID="$( docker run -d --rm -t ${VEND}/${NAME} )"
+INFO="$( docker exec "${DID}" nginx -v 2>&1 )"
+docker stop "${DID}"
 
-INFO="$( echo "${INFO}" | sed 's/\s$//g' )"        # remove trailing space
 echo "${INFO}"
 
 sed -i'' '/##[[:space:]]Version/q' "${CWD}/README.md"

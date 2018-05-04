@@ -1,24 +1,22 @@
-# Nginx stable Docker
+# Nginx stable Docker image
 
-[![Devilbox](https://raw.githubusercontent.com/cytopia/devilbox/master/.devilbox/www/htdocs/assets/img/devilbox_80.png)](https://github.com/cytopia/devilbox)
+[![Build Status](https://travis-ci.org/devilbox/docker-nginx-stable.svg?branch=master)](https://travis-ci.org/devilbox/docker-nginx-stable)
+[![release](https://img.shields.io/github/release/devilbox/docker-nginx-stable.svg)](https://github.com/devilbox/docker-nginx-stable/releases)
+[![Join the chat at https://gitter.im/devilbox/Lobby](https://badges.gitter.im/devilbox/Lobby.svg)](https://gitter.im/devilbox/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Github](https://img.shields.io/badge/github-docker--nginx--stable-red.svg)](https://github.com/devilbox/docker-nginx-stable)
+[![](https://images.microbadger.com/badges/license/devilbox/nginx-stable.svg)](https://microbadger.com/images/devilbox/nginx-stable "nginx-stable")
 
-<sub>This Docker image is part of the **[devilbox](https://github.com/cytopia/devilbox)**.</sub>
+**[devilbox/docker-nginx-stable](https://github.com/devilbox/docker-nginx-stable)**
+
+This image is based on the official **[Nginx](https://hub.docker.com/_/nginx)** Docker image and extends it with the ability to have **virtual hosts created automatically**, as well as **adding SSL certificates** when creating new directories. For that to work, it integrates two tools that will take care about the whole process: **[watcherd](https://github.com/devilbox/watcherd)** and **[vhost-gen](https://github.com/devilbox/vhost-gen)**.
+
+From a users perspective, you mount your local project directory into the container under `/shared/httpd`. Any directory then created in your local project directory wil spawn a new virtual host by the same name. Additional settings such as custom server names, PHP-FPM or even different Apache templates per project are supported as well.
+
+| Docker Hub | Upstream Project |
+|------------|------------------|
+| <a href="https://hub.docker.com/r/devilbox/nginx-stable"><img height="82px" src="http://dockeri.co/image/devilbox/nginx-stable" /></a> | <a href="https://github.com/cytopia/devilbox" ><img height="82px" src="https://raw.githubusercontent.com/devilbox/artwork/master/submissions_banner/cytopia/01/png/banner_256_trans.png" /></a> |
 
 **[Apache 2.2](https://github.com/devilbox/docker-apache-2.2) | [Apache 2.4](https://github.com/devilbox/docker-apache-2.4) | Nginx stable | [Nginx mainline](https://github.com/devilbox/docker-nginx-mainline)**
-
-[![Build Status](https://travis-ci.org/devilbox/docker-nginx-stable.svg?branch=master)](https://travis-ci.org/devilbox/docker-nginx-stable) [![](https://images.microbadger.com/badges/version/devilbox/nginx-stable.svg)](https://microbadger.com/images/devilbox/nginx-stable "nginx-stable") [![](https://images.microbadger.com/badges/image/devilbox/nginx-stable.svg)](https://microbadger.com/images/devilbox/nginx-stable "nginx-stable") [![](https://images.microbadger.com/badges/license/devilbox/nginx-stable.svg)](https://microbadger.com/images/devilbox/nginx-stable "nginx-stable")
-
-This image is based on the official **[Nginx (stable)](https://hub.docker.com/_/nginx/)** Docker image and extends it with the ability to have **virtual hosts created automatically** when adding new directories. For that to work, it integrates two tools that will take care about the whole process: **[watcherd](https://github.com/devilbox/watcherd)** and **[vhost-gen](https://github.com/devilbox/vhost-gen)**.
-
-From a users perspective, you mount your local project directory into the Docker under `/shared/httpd`. Any directory then created in your local project directory wil spawn a new virtual host by the same name. Additional settings such as custom server names, PHP-FPM or even different nginx templates per project are supported as well.
-
-----
-
-Find me on **[Docker Hub](https://hub.docker.com/r/devilbox/nginx-stable)**:
-
-[![devilbox/nginx-stable](http://dockeri.co/image/devilbox/nginx-stable)](https://hub.docker.com/r/devilbox/nginx-stable/)
-
-<small>**Latest build:** This container is built every night by [travis-ci](https://travis-ci.org/devilbox/docker-nginx-stable).</small>
 
 ----
 
@@ -29,12 +27,16 @@ Find me on **[Docker Hub](https://hub.docker.com/r/devilbox/nginx-stable)**:
 
 1. Automated virtual hosts can be enabled by providing `-e MASS_VHOST_ENABLE=1`.
 2. You should mount a local project directory into the Docker under `/shared/httpd` (`-v /local/path:/shared/httpd`).
-3. You can optionally specify a global server name suffix via e.g.: `-e MASS_VHOST_TLD=.local`
+3. You can optionally specify a global server name suffix via e.g.: `-e MASS_VHOST_TLD=.loc`
 4. You can optionally specify a global subdirectory from which the virtual host will servve the documents via e.g.: `-e MASS_VHOST_DOCROOT=www`
-4. Allow the Docker to expose its port via `-p 80:80`.
-5. Have DNS names point to the IP address the docker runs on (e.g. via `/etc/hosts`)
+5. Allow the Docker to expose its port via `-p 80:80`.
+6. Have DNS names point to the IP address the container runs on (e.g. via `/etc/hosts`)
 
-With the above described settings, whenever you create a local directory under your projects dir, such as `/local/path/mydir`, there will be a new virtual host created by the same name `http://mydir`. You can also specify a global suffix for the vhost names via `-e MASS_VHOST_TLD=.local`, afterwards your above created vhost would be reachable via `http://mydir.local`.
+With the above described settings, whenever you create a local directory under your projects dir
+such as `/local/path/mydir`, there will be a new virtual host created by the same name
+`http://mydir`. You can also specify a global suffix for the vhost names via
+`-e MASS_VHOST_TLD=.loc`, afterwards your above created vhost would be reachable via
+`http://mydir.loc`.
 
 Just to give you a few examples:
 
@@ -67,7 +69,7 @@ docker run -it \
     -p 80:80 \
     -e MASS_VHOST_ENABLE=1 \
     -e MASS_VHOST_DOCROOT=www \
-    -e MASS_VHOST_TLD=.local \
+    -e MASS_VHOST_TLD=.loc \
     -v /local/path:/shared/httpd \
     devilbox/nginx-stable
 ```
@@ -99,7 +101,7 @@ PHP-FPM is not included inside this Docker container, but can be enabled to cont
 
 #### Disabling the default virtual host
 
-If you only want to server you custom projects and don't need the default virtual host, you can disable it by `-e MAIN_VHOST_DISABLE=1`.
+If you only want to server you custom projects and don't need the default virtual host, you can disable it by `-e MAIN_VHOST_ENABLE=0`.
 
 
 ## Options
@@ -130,7 +132,10 @@ This Docker container adds a lot of injectables in order to customize it to your
 
 | Variable | Type | Default | Description |
 |----------|------|---------|-------------|
-| MAIN_VHOST_DISABLE  | bool   | `0`     | By default there is a standard (catch-all) vhost configured to accept requests served from `/var/www/default/htdocs`. If you want to disable it, set the value to `1`.<br/><strong>Note:</strong>The `htdocs` dir name can be changed with `MAIN_VHOST_DOCROOT`. See below. |
+| MAIN_VHOST_ENABLE  | bool   | `1`     | By default there is a standard (catch-all) vhost configured to accept requests served from `/var/www/default/htdocs`. If you want to disable it, set the value to `0`.<br/><strong>Note:</strong>The `htdocs` dir name can be changed with `MAIN_VHOST_DOCROOT`. See below. |
+| MAIN_VHOST_SSL_TYPE | string | `plain` | <ul><li><code>plain</code> - only serve via http</li><li><code>ssl</code> - only serve via https</li><li><code>both</code> - serve via http and https</li><li><code>redir</code> - serve via https and redirect http to https</li></ul> |
+| MAIN_VHOST_SSL_GEN | bool | `0` | `0`: Do not generate an ssl certificate<br/> `1`: Generate self-signed certificate automatically |
+| MAIN_VHOST_SSL_CN  | string | `localhost` | Comma separated list of CN names for SSL certificate generation (The domain names by which you want to reach the default server) |
 | MAIN_VHOST_DOCROOT  | string | `htdocs`| This is the directory name appended to `/var/www/default/` from which the default virtual host will serve its files.<br/><strong>Default:</strong><br/>`/var/www/default/htdocs`<br/><strong>Example:</strong><br/>`MAIN_VHOST_DOCROOT=www`<br/>Doc root: `/var/www/default/www` | 
 | MAIN_VHOST_TPL      | string | `cfg`   | Directory within th default vhost base path (`/var/www/default`) to look for templates to overwrite virtual host settings. See [vhost-gen](https://github.com/devilbox/vhost-gen/tree/master/etc/templates) for available template files.<br/><strong>Resulting default path:</strong><br/>`/var/www/default/cfg` |
 | MAIN_VHOST_STATUS_ENABLE | bool | `0`  | Enable httpd status page. |
@@ -141,7 +146,9 @@ This Docker container adds a lot of injectables in order to customize it to your
 | Variable | Type | Default | Description |
 |----------|------|---------|-------------|
 | MASS_VHOST_ENABLE   | bool   | `0`     | You can enable mass virtual hosts by setting this value to `1`. Mass virtual hosts will be created for each directory present in `/shared/httpd` by the same name including a top-level domain suffix (which could also be a domain+tld). See `MASS_VHOST_TLD` for how to set it. |
-| MASS_VHOST_TLD      | string | `.local`| This string will be appended to the server name (which is built by its directory name) for mass virtual hosts and together build the final domain.<br/><strong>Default:</strong>`<project>.local`<br/><strong>Example:</strong><br/>Path: `/shared/httpd/temp`<br/>`MASS_VHOST_TLD=.lan`<br/>Server name: `temp.lan`<br/><strong>Example:</strong><br/>Path:`/shared/httpd/api`<br/>`MASS_VHOST_TLD=.example.com`<br/>Server name: `api.example.com` |
+| MASS_VHOST_SSL_TYPE | string | `plain` | <ul><li><code>plain</code> - only serve via http</li><li><code>ssl</code> - only serve via https</li><li><code>both</code> - serve via http and https</li><li><code>redir</code> - serve via https and redirect http to https</li></ul> |
+| MASS_VHOST_SSL_GEN | bool | `0` | `0`: Do not generate an ssl certificate<br/> `1`: Generate self-signed certificate automatically |
+| MASS_VHOST_TLD      | string | `.loc`| This string will be appended to the server name (which is built by its directory name) for mass virtual hosts and together build the final domain.<br/><strong>Default:</strong>`<project>.loc`<br/><strong>Example:</strong><br/>Path: `/shared/httpd/temp`<br/>`MASS_VHOST_TLD=.lan`<br/>Server name: `temp.lan`<br/><strong>Example:</strong><br/>Path:`/shared/httpd/api`<br/>`MASS_VHOST_TLD=.example.com`<br/>Server name: `api.example.com` |
 | MASS_VHOST_DOCROOT  | string | `htdocs`| This is a subdirectory within your project dir under each project from which the web server will serve its files.<br/>`/shared/httpd/<project>/$MASS_VHOST_DOCROOT/`<br/><strong>Default:</strong><br/>`/shared/httpd/<project>/htdocs/` |
 | MASS_VHOST_TPL      | string | `cfg`   | Directory within your new virtual host to look for templates to overwrite virtual host settings. See [vhost-gen](https://github.com/devilbox/vhost-gen/tree/master/etc/templates) for available template files.<br/>`/shared/httpd/<project>/$MASS_VHOST_TPL/`<br/><strong>Resulting default path:</strong><br/>`/shared/httpd/<project>/cfg/` |
 
@@ -159,7 +166,8 @@ This Docker container adds a lot of injectables in order to customize it to your
 
 | Docker | Description |
 |--------|-------------|
-| 80     | Nginx listening Port |
+| 80     | HTTP listening Port |
+| 443    | HTTPS listening Port |
 
 
 ## Examples
@@ -247,8 +255,5 @@ It allows any of the following combinations:
 ## Version
 
 ```
-nginx version: nginx/1.12.1
-built by gcc 6.3.0 20170516 (Debian 6.3.0-18)
-built with OpenSSL 1.1.0f  25 May 2017
-TLS SNI support enabled
+nginx version: nginx/1.14.0
 ```

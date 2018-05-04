@@ -71,7 +71,7 @@ jobs:
             elif [ "${TRAVIS_BRANCH}" == "master" ]; then
               docker build --no-cache=true -t "${IMAGE}:latest" . &&
               docker images;
-            elif [[ ${TRAVIS_BRANCH} =~ ^(release[/-][.0-9]+)$ ]]; then
+            elif [[ ${TRAVIS_BRANCH} =~ ^(release-[.0-9]+)$ ]]; then
               docker build --no-cache=true -t "${IMAGE}:${TRAVIS_BRANCH}" . &&
               docker images;
             else
@@ -91,7 +91,7 @@ jobs:
             elif [ "${TRAVIS_BRANCH}" == "master" ]; then
               echo "Pushing ${IMAGE}:latest" &&
               docker push "${IMAGE}:latest";
-            elif [[ ${TRAVIS_BRANCH} =~ ^(release[/-][.0-9]+)$ ]]; then
+            elif [[ ${TRAVIS_BRANCH} =~ ^(release-[.0-9]+)$ ]]; then
               echo "Pushing ${IMAGE}:${TRAVIS_BRANCH}" &&
               docker push "${IMAGE}:${TRAVIS_BRANCH}";
             else
