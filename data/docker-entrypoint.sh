@@ -23,6 +23,10 @@ CA_CRT=/ca/devilbox-ca.crt
 CONFIG_DIR="/docker-entrypoint.d"
 
 
+# Wait this many seconds to start watcherd after httpd has been started
+WATCHERD_STARTUP_DELAY="3"
+
+
 ###
 ### Source libs
 ###
@@ -224,7 +228,7 @@ if [ "${MASS_VHOST_ENABLE}" -eq "1" ]; then
 
 	supervisord_create \
 		"${HTTPD_START}" \
-		"watcherd -v -p /shared/httpd -a \"${watcherd_add}\" -d \"${watcherd_del}\" -t \"${watcherd_tri}\"" \
+		"bash -c 'sleep ${WATCHERD_STARTUP_DELAY} && exec watcherd -v -p /shared/httpd -a \"${watcherd_add}\" -d \"${watcherd_del}\" -t \"${watcherd_tri}\"'" \
 		"/etc/supervisord.conf"
 
 	log "info" "Starting supervisord: $(supervisord -v)" "${DEBUG_LEVEL}"
