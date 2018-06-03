@@ -29,8 +29,8 @@ supervisord_create() {
 		echo
 		echo "[program:httpd]"
 		echo "command=${httpd_command}"
-		echo "autostart=true"
-		echo "autorestart=true"
+		echo "autostart=false"
+		echo "autorestart=false"
 		echo "stdout_logfile=/dev/stdout"
 		echo "stdout_logfile_maxbytes=0"
 		echo "stderr_logfile=/dev/stderr"
