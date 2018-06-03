@@ -25,7 +25,7 @@ ENV RUN_DEPS \
 ENV MY_USER=nginx
 ENV MY_GROUP=nginx
 ENV HTTPD_START="/usr/sbin/nginx"
-ENV HTTPD_RELOAD="nginx -s reload"
+ENV HTTPD_RELOAD="nginx -s stop"
 
 
 ###

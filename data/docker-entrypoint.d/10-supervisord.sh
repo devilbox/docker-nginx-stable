@@ -29,8 +29,11 @@ supervisord_create() {
 		echo
 		echo "[program:httpd]"
 		echo "command=${httpd_command}"
-		echo "autostart=false"
-		echo "autorestart=false"
+		echo "priority=1"
+		echo "autostart=true"
+		echo "startretries=100"
+		echo "startsecs=1"
+		echo "autorestart=true"
 		echo "stdout_logfile=/dev/stdout"
 		echo "stdout_logfile_maxbytes=0"
 		echo "stderr_logfile=/dev/stderr"
@@ -40,6 +43,8 @@ supervisord_create() {
 		echo
 		echo "[program:watcherd]"
 		echo "command=${watcherd_command}"
+		echo "priority=999"
+		echo "autostart=true"
 		echo "autorestart=false"
 		echo "stdout_logfile=/dev/stdout"
 		echo "stdout_logfile_maxbytes=0"
