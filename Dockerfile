@@ -35,7 +35,6 @@ ENV HTTPD_RELOAD="nginx -s stop"
 # required packages
 RUN set -x \
 	&& apt-get update \
-	&& apt-get upgrade -y \
 	&& apt-get install --no-install-recommends --no-install-suggests -y \
 		${BUILD_DEPS} \
 		${RUN_DEPS} \
