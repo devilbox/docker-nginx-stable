@@ -5,7 +5,7 @@ MAINTAINER "cytopia" <cytopia@everythingcli.org>
 ###
 ### Build arguments
 ###
-ARG VHOST_GEN_GIT_REF=0.5
+ARG VHOST_GEN_GIT_REF=0.6
 ARG CERT_GEN_GIT_REF=0.2
 
 ENV BUILD_DEPS \
