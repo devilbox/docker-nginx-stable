@@ -5,7 +5,7 @@ MAINTAINER "cytopia" <cytopia@everythingcli.org>
 ###
 ### Build arguments
 ###
-ARG VHOST_GEN_GIT_REF=0.5
+ARG VHOST_GEN_GIT_REF=0.7
 ARG CERT_GEN_GIT_REF=0.2
 
 ENV BUILD_DEPS \
@@ -35,7 +35,6 @@ ENV HTTPD_RELOAD="nginx -s stop"
 # required packages
 RUN set -x \
 	&& apt-get update \
-	&& apt-get upgrade -y \
 	&& apt-get install --no-install-recommends --no-install-suggests -y \
 		${BUILD_DEPS} \
 		${RUN_DEPS} \

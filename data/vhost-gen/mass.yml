@@ -87,6 +87,11 @@ vhost:
   # to prepend another subdirectory here.
   docroot:
     suffix: __DOCROOT_SUFFIX__
+  # Array of indecies to serve as default files (e.g.: index.php, index.html, etc)
+  index:
+    - index.php
+    - index.html
+    - index.htm
   # SSL Definition
   ssl:
     dir_crt: /etc/httpd/cert/mass
