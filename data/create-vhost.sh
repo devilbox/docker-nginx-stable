@@ -10,8 +10,8 @@ VHOST_TLD="${3}"
 VHOST_TPL="${4}"
 CA_KEY="${5}"
 CA_CRT="${6}"
-VERBOSE="${7}"
-GENERATE_SSL="${8}"
+GENERATE_SSL="${7}"
+VERBOSE="${8:-}"
 
 if [ "${GENERATE_SSL}" = "1" ]; then
 	if [ ! -d "/etc/httpd/cert/mass" ]; then
