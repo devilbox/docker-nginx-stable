@@ -222,7 +222,7 @@ if [ "${MASS_VHOST_ENABLE}" -eq "1" ]; then
 	fi
 
 	# Create watcherd sub commands
-	watcherd_add="create-vhost.sh '%%p' '%%n' '${MASS_VHOST_TLD}' '%%p/${MASS_VHOST_TPL}/' '${CA_KEY}' '${CA_CRT}' '${verbose}' '1'"
+	watcherd_add="create-vhost.sh '%%p' '%%n' '${MASS_VHOST_TLD}' '%%p/${MASS_VHOST_TPL}/' '${CA_KEY}' '${CA_CRT}' '1' '${verbose}'"
 	watcherd_del="rm /etc/httpd/vhost.d/%%n.conf"
 	watcherd_tri="${HTTPD_RELOAD}"
 
