@@ -12,25 +12,9 @@ IFS=$'\n'
 
 # Current directory
 CWD="$( dirname "${0}" )"
+IMAGE="${1}"
 
 declare -a TESTS=()
-
-
-###
-### Sanity checks
-###
-
-# Check Dockerfile
-if [ ! -f "${CWD}/../Dockerfile" ]; then
-	echo "Dockerfile not found in: ${CWD}/../Dockerfile."
-	exit 1
-fi
-
-# Check docker Name
-if ! grep -q 'image=".*"' "${CWD}/../Dockerfile" > /dev/null 2>&1; then
-	echo "No 'image' LABEL found"
-	exit
-fi
 
 
 ###
@@ -44,13 +28,13 @@ for f in ${FILES}; do
 done
 
 # Start a single test
-if [ "${#}" -eq "1" ]; then
-	sh -c "${TESTS[${1}]}"
+if [ "${#}" -eq "2" ]; then
+	sh -c "${TESTS[${2}]} ${IMAGE}"
 
 # Run all tests
 else
 	for i in "${TESTS[@]}"; do
-		echo "sh -c ${CWD}/${i}"
-		sh -c "${i}"
+		echo "sh -c ${CWD}/${i} ${IMAGE}"
+		sh -c "${i} ${IMAGE}"
 	done
 fi

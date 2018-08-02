@@ -6,12 +6,6 @@ set -o pipefail
 
 
 ###
-### Variables
-###
-CWD="$( dirname "${0}" )"
-
-
-###
 ### Run
 ###
 run() {
@@ -45,9 +39,3 @@ function get_random_name() {
 	done
 	echo "${name}"
 }
-
-
-DOCKER_IMAGE="$( grep 'image=".*"' "${CWD}/../Dockerfile" | sed 's/^[[:space:]]*//g' | awk -F'"' '{print $2}' )"
-DOCKER_VENDOR="$( grep 'vendor=".*"' "${CWD}/../Dockerfile" | sed 's/^[[:space:]]*//g' | awk -F'"' '{print $2}' )"
-# shellcheck disable=SC2034
-DOCKER_NAME="${DOCKER_VENDOR}/${DOCKER_IMAGE}"

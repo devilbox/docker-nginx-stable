@@ -90,6 +90,8 @@ vhost:
   # Array of indecies to serve as default files (e.g.: index.php, index.html, etc)
   index:
     - index.php
+    - index.html
+    - index.htm
   # SSL Definition
   ssl:
     dir_crt: /etc/httpd/cert/main

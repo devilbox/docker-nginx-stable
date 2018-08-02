@@ -72,9 +72,6 @@ RUN set -x \
 	&& sed -i'' 's|^\s*include.*conf\.d/.*|    include /etc/httpd-custom.d/*.conf;\n    include /etc/httpd/conf.d/*.conf;\n    include /etc/httpd/vhost.d/*.conf;\n|g' /etc/nginx/nginx.conf \
 	&& echo "daemon off;" >> /etc/nginx/nginx.conf
 
-RUN set -x \
-	&& sed -i'' 's|http {|http {\nfastcgi_intercept_errors = on;|g' /etc/nginx/nginx.conf
-
 # create directories
 RUN set -x \
 	&& mkdir -p /etc/httpd-custom.d \

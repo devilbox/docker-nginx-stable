@@ -5,6 +5,7 @@ set -u
 set -o pipefail
 
 CWD="$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
+DOCKER_NAME="${1}"
 
 
 ###
@@ -21,13 +22,7 @@ CWD="$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
 RAND_DIR="$( mktemp -d )"
 RAND_NAME1="$( get_random_name )"
 RAND_NAME2="$( get_random_name )"
-run "echo \"<?php echo 'hello world php';\" > ${RAND_DIR}/index.php"
-
-
-###
-### Build container
-###
-run "docker build -t ${DOCKER_NAME} ${CWD}/.."
+run "echo \"<?php echo 'h'.'e'.'llo world php';\" > ${RAND_DIR}/index.php"
 
 
 ###
@@ -61,8 +56,8 @@ run "sleep 5"
 run "docker ps"
 run "docker logs ${RAND_NAME1}"
 run "docker logs ${RAND_NAME2}"
-run "curl localhost"
-run "curl localhost | grep 'hello world php'"
+run "curl -sS localhost"
+run "curl -sS localhost | grep 'hello world php'"
 
 
 ###
