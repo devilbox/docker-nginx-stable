@@ -1,11 +1,16 @@
 FROM nginx:stable
 MAINTAINER "cytopia" <cytopia@everythingcli.org>
 
+LABEL \
+	name="cytopia's nginx stable image" \
+	image="devilbox/nginx-stable" \
+	vendor="devilbox" \
+	license="MIT"
 
 ###
 ### Build arguments
 ###
-ARG VHOST_GEN_GIT_REF=0.7
+ARG VHOST_GEN_GIT_REF=0.10
 ARG CERT_GEN_GIT_REF=0.2
 
 ENV BUILD_DEPS \
