@@ -1,6 +1,11 @@
 FROM nginx:stable
 MAINTAINER "cytopia" <cytopia@everythingcli.org>
 
+LABEL \
+	name="cytopia's nginx stable image" \
+	image="devilbox/nginx-stable" \
+	vendor="devilbox" \
+	license="MIT"
 
 ###
 ### Build arguments
