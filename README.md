@@ -127,6 +127,7 @@ This Docker container adds a lot of injectables in order to customize it to your
 | PHP_FPM_ENABLE      | bool   | `0`     | Enable PHP-FPM for the default vhost and the mass virtual hosts. |
 | PHP_FPM_SERVER_ADDR | string | ``      | IP address or hostname of remote PHP-FPM server.<br/><strong>Required when enabling PHP.</strong> |
 | PHP_FPM_SERVER_PORT | int    | `9000`  | Port of remote PHP-FPM server |
+| PHP_FPM_TIMEOUT     | int    | `180`   | Timeout in seconds to upstream PHP-FPM server |
 
 ##### Optional environmental variables (default vhost)
 

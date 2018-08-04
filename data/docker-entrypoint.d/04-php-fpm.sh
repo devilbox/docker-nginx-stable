@@ -96,3 +96,38 @@ export_php_fpm_server_port() {
 	# Ensure variable is exported if not set
 	eval "export ${varname}=${value}"
 }
+
+
+###
+### Ensure PHP_FPM_TIMEOUT is set (if needed)
+###
+export_php_fpm_timeout() {
+	local varname="${1}"
+	local debug="${2}"
+	local value="180"
+
+	if [ "${PHP_FPM_ENABLE}" = "1" ]; then
+		if ! env_set "${varname}"; then
+			log "info" "\$${varname} not specified, keeping default: ${value}" "${debug}"
+		else
+			value="$( env_get "${varname}" )"
+
+			if [ -z "${value}" ]; then
+				log "err" "\$${varname} is empty." "${debug}"
+				exit 1
+			fi
+			if ! isint "${value}"; then
+				log "err" "\$${varname} is not a valid integer: ${value}" "${debug}"
+				exit 1
+			fi
+			if [ "${value}" -lt "0" ]; then
+				log "err" "\$${varname} must be greater than 0: ${value}" "${debug}"
+				exit 1
+			fi
+			log "info" "PHP-FPM: Timeout: ${value}" "${debug}"
+		fi
+	fi
+
+	# Ensure variable is exported if not set
+	eval "export ${varname}=${value}"
+}
