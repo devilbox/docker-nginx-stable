@@ -14,6 +14,9 @@ rebuild: pull
 	docker build --no-cache -t $(image) .
 	cd build; ./gen-readme.sh $(image)
 
+tag:
+	docker tag $(image) $(image):$(ARG)
+
 test:
 	.ci/start-ci.sh $(image) $(ARG)
 

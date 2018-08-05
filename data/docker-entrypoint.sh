@@ -21,6 +21,8 @@ CA_CRT=/ca/devilbox-ca.crt
 
 # Path to scripts to source
 CONFIG_DIR="/docker-entrypoint.d"
+VHOST_GEN_DIR="/etc/vhost-gen/templates"
+VHOST_GEN_CUST_DIR="/etc/vhost-gen.d"
 
 
 # Wait this many seconds to start watcherd after httpd has been started
@@ -122,6 +124,12 @@ fi
 #############################################################
 ## vhost-gen Configuration
 #############################################################
+
+###
+### Copy custom vhost-gen template
+###
+vhost_gen_copy_custom_template "${VHOST_GEN_CUST_DIR}" "${VHOST_GEN_DIR}" "apache22.yml" "${DEBUG_LEVEL}"
+
 
 ###
 ### Enable and configure PHP-FPM
