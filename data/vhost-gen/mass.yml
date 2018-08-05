@@ -138,6 +138,8 @@ vhost:
     # Hostname or IP address
     address: __PHP_ADDR__
     port: __PHP_PORT__
+    # Timeout to upstream FPM service
+    timeout: __PHP_TIMEOUT__
   # Create additional aliases
   alias:
     - alias: /devilbox-api/

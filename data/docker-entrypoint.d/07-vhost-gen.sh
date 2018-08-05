@@ -16,13 +16,15 @@ vhost_gen_php_fpm() {
 	local enable="${1}"
 	local addr="${2}"
 	local port="${3}"
-	local config="${4}"
-	local debug="${5}"
+	local timeout="${4}"
+	local config="${5}"
+	local debug="${6}"
 
 	if [ "${enable}" -eq "1" ]; then
 		run "sed -i'' 's/__PHP_ENABLE__/yes/g' ${config}" "${debug}"
 		run "sed -i'' 's/__PHP_ADDR__/${addr}/g' ${config}" "${debug}"
 		run "sed -i'' 's/__PHP_PORT__/${port}/g' ${config}" "${debug}"
+		run "sed -i'' 's/__PHP_TIMEOUT__/${timeout}/g' ${config}" "${debug}"
 	else
 		run "sed -i'' 's/__PHP_ENABLE__/no/g' ${config}" "${debug}"
 	fi
