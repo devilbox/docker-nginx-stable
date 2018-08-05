@@ -10,6 +10,28 @@ set -o pipefail
 ############################################################
 
 ###
+### Copy custom vhost-gen template
+###
+vhost_gen_copy_custom_template() {
+	local input_dir="${1}"
+	local output_dir="${2}"
+	local template_name="${3}"
+	local debug="${4}"
+
+	if [ ! -d "${input_dir}" ]; then
+		run "mkdir -p ${input_dir}" "${debug}"
+	fi
+
+	if [ -f "${input_dir}/${template_name}" ]; then
+		log "info" "vhost-gen: applying customized global template: ${template_name}" "${debug}"
+		run "cp ${input_dir}/${template_name} ${output_dir}/${template_name}" "${debug}"
+	else
+		log "info" "vhost-gen: no customized template found" "${debug}"
+	fi
+}
+
+
+###
 ### Set PHP_FPM
 ###
 vhost_gen_php_fpm() {
