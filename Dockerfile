@@ -88,6 +88,7 @@ RUN set -x \
 ###
 COPY ./data/vhost-gen/main.yml /etc/vhost-gen/main.yml
 COPY ./data/vhost-gen/mass.yml /etc/vhost-gen/mass.yml
+COPY ./data/vhost-gen/templates-main /etc/vhost-gen/templates-main
 COPY ./data/create-vhost.sh /usr/local/bin/create-vhost.sh
 COPY ./data/docker-entrypoint.d /docker-entrypoint.d
 COPY ./data/docker-entrypoint.sh /docker-entrypoint.sh
