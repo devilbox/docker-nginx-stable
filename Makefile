@@ -21,4 +21,4 @@ test:
 	.ci/start-ci.sh $(image) $(ARG)
 
 pull:
-	docker pull $(shell grep FROM Dockerfile | sed 's/^FROM//g'; done)
+	docker pull $(shell grep 'FROM' Dockerfile | sed 's/^FROM//g'; )

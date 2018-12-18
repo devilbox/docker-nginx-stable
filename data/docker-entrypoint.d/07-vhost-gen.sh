@@ -92,7 +92,9 @@ vhost_gen_generate_main_vhost() {
 		else
 			verbose=""
 		fi
-		run "vhost_gen.py -n localhost -p ${docroot} -c ${config} -o ${template} ${verbose} -d -s -m ${ssl_type}" "${debug}"
+		# Adding custom nginx vhost template to ensure paths like:
+		# /vendor/index.php/arg1/arg2 will also work (just like Apache)
+		run "vhost_gen.py -n localhost -p ${docroot} -t /etc/vhost-gen/templates-main/ -c ${config} -o ${template} ${verbose} -d -s -m ${ssl_type}" "${debug}"
 	fi
 }
 
