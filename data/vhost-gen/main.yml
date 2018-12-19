@@ -149,6 +149,8 @@ vhost:
       xdomain_request:
         enable: no
         origin: 'http(s)?://(.*)$'
+    - alias: /vhost.d/
+      path: /etc/httpd
   # Denies locations
   deny:
     - alias: '/\.git'
