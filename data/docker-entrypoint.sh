@@ -67,6 +67,12 @@ set_gid "NEW_GID" "${MY_GROUP}" "${DEBUG_LEVEL}"
 set_timezone "TIMEZONE" "${DEBUG_LEVEL}"
 
 
+###
+### Nginx settings
+###
+set_worker_processess "WORKER_PROCESSES" "${DEBUG_LEVEL}"
+set_worker_connections "WORKER_CONNECTIONS" "${DEBUG_LEVEL}"
+
 
 #############################################################
 ## Variable exports

@@ -116,6 +116,13 @@ This Docker container adds a lot of injectables in order to customize it to your
 
 `PHP_FPM_SERVER_ADDR` is required when enabling PHP FPM.
 
+##### Optional environmental variables (nginx)
+
+| Variable | Type | Default | Description |
+|----------|------|---------|-------------|
+| WORKER_CONNECTIONS | int    | `1024`    | [worker_connections](https://nginx.org/en/docs/ngx_core_module.html#worker_connections) |
+| WORKER_PROCESSES   | int or `auto` | `auto`  | [worker_processes](https://nginx.org/en/docs/ngx_core_module.html#worker_processes) |
+
 ##### Optional environmental variables (general)
 
 | Variable | Type | Default | Description |
