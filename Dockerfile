@@ -7,6 +7,7 @@ LABEL \
 	vendor="devilbox" \
 	license="MIT"
 
+
 ###
 ### Build arguments
 ###
@@ -34,10 +35,8 @@ ENV HTTPD_RELOAD="nginx -s stop"
 
 
 ###
-### Installation
+### Install required packages
 ###
-
-# required packages
 RUN set -x \
 	&& apt-get update \
 	&& apt-get install --no-install-recommends --no-install-suggests -y \
@@ -67,12 +66,10 @@ RUN set -x \
 		${BUILD_DEPS} \
 	&& rm -rf /var/lib/apt/lists/*
 
-# Add custom config directive to httpd server
-RUN set -x \
-	&& sed -i'' 's|^\s*include.*conf\.d/.*|    include /etc/httpd-custom.d/*.conf;\n    include /etc/httpd/conf.d/*.conf;\n    include /etc/httpd/vhost.d/*.conf;\n|g' /etc/nginx/nginx.conf \
-	&& echo "daemon off;" >> /etc/nginx/nginx.conf
 
-# create directories
+###
+### Create directories
+###
 RUN set -x \
 	&& mkdir -p /etc/httpd-custom.d \
 	&& mkdir -p /etc/httpd/conf.d \
@@ -86,6 +83,7 @@ RUN set -x \
 ###
 ### Copy files
 ###
+COPY ./data/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY ./data/vhost-gen/main.yml /etc/vhost-gen/main.yml
 COPY ./data/vhost-gen/mass.yml /etc/vhost-gen/mass.yml
 COPY ./data/vhost-gen/templates-main /etc/vhost-gen/templates-main
