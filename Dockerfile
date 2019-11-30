@@ -12,7 +12,7 @@ LABEL \
 ### Build arguments
 ###
 ARG VHOST_GEN_GIT_REF=0.15
-ARG CERT_GEN_GIT_REF=0.2
+ARG CERT_GEN_GIT_REF=0.7
 
 ENV BUILD_DEPS \
 	git \
