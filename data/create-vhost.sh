@@ -11,7 +11,8 @@ VHOST_TPL="${4}"
 CA_KEY="${5}"
 CA_CRT="${6}"
 GENERATE_SSL="${7}"
-VERBOSE="${8:-}"
+GEN_MODE="${8}"
+VERBOSE="${9:-}"
 
 if [ "${GENERATE_SSL}" = "1" ]; then
 	if [ ! -d "/etc/httpd/cert/mass" ]; then
@@ -29,7 +30,7 @@ if [ "${GENERATE_SSL}" = "1" ]; then
 	fi
 fi
 
-cmd="vhost_gen.py -p \"${VHOST_PATH}\" -n \"${VHOST_NAME}\" -c /etc/vhost-gen/mass.yml -o \"${VHOST_TPL}\" -s ${VERBOSE} -m both"
+cmd="vhost_gen.py -p \"${VHOST_PATH}\" -n \"${VHOST_NAME}\" -c /etc/vhost-gen/mass.yml -o \"${VHOST_TPL}\" -s ${VERBOSE} -m ${GEN_MODE}"
 if [ -n "${VERBOSE}" ]; then
 	echo "\$ ${cmd}"
 fi
