@@ -70,7 +70,9 @@ RUN set -x \
 ###
 ### Create directories
 ###
+# /docker-entrypoint.d/10-ipv6* was added by nginx to do some IPv6 magic (which breaks the image)
 RUN set -x \
+	&& rm -rf /docker-entrypoint.d || true \
 	&& mkdir -p /etc/httpd-custom.d \
 	&& mkdir -p /etc/httpd/conf.d \
 	&& mkdir -p /etc/httpd/vhost.d \
