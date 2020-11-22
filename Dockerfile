@@ -58,7 +58,7 @@ RUN set -x \
 	&& chmod +x /usr/bin/cert-gen \
 	\
 	# Install watcherd
-	&& wget --no-check-certificate -O /usr/bin/watcherd https://raw.githubusercontent.com/devilbox/watcherd/v1.0.0/watcherd \
+	&& wget --no-check-certificate -O /usr/bin/watcherd https://raw.githubusercontent.com/devilbox/watcherd/v1.0.1/watcherd \
 	&& chmod +x /usr/bin/watcherd \
 	\
 	# Clean-up
