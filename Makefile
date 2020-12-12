@@ -52,11 +52,11 @@ lint-workflow:
 
 build: pull-base-image
 	docker build -t $(IMAGE) .
-	cd build; ./gen-readme.sh $(IMAGE)
+	./build/gen-readme.sh $(IMAGE)
 
 rebuild: pull-base-image
 	docker build --no-cache -t $(IMAGE) .
-	cd build; ./gen-readme.sh $(IMAGE)
+	./build/gen-readme.sh $(IMAGE)
 
 
 # -------------------------------------------------------------------------------------------------
