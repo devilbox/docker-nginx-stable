@@ -30,7 +30,7 @@ if [ "${GENERATE_SSL}" = "1" ]; then
 	fi
 fi
 
-cmd="vhost_gen.py -p \"${VHOST_PATH}\" -n \"${VHOST_NAME}\" -c /etc/vhost-gen/mass.yml -o \"${VHOST_TPL}\" -s ${VERBOSE} -m ${GEN_MODE}"
+cmd="vhost-gen -p \"${VHOST_PATH}\" -n \"${VHOST_NAME}\" -c /etc/vhost-gen/mass.yml -o \"${VHOST_TPL}\" -s ${VERBOSE} -m ${GEN_MODE}"
 if [ -n "${VERBOSE}" ]; then
 	echo "\$ ${cmd}"
 fi
