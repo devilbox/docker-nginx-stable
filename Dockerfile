@@ -11,7 +11,8 @@ LABEL \
 ###
 ### Build arguments
 ###
-ARG VHOST_GEN_GIT_REF=0.16
+ARG VHOST_GEN_GIT_REF=1.0.3
+ARG WATCHERD_GIT_REF=v1.0.2
 ARG CERT_GEN_GIT_REF=0.7
 
 ENV BUILD_DEPS \
@@ -58,7 +59,7 @@ RUN set -x \
 	&& chmod +x /usr/bin/cert-gen \
 	\
 	# Install watcherd
-	&& wget --no-check-certificate -O /usr/bin/watcherd https://raw.githubusercontent.com/devilbox/watcherd/v1.0.1/watcherd \
+	&& wget --no-check-certificate -O /usr/bin/watcherd https://raw.githubusercontent.com/devilbox/watcherd/${WATCHERD_GIT_REF}/watcherd \
 	&& chmod +x /usr/bin/watcherd \
 	\
 	# Clean-up
