@@ -22,7 +22,7 @@ ENV BUILD_DEPS \
 
 ENV RUN_DEPS \
 	ca-certificates \
-	python-yaml \
+	python3-yaml \
 	supervisor
 
 
@@ -81,6 +81,13 @@ RUN set -x \
 	&& mkdir -p /shared/httpd \
 	&& chmod 0775 /shared/httpd \
 	&& chown ${MY_USER}:${MY_GROUP} /shared/httpd
+
+
+###
+### Symlink Python3 to Python
+###
+RUN set -x \
+	&& ln -sf /usr/bin/python3 /usr/bin/python
 
 
 ###
