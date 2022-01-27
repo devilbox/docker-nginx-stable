@@ -71,9 +71,6 @@ set_uid() {
 			# Change uid and fix homedir permissions
 			log "info" "Changing user '${username}' uid to: ${uid}" "${debug}"
 			run "usermod -u ${uid} ${username}" "${debug}"
-			if [ -d "${homedir}" ]; then
-				run "chown -R ${username} ${homedir}" "${debug}"
-			fi
 		fi
 	fi
 }
@@ -114,9 +111,6 @@ set_gid() {
 			# Change ugd and fix homedir permissions
 			log "info" "Changing group '${groupname}' gid to: ${gid}" "${debug}"
 			run "groupmod -g ${gid} ${groupname}" "${debug}"
-			if [ -d "${homedir}" ]; then
-				run "chown -R :${groupname} ${homedir}" "${debug}"
-			fi
 		fi
 	fi
 }
