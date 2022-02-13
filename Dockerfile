@@ -16,7 +16,6 @@ ARG WATCHERD_GIT_REF=v1.0.2
 ARG CERT_GEN_GIT_REF=0.7
 
 ENV BUILD_DEPS \
-	git \
 	make \
 	wget
 
@@ -38,16 +37,16 @@ ENV HTTPD_RELOAD="nginx -s stop"
 ###
 ### Install required packages
 ###
-RUN set -x \
+RUN set -eux \
 	&& apt-get update \
 	&& apt-get install --no-install-recommends --no-install-suggests -y \
 		${BUILD_DEPS} \
 		${RUN_DEPS} \
 	\
 	# Install vhost-gen
-	&& git clone https://github.com/devilbox/vhost-gen \
-	&& cd vhost-gen \
-	&& git checkout "${VHOST_GEN_GIT_REF}" \
+	&& wget --no-check-certificate -O vhost-gen.tar.gz "https://github.com/devilbox/vhost-gen/archive/refs/tags/${VHOST_GEN_GIT_REF}.tar.gz" \
+	&& tar xvfz vhost-gen.tar.gz \
+	&& cd "vhost-gen-${VHOST_GEN_GIT_REF}" \
 	&& make install \
 	&& cd .. \
 	&& rm -rf vhost*gen* \
@@ -72,7 +71,7 @@ RUN set -x \
 ### Create directories
 ###
 # /docker-entrypoint.d/10-ipv6* was added by nginx to do some IPv6 magic (which breaks the image)
-RUN set -x \
+RUN set -eux \
 	&& rm -rf /docker-entrypoint.d || true \
 	&& mkdir -p /etc/httpd-custom.d \
 	&& mkdir -p /etc/httpd/conf.d \
@@ -86,7 +85,7 @@ RUN set -x \
 ###
 ### Symlink Python3 to Python
 ###
-RUN set -x \
+RUN set -eux \
 	&& ln -sf /usr/bin/python3 /usr/bin/python
 
 

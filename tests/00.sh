@@ -6,6 +6,7 @@ set -o pipefail
 
 CWD="$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
 DOCKER_NAME="${1}"
+ARCH="${2}"
 
 
 ###
@@ -27,7 +28,7 @@ run "echo \"hello world\" > ${RAND_DIR}/index.html"
 ###
 ### Startup container
 ###
-run "docker run -d --rm \
+run "docker run -d --rm --platform ${ARCH} \
  -v ${RAND_DIR}:/var/www/default/htdocs \
  -p 127.0.0.1:80:80 \
  -e DEBUG_ENTRYPOINT=2 \
@@ -40,7 +41,7 @@ run "docker run -d --rm \
 ###
 ### Tests
 ###
-run "sleep 5"
+run "sleep 20"  # Startup-time is longer on cross-platform
 run "docker ps"
 run "docker logs ${RAND_NAME}"
 run "curl -sS localhost/index.html"
