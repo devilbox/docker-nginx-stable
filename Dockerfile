@@ -62,7 +62,7 @@ RUN set -eux \
 	&& chmod +x /usr/bin/watcherd \
 	\
 	# Clean-up
-	&& apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $fetchDeps \
+	&& apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
 		${BUILD_DEPS} \
 	&& rm -rf /var/lib/apt/lists/*
 
