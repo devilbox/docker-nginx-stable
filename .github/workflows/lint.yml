@@ -34,5 +34,6 @@ jobs:
       # Lint repository
       # ------------------------------------------------------------
       - name: Lint workflow
+        id: vars
         run: |
           make lint-workflow

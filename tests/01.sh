@@ -6,6 +6,7 @@ set -o pipefail
 
 CWD="$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
 DOCKER_NAME="${1}"
+ARCH="${2}"
 
 
 ###
@@ -22,20 +23,18 @@ DOCKER_NAME="${1}"
 RAND_DIR="$( mktemp -d )"
 RAND_NAME1="$( get_random_name )"
 RAND_NAME2="$( get_random_name )"
-run "echo \"<?php echo 'h'.'e'.'llo world php';\" > ${RAND_DIR}/index.php"
+run "chmod 0755 ${RAND_DIR}"
+run "echo \"<?php echo 'hello world php';\" > ${RAND_DIR}/index.php"
 
 
 ###
 ### Startup container
 ###
-run "docker run -d --rm \
+run "docker run -d --rm --platform ${ARCH} \
  -v ${RAND_DIR}:/var/www/default/htdocs \
- -e DEBUG_ENTRYPOINT=1 \
- -e NEW_UID=$( id -u ) \
- -e NEW_GID=$( id -g ) \
- --name ${RAND_NAME1} cytopia/php-fpm-5.6"
+ --name ${RAND_NAME1} devilbox/php-fpm-8.1"
 
-run "docker run -d --rm \
+run "docker run -d --rm --platform ${ARCH} \
  -v ${RAND_DIR}:/var/www/default/htdocs \
  -p 127.0.0.1:80:80 \
  -e DEBUG_ENTRYPOINT=2 \
@@ -52,12 +51,12 @@ run "docker run -d --rm \
 ###
 ### Tests
 ###
-run "sleep 5"
+run "sleep 20"  # Startup-time is longer on cross-platform
 run "docker ps"
 run "docker logs ${RAND_NAME1}"
 run "docker logs ${RAND_NAME2}"
-run "curl -sS localhost"
-run "curl -sS localhost | grep 'hello world php'"
+run "curl localhost"
+run "curl localhost | grep 'hello world php'"
 
 
 ###
