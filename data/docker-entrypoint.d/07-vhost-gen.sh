@@ -9,6 +9,35 @@ set -o pipefail
 # Functions
 ############################################################
 
+
+###
+### Ensure HTTP2_ENABLE is exported
+###
+export_http2_enable() {
+	local varname="${1}"
+	local debug="${2}"
+	local value="1"
+
+	if ! env_set "${varname}"; then
+		log "info" "\$${varname} not set. Enabling http2." "${debug}"
+	else
+		value="$( env_get "${varname}" )"
+		if [ "${value}" = "0" ]; then
+			log "info" "http2: Disabled" "${debug}"
+		elif [ "${value}" = "1" ]; then
+			log "info" "http2: Enabled" "${debug}"
+		else
+			log "err" "Invalid value for \$${varname}: ${value}"
+			log "err" "Must be '1' (for On) or '0' (for Off)"
+			exit 1
+		fi
+	fi
+
+	# Ensure variable is exported
+	eval "export ${varname}=${value}"
+}
+
+
 ###
 ### Copy custom vhost-gen template
 ###
@@ -145,5 +174,21 @@ vhost_gen_mass_vhost_tld() {
 
 	if [ "${enable}" -eq "1" ]; then
 		run "sed -i'' 's/__TLD__/${tld}/g' ${config}" "${debug}"
+	fi
+}
+
+
+###
+### Set HTTP2_ENABLE
+###
+vhost_gen_http2() {
+	local enable="${1}"
+	local config="${2}"
+	local debug="${3}"
+
+	if [ "${enable}" -eq "1" ]; then
+		run "sed -i'' 's/__HTTP2_ENABLE__/True/g' ${config}" "${debug}"
+	else
+		run "sed -i'' 's/__HTTP2_ENABLE__/False/g' ${config}" "${debug}"
 	fi
 }

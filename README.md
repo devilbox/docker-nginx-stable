@@ -142,6 +142,7 @@ This Docker container adds a lot of injectables in order to customize it to your
 | PHP_FPM_SERVER_ADDR | string | ``      | IP address or hostname of remote PHP-FPM server.<br/><strong>Required when enabling PHP.</strong> |
 | PHP_FPM_SERVER_PORT | int    | `9000`  | Port of remote PHP-FPM server |
 | PHP_FPM_TIMEOUT     | int    | `180`   | Timeout in seconds to upstream PHP-FPM server |
+| HTTP2_ENABLE        | int    | `1`     | Enabled or disabled HTTP2 support.<br/>Values:<br/>`0`: Disabled<br/>`1`: Enabled<br/>Defaults to Enabled |
 
 ##### Optional environmental variables (default vhost)
 

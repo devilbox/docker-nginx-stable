@@ -92,6 +92,11 @@ export_php_fpm_server_addr "PHP_FPM_SERVER_ADDR" "${DEBUG_LEVEL}"
 export_php_fpm_server_port "PHP_FPM_SERVER_PORT" "${DEBUG_LEVEL}"
 export_php_fpm_timeout "PHP_FPM_TIMEOUT" "${DEBUG_LEVEL}"
 
+###
+### Ensure global main/mass variables are eported
+###
+export_http2_enable "HTTP2_ENABLE" "${DEBUG_LEVEL}"
+
 
 ###
 ### Ensure MAIN_VHOST variables are exported
@@ -149,6 +154,13 @@ vhost_gen_php_fpm "${PHP_FPM_ENABLE}" "${PHP_FPM_SERVER_ADDR}" "${PHP_FPM_SERVER
 ###
 vhost_gen_docker_logs "${DOCKER_LOGS}" "/etc/vhost-gen/main.yml" "${DEBUG_LEVEL}"
 vhost_gen_docker_logs "${DOCKER_LOGS}" "/etc/vhost-gen/mass.yml" "${DEBUG_LEVEL}"
+
+
+###
+### Set HTTP2 support
+###
+vhost_gen_http2 "${HTTP2_ENABLE}"  "/etc/vhost-gen/main.yml" "${DEBUG_LEVEL}"
+vhost_gen_http2 "${HTTP2_ENABLE}"  "/etc/vhost-gen/mass.yml" "${DEBUG_LEVEL}"
 
 
 ###
