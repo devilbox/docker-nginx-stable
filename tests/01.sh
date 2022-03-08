@@ -59,9 +59,16 @@ run "sleep 20"  # Startup-time is longer on cross-platform
 run "docker ps"
 run "docker logs ${RAND_NAME1}"
 run "docker logs ${RAND_NAME2}"
-run "curl localhost"
-run "curl localhost | grep 'hello world php'"
-
+if ! run "curl localhost"; then
+	run "docker stop ${RAND_NAME1}"
+	run "docker stop ${RAND_NAME2}"
+	exit 1
+fi
+if ! run "curl localhost | grep 'hello world php'"; then
+	run "docker stop ${RAND_NAME1}"
+	run "docker stop ${RAND_NAME2}"
+	exit 1
+fi
 
 ###
 ### Cleanup

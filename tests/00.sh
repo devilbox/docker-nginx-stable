@@ -48,8 +48,14 @@ run "docker run -d --rm --platform ${ARCH} \
 run "sleep 20"  # Startup-time is longer on cross-platform
 run "docker ps"
 run "docker logs ${RAND_NAME}"
-run "curl -sS localhost/index.html"
-run "curl -sS localhost/index.html | grep 'hello world'"
+if ! run "curl -sS localhost/index.html"; then
+	run "docker stop ${RAND_NAME}"
+	exit 1
+fi
+if ! run "curl -sS localhost/index.html | grep 'hello world'"; then
+	run "docker stop ${RAND_NAME}"
+	exit 1
+fi
 
 
 ###
