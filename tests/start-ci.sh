@@ -13,9 +13,14 @@ IFS=$'\n'
 # Current directory
 CWD="$( dirname "${0}" )"
 IMAGE="${1}"
-ARCH="${2:-linux/amd64}"
+NAME="${2}"
+VERSION="${3}"
+TAG="${4}"
+ARCH="${5}"
 
 declare -a TESTS=()
+
+
 
 
 ###
@@ -30,12 +35,14 @@ done
 
 # Start a single test
 if [ "${#}" -eq "3" ]; then
-	sh -c "${TESTS[${2}]} ${IMAGE} ${ARCH}"
+	sh -c "${TESTS[${2}]} ${IMAGE} ${NAME} ${VERSION} ${TAG} ${ARCH}"
 
 # Run all tests
 else
 	for i in "${TESTS[@]}"; do
-		echo "sh -c ${CWD}/${i} ${IMAGE} ${ARCH}"
-		sh -c "${i} ${IMAGE} ${ARCH}"
+		echo "################################################################################"
+		echo "# [${CWD}/${i}] ${IMAGE}:${TAG} ${NAME}-${VERSION} (${ARCH})"
+		echo "################################################################################"
+		sh -c "${i} ${IMAGE} ${NAME} ${VERSION} ${TAG} ${ARCH}"
 	done
 fi

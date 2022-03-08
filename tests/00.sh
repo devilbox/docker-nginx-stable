@@ -5,15 +5,19 @@ set -u
 set -o pipefail
 
 CWD="$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
-DOCKER_NAME="${1}"
-ARCH="${2}"
+
+IMAGE="${1}"
+#NAME="${2}"
+#VERSION="${3}"
+TAG="${4}"
+ARCH="${5}"
 
 
 ###
 ### Load Library
 ###
-# shellcheck disable=SC1090
-. ${CWD}/.lib.sh
+# shellcheck disable=SC1091
+. "${CWD}/.lib.sh"
 
 
 
@@ -35,7 +39,7 @@ run "docker run -d --rm --platform ${ARCH} \
  -e DEBUG_RUNTIME=1 \
  -e NEW_UID=$( id -u ) \
  -e NEW_GID=$( id -g ) \
- --name ${RAND_NAME} ${DOCKER_NAME}"
+ --name ${RAND_NAME} ${IMAGE}:${TAG}"
 
 
 ###
@@ -44,8 +48,14 @@ run "docker run -d --rm --platform ${ARCH} \
 run "sleep 20"  # Startup-time is longer on cross-platform
 run "docker ps"
 run "docker logs ${RAND_NAME}"
-run "curl -sS localhost/index.html"
-run "curl -sS localhost/index.html | grep 'hello world'"
+if ! run "curl -sS localhost/index.html"; then
+	run "docker stop ${RAND_NAME}"
+	exit 1
+fi
+if ! run "curl -sS localhost/index.html | grep 'hello world'"; then
+	run "docker stop ${RAND_NAME}"
+	exit 1
+fi
 
 
 ###
