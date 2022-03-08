@@ -31,11 +31,11 @@ function get_random_name() {
 	local len="${#chr[@]}"
 	local name=
 
+	# shellcheck disable=SC2034
 	for i in {1..15}; do
-		rand="$( shuf -i 0-${len} -n 1 )"
+		rand="$( shuf -i "0-${len}" -n 1 )"
 		rand=$(( rand - 1 ))
 		name="${name}${chr[$rand]}"
-		i="${i}" # simply to get rid of shellcheck complaints
 	done
 	echo "${name}"
 }

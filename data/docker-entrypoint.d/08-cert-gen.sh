@@ -20,10 +20,10 @@ cert_gen_generate_ca() {
 
 	# Create directories
 	if [ ! -d "$( dirname "${key}" )" ]; then
-		run "mkdir -p $( dirname ${key} )" "${debug}"
+		run "mkdir -p $( dirname "${key}" )" "${debug}"
 	fi
 	if [ ! -d "$( dirname "${crt}" )" ]; then
-		run "mkdir -p $( dirname ${crt} )" "${debug}"
+		run "mkdir -p $( dirname "${crt}" )" "${debug}"
 	fi
 
 	# cert-gen verbosity
@@ -67,13 +67,13 @@ cert_gen_generate_cert() {
 
 	# Create directories
 	if [ ! -d "$( dirname "${key}" )" ]; then
-		run "mkdir -p $( dirname ${key} )" "${debug}"
+		run "mkdir -p $( dirname "${key}" )" "${debug}"
 	fi
 	if [ ! -d "$( dirname "${csr}" )" ]; then
-		run "mkdir -p $( dirname ${csr} )" "${debug}"
+		run "mkdir -p $( dirname "${csr}" )" "${debug}"
 	fi
 	if [ ! -d "$( dirname "${crt}" )" ]; then
-		run "mkdir -p $( dirname ${crt} )" "${debug}"
+		run "mkdir -p $( dirname "${crt}" )" "${debug}"
 	fi
 
 	# cert-gen verbosity

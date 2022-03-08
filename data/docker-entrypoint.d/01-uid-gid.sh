@@ -44,8 +44,8 @@ set_uid() {
 	local uid_varname="${1}"
 	local username="${2}"
 	local debug="${3}"
-	local homedir
-	homedir="$( _get_homedir_by_username "${username}" )"
+	#local homedir
+	#homedir="$( _get_homedir_by_username "${username}" )"
 
 	local uid=				# new uid
 	local spare_uid=9876	# spare uid to change another user to
@@ -83,8 +83,8 @@ set_gid() {
 	local gid_varname="${1}"
 	local groupname="${2}"
 	local debug="${3}"
-	local homedir
-	homedir="$( _get_homedir_by_groupname "${groupname}" )"
+	#local homedir
+	#homedir="$( _get_homedir_by_groupname "${groupname}" )"
 
 	local gid=				# new gid
 	local spare_gid=9876	# spare gid to change another group to

@@ -5,15 +5,19 @@ set -u
 set -o pipefail
 
 CWD="$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
-DOCKER_NAME="${1}"
-ARCH="${2}"
+
+IMAGE="${1}"
+#NAME="${2}"
+#VERSION="${3}"
+TAG="${4}"
+ARCH="${5}"
 
 
 ###
 ### Load Library
 ###
-# shellcheck disable=SC1090
-. ${CWD}/.lib.sh
+# shellcheck disable=SC1091
+. "${CWD}/.lib.sh"
 
 
 
@@ -45,7 +49,7 @@ run "docker run -d --rm --platform ${ARCH} \
  -e PHP_FPM_SERVER_ADDR=${RAND_NAME1} \
  -e PHP_FPM_SERVER_PORT=9000 \
  --link ${RAND_NAME1} \
- --name ${RAND_NAME2} ${DOCKER_NAME}"
+ --name ${RAND_NAME2} ${IMAGE}:${TAG}"
 
 
 ###
