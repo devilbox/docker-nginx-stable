@@ -26,7 +26,7 @@ TAG        = latest
 # Makefile.docker overwrites
 NAME       = Nginx
 VERSION    = stable
-IMAGE      = devilbox/nginx-stable
+IMAGE      = devilbox/nginx-$(VERSION)
 DIR        = .
 FILE       = Dockerfile
 DOCKER_TAG = $(TAG)
