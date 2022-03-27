@@ -11,7 +11,8 @@
 
 **[devilbox/docker-nginx-stable](https://github.com/devilbox/docker-nginx-stable)**
 
-**Available Architectures:**  `amd64`, `arm64`, `386`, `arm/v7`, `arm/v6`
+* **Available Architectures:**  `amd64`, `arm64`, `386`, `arm/v7`, `arm/v6`
+* **Available Docker tags:**  `latest`, `alpine`, `debian`
 
 This image is based on the official **[Nginx](https://hub.docker.com/_/nginx)** Docker image and extends it with the ability to have **virtual hosts created automatically**, as well as **adding SSL certificates** when creating new directories. For that to work, it integrates two tools that will take care about the whole process: **[watcherd](https://github.com/devilbox/watcherd)** and **[vhost-gen](https://github.com/devilbox/vhost-gen)**.
 
