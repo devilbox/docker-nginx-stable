@@ -43,6 +43,8 @@ else
 		echo "################################################################################"
 		echo "# [${CWD}/${i}] ${IMAGE}:${TAG} ${NAME}-${VERSION} (${ARCH})"
 		echo "################################################################################"
-		sh -c "${i} ${IMAGE} ${NAME} ${VERSION} ${TAG} ${ARCH}"
+		if ! sh -c "${i} ${IMAGE} ${NAME} ${VERSION} ${TAG} ${ARCH}"; then
+			exit 1
+		fi
 	done
 fi
