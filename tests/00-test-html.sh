@@ -13,6 +13,8 @@ TAG="${4}"
 ARCH="${5}"
 
 
+HOST_PORT="8093"
+
 ###
 ### Load Library
 ###
@@ -26,7 +28,7 @@ ARCH="${5}"
 ###
 RAND_DIR="$( mktemp -d )"
 RAND_NAME="$( get_random_name )"
-run "echo \"hello world\" > ${RAND_DIR}/index.html"
+run "echo \"hello world via html\" > ${RAND_DIR}/index.html"
 
 
 ###
@@ -34,7 +36,7 @@ run "echo \"hello world\" > ${RAND_DIR}/index.html"
 ###
 run "docker run --rm --platform ${ARCH} \
  -v ${RAND_DIR}:/var/www/default/htdocs \
- -p 127.0.0.1:80:80 \
+ -p 127.0.0.1:${HOST_PORT}:80 \
  -e DEBUG_ENTRYPOINT=2 \
  -e DEBUG_RUNTIME=1 \
  -e NEW_UID=$( id -u ) \
@@ -45,20 +47,22 @@ run "docker run --rm --platform ${ARCH} \
 ###
 ### Tests
 ###
-run "sleep 20"  # Startup-time is longer on cross-platform
-run "docker ps"
-if ! run "docker logs ${RAND_NAME}"; then
-	exit 1
-fi
-if ! run "curl -sS localhost/index.html"; then
-	run "docker stop ${RAND_NAME}"
-	exit 1
-fi
-if ! run "curl -sS localhost/index.html | grep 'hello world'"; then
-	run "docker stop ${RAND_NAME}"
-	exit 1
-fi
-
+WAIT=120
+INDEX=0
+printf "Testing connectivity"
+while ! curl -sS "http://localhost:${HOST_PORT}" 2>/dev/null | grep 'hello world via html'; do
+	printf "."
+	if [ "${INDEX}" = "${WAIT}" ]; then
+		printf "\\n"
+		run "docker logs ${RAND_NAME}" || true
+		run "docker stop ${RAND_NAME}" || true
+		echo "Error"
+		exit 1
+	fi
+	INDEX=$(( INDEX + 1 ))
+	sleep 1
+done
+printf "\\n[OK]  Test success\\n"
 
 ###
 ### Cleanup
