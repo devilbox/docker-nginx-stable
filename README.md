@@ -24,8 +24,8 @@ From a users perspective, you mount your local project directory into the contai
 
 > ##### 🐱 GitHub: [devilbox/docker-nginx-stable](https://github.com/devilbox/docker-nginx-stable)
 
-| Current Project  | Reference Implementation |
-|:----------------:|:------------------------:|
+| Web Server Project  | Reference Implementation |
+|:-------------------:|:------------------------:|
 | <a title="Docker Nginx" href="https://github.com/devilbox/docker-nginx-stable" ><img height="82px" src="https://raw.githubusercontent.com/devilbox/artwork/master/submissions_banner/cytopia/05/png/banner_256_trans.png" /></a> | <a title="Devilbox" href="https://github.com/cytopia/devilbox" ><img height="82px" src="https://raw.githubusercontent.com/devilbox/artwork/master/submissions_banner/cytopia/01/png/banner_256_trans.png" /></a> |
 | Streamlined Webserver images | The [Devilbox](https://github.com/cytopia/devilbox) |
 
@@ -73,157 +73,116 @@ The following Docker image tags are built once and can be used for reproducible 
 | **[`<tag>-debian`][tag_debian]** | git: `<tag>` |  `amd64`, `i386`, `arm64`, `arm/v7`, `arm/v6` |
 | **[`<tag>-alpine`][tag_alpine]** | git: `<tag>` |  `amd64`, `i386`, `arm64`, `arm/v7`, `arm/v6` |
 
-> 🛈 Where `<tag>` refers to the chosen git tag from this repository.
+> 🛈 Where `<tag>` refers to the chosen git tag from this repository.<br/>
+> ⚠ **Warning:** The latest available git tag is also build every night and considered a rolling tag.
 
 
 ## ✰ Features
 
 ### Automated virtual hosts
 
-1. Automated virtual hosts can be enabled by providing `-e MASS_VHOST_ENABLE=1`.
-2. You should mount a local project directory into the Docker under `/shared/httpd` (`-v /local/path:/shared/httpd`).
-3. You can optionally specify a global server name suffix via e.g.: `-e MASS_VHOST_TLD=.loc`
-4. You can optionally specify a global subdirectory from which the virtual host will servve the documents via e.g.: `-e MASS_VHOST_DOCROOT=www`
-5. Allow the Docker to expose its port via `-p 80:80`.
-6. Have DNS names point to the IP address the container runs on (e.g. via `/etc/hosts`)
+> 🛈 For details see **[Features: Automated virtual hosts](doc/features.md#automated-virtual-hosts)**
 
-With the above described settings, whenever you create a local directory under your projects dir
-such as `/local/path/mydir`, there will be a new virtual host created by the same name
-`http://mydir`. You can also specify a global suffix for the vhost names via
-`-e MASS_VHOST_TLD=.loc`, afterwards your above created vhost would be reachable via
-`http://mydir.loc`.
 
-Just to give you a few examples:
+### Automated SSL certificate generation
 
-**Assumption:** `/local/path` is mounted to `/shared/httpd`
+> 🛈 For details see **[Features: Automated SSL certificate generation](doc/features.md#automated-ssl-certificate-generation)
 
-| Directory | `MASS_VHOST_DOCROOT` | `MASS_VHOST_TLD` | Serving from <sup>(*)</sup> | Via                  |
-|-----------|----------------------|------------------|--------------------------|----------------------|
-| work1/    | htdocs/              |                  | /local/path/work1/htdocs | http://work1         |
-| work1/    | www/                 |                  | /local/path/work1/www    | http://work1         |
-| work1/    | htdocs/              | .loc             | /local/path/work1/htdocs | http://work1.loc     |
-| work1/    | www/                 | .loc             | /local/path/work1/www    | http://work1.loc     |
+### Automatically trusted HTTPS
 
-<sub>(*) This refers to the directory on your host computer</sub>
-
-**Assumption:** `/tmp` is mounted to `/shared/httpd`
-
-| Directory | `MASS_VHOST_DOCROOT` | `MASS_VHOST_TLD` | Serving from <sup>(*)</sup> | Via                  |
-|-----------|----------------------|------------------|--------------------------|----------------------|
-| api/      | htdocs/              |                  | /tmp/api/htdocs          | http://api           |
-| api/      | www/                 |                  | /tmp/api/www             | http://api           |
-| api/      | htdocs/              | .test.com        | /tmp/api/htdocs          | http://api.test.com  |
-| api/      | www/                 | .test.com        | /tmp/api/www             | http://api.test.com  |
-
-<sub>(*) This refers to the directory on your host computer</sub>
-
-You would start it as follows:
-
-```shell
-docker run -it \
-    -p 80:80 \
-    -e MASS_VHOST_ENABLE=1 \
-    -e MASS_VHOST_DOCROOT=www \
-    -e MASS_VHOST_TLD=.loc \
-    -v /local/path:/shared/httpd \
-    devilbox/nginx-stable
-```
+> 🛈 For details see **[Features: Automatically trusted HTTPS](doc/features.md#automatically-trusted-https)**
 
 ### Customization per virtual host
 
-Each virtual host is generated from templates by **[vhost-gen](https://github.com/devilbox/vhost-gen/tree/master/etc/templates)**. As `vhost-gen` is really flexible and allows combining multiple templates, you can copy and alter an existing template and then place it in a subdirectory of your project folder. The subdirectory is specified by `MASS_VHOST_TPL`.
+> 🛈 For details see **[Features: Customization per virtual host](doc/features.md#customization-per-virtual-host)**
 
-**Assumption:** `/local/path` is mounted to `/shared/httpd`
+### Customization for the default virtual host
 
-| Directory | `MASS_VHOST_TPL` | Templates are then read from <sup>(*)</sup> |
-|-----------|------------------|------------------------------|
-| work1/    | cfg/             | /local/path/work1/cfg/       |
-| api/      | cfg/             | /local/path/api/cfg/         |
-| work1/    | conf/            | /local/path/work1/conf/      |
-| api/      | conf/            | /local/path/api/conf/        |
+> 🛈 For details see **[Features: Customization for the default virtual host](doc/features.md#customization-for-the-default-virtual-host)**
 
-<sub>(*) This refers to the directory on your host computer</sub>
+### Automated PHP-FPM setup
 
-### Customizing the default virtual host
+> 🛈 For details see **[Features: Automated PHP-FPM setup](doc/features.md#automated-php-fpm-setup)**
 
-The default virtual host can also be overwritten with a custom template. Use `MAIN_VHOST_TPL` variable in order to set the subdirectory to look for template files.
+### Local file system permission sync
 
-### PHP-FPM setup automation
-
-PHP-FPM is not included inside this Docker container, but can be enabled to contact a remote PHP-FPM server. To do so, you must enable it and at least specify the remote PHP-FPM server address (hostname or IP address). Additionally you must mount the data dir under the same path into the PHP-FPM docker container as it is mounted into the web server.
-
-**Note:** When PHP-FPM is enabled, it is enabled for the default virtual host as well as for all other automatically created mass virtual hosts.
-
-### Disabling the default virtual host
-
-If you only want to server you custom projects and don't need the default virtual host, you can disable it by `-e MAIN_VHOST_ENABLE=0`.
+> 🛈 For details see **[Features: Local file system permission sync](doc/features.md#local-file-system-permission-sync)**
 
 
 
 ## ∑ Environment Variables
 
-This Docker container adds a lot of injectables in order to customize it to your needs. See the table below for a detailed description.
+The provided Docker images add a lot of injectables in order to customize it to your needs. See the table below for a brief overview.
 
-### Required environmental variables
+> 🛈 For details see **[Documentation: Environment variables](doc/environment-variables.md)**
 
-`PHP_FPM_SERVER_ADDR` is required when enabling PHP FPM.
-
-### Optional environmental variables (nginx)
-
-| Variable | Type | Default | Description |
-|----------|------|---------|-------------|
-| `WORKER_CONNECTIONS` | int    | `1024`    | [worker_connections](https://nginx.org/en/docs/ngx_core_module.html#worker_connections) |
-| `WORKER_PROCESSES`   | int or `auto` | `auto`  | [worker_processes](https://nginx.org/en/docs/ngx_core_module.html#worker_processes) |
-
-### Optional environmental variables (general)
-
-| Variable | Type | Default | Description |
-|----------|------|---------|-------------|
-| `DEBUG_ENTRYPOINT`    | int    | `0`     | Show settings and shell commands executed during startup.<br/>Values:<br/>`0`: Off<br/>`1`: Show settings<br/>`2`: Show settings and commands |
-| `DEBUG_RUNTIME`       | bool   | `0`     | Be verbose during runtime.<br/>Value: `0` or `1` |
-| `DOCKER_LOGS`         | bool   | `0`     | When set to `1` will redirect error and access logs to Docker logs (`stderr` and `stdout`) instead of file inside container.<br/>Value: `0` or `1` |
-| `TIMEZONE`            | string | `UTC`   | Set docker OS timezone.<br/>(Example: `Europe/Berlin`) |
-| `NEW_UID`             | int    | `101`   | Assign the default Nginx user a new UID. This is useful if you you mount your document root and want to match the file permissions to the one of your local user. Set it to your host users uid (see `id` for your uid). |
-| `NEW_GID`             | int    | `101`   | This is useful if you you mount your document root and want to match the file permissions to the one of your local user group. Set it to your host user groups gid (see `id` for your gid). |
-| `PHP_FPM_ENABLE`      | bool   | `0`     | Enable PHP-FPM for the default vhost and the mass virtual hosts. |
-| `PHP_FPM_SERVER_ADDR` | string | ``      | IP address or hostname of remote PHP-FPM server.<br/><strong>Required when enabling PHP.</strong> |
-| `PHP_FPM_SERVER_PORT` | int    | `9000`  | Port of remote PHP-FPM server |
-| `PHP_FPM_TIMEOUT`     | int    | `180`   | Timeout in seconds to upstream PHP-FPM server |
-| `HTTP2_ENABLE`        | int    | `1`     | Enabled or disabled HTTP2 support.<br/>Values:<br/>`0`: Disabled<br/>`1`: Enabled<br/>Defaults to Enabled |
-
-### Optional environmental variables (default vhost)
-
-| Variable | Type | Default | Description |
-|----------|------|---------|-------------|
-| `MAIN_VHOST_ENABLE`  | bool   | `1`     | By default there is a standard (catch-all) vhost configured to accept requests served from `/var/www/default/htdocs`. If you want to disable it, set the value to `0`.<br/><strong>Note:</strong>The `htdocs` dir name can be changed with `MAIN_VHOST_DOCROOT`. See below. |
-| `MAIN_VHOST_SSL_TYPE` | string | `plain` | <ul><li><code>plain</code> - only serve via http</li><li><code>ssl</code> - only serve via https</li><li><code>both</code> - serve via http and https</li><li><code>redir</code> - serve via https and redirect http to https</li></ul> |
-| `MAIN_VHOST_SSL_GEN` | bool | `0` | `0`: Do not generate an ssl certificate<br/> `1`: Generate self-signed certificate automatically |
-| `MAIN_VHOST_SSL_CN`  | string | `localhost` | Comma separated list of CN names for SSL certificate generation (The domain names by which you want to reach the default server) |
-| `MAIN_VHOST_DOCROOT`  | string | `htdocs`| This is the directory name appended to `/var/www/default/` from which the default virtual host will serve its files.<br/><strong>Default:</strong><br/>`/var/www/default/htdocs`<br/><strong>Example:</strong><br/>`MAIN_VHOST_DOCROOT=www`<br/>Doc root: `/var/www/default/www` |
-| `MAIN_VHOST_TPL`      | string | `cfg`   | Directory within th default vhost base path (`/var/www/default`) to look for templates to overwrite virtual host settings. See [vhost-gen](https://github.com/devilbox/vhost-gen/tree/master/etc/templates) for available template files.<br/><strong>Resulting default path:</strong><br/>`/var/www/default/cfg` |
-| `MAIN_VHOST_STATUS_ENABLE` | bool | `0`  | Enable httpd status page. |
-| `MAIN_VHOST_STATUS_ALIAS`  | string | `/httpd-status` | Set the alias under which the httpd server should serve its status page. |
-
-### Optional environmental variables (mass vhosts)
-
-| Variable | Type | Default | Description |
-|----------|------|---------|-------------|
-| `MASS_VHOST_ENABLE`   | bool   | `0`     | You can enable mass virtual hosts by setting this value to `1`. Mass virtual hosts will be created for each directory present in `/shared/httpd` by the same name including a top-level domain suffix (which could also be a domain+tld). See `MASS_VHOST_TLD` for how to set it. |
-| `MASS_VHOST_SSL_TYPE` | string | `plain` | <ul><li><code>plain</code> - only serve via http</li><li><code>ssl</code> - only serve via https</li><li><code>both</code> - serve via http and https</li><li><code>redir</code> - serve via https and redirect http to https</li></ul> |
-| `MASS_VHOST_SSL_GEN` | bool | `0` | `0`: Do not generate an ssl certificate<br/> `1`: Generate self-signed certificate automatically |
-| `MASS_VHOST_TLD`      | string | `.loc`| This string will be appended to the server name (which is built by its directory name) for mass virtual hosts and together build the final domain.<br/><strong>Default:</strong>`<project>.loc`<br/><strong>Example:</strong><br/>Path: `/shared/httpd/temp`<br/>`MASS_VHOST_TLD=.lan`<br/>Server name: `temp.lan`<br/><strong>Example:</strong><br/>Path:`/shared/httpd/api`<br/>`MASS_VHOST_TLD=.example.com`<br/>Server name: `api.example.com` |
-| `MASS_VHOST_DOCROOT`  | string | `htdocs`| This is a subdirectory within your project dir under each project from which the web server will serve its files.<br/>`/shared/httpd/<project>/$MASS_VHOST_DOCROOT/`<br/><strong>Default:</strong><br/>`/shared/httpd/<project>/htdocs/` |
-| `MASS_VHOST_TPL`      | string | `cfg`   | Directory within your new virtual host to look for templates to overwrite virtual host settings. See [vhost-gen](https://github.com/devilbox/vhost-gen/tree/master/etc/templates) for available template files.<br/>`/shared/httpd/<project>/$MASS_VHOST_TPL/`<br/><strong>Resulting default path:</strong><br/>`/shared/httpd/<project>/cfg/` |
+<table>
+ <tr>
+  <th>Nginx</th>
+  <th>Logging</th>
+  <th>Features</th>
+ </tr>
+ <tr style="vertical-align:top">
+  <td>
+   <code>WORKER_CONNECTIONS</code><br/>
+   <code>WORKER_PROCESSES</code><br/>
+   <code>HTTP2_ENABLE</code><br/>
+  </td>
+  <td>
+   <code>DEBUG_ENTRYPOINT</code><br/>
+   <code>DEBUG_RUNTIME</code><br/>
+   <code>DOCKER_LOGS</code><br/>
+  </td>
+  <td>
+   <code>TIMEZONE</code><br/>
+   <code>NEW_UID</code><br/>
+   <code>NEW_GID</code><br/>
+  </td>
+ </tr>
+ <tr>
+  <th>Main vHost</th>
+  <th>Mass vHost</th>
+  <th>PHP</th>
+ </tr>
+ <tr style="vertical-align:top">
+  <td>
+   <code>MAIN_VHOST_ENABLE</code><br/>
+   <code>MAIN_VHOST_SSL_TYPE</code><br/>
+   <code>MAIN_VHOST_SSL_GEN</code><br/>
+   <code>MAIN_VHOST_SSL_CN</code><br/>
+   <code>MAIN_VHOST_DOCROOT</code><br/>
+   <code>MAIN_VHOST_TPL</code><br/>
+   <code>MAIN_VHOST_STATUS_ENABLE</code><br/>
+   <code>MAIN_VHOST_STATUS_ALIAS</code><br/>
+  </td>
+  <td>
+   <code>MASS_VHOST_ENABLE</code><br/>
+   <code>MASS_VHOST_SSL_TYPE</code><br/>
+   <code>MASS_VHOST_SSL_GEN</code><br/>
+   <code>MASS_VHOST_TLD</code><br/>
+   <code>MASS_VHOST_DOCROOT</code><br/>
+   <code>MASS_VHOST_TPL</code><br/>
+  </td>
+  <td>
+   <code>PHP_FPM_ENABLE</code><br/>
+   <code>PHP_FPM_SERVER_ADDR</code><br/>
+   <code>PHP_FPM_SERVER_PORT</code><br/>
+   <code>PHP_FPM_TIMEOUT</code><br/>
+  </td>
+ </tr>
+</table>
 
 
 ## 📂 Volumes
 
-| Docker                | Description |
-|-----------------------|-------------|
-| `/etc/httpd-custom.d/` | Mount this directory to add outside configuration files (`*.conf`) to Nginx |
-| `/var/www/default/`    | Nginx default virtual host base path (contains by default `htdocs/` and `cfg/` |
-| `/shared/httpd/`       | Nginx mass virtual host root directory |
-| `/etc/vhost-gen.d/`    | [vhost-gen](https://github.com/devilbox/vhost-gen) directory for custom templates. Copy and customize [nginx.yml](https://github.com/devilbox/vhost-gen/blob/master/etc/templates/nginx.yml) into this mounted directory for global vhost customizations |
+> 🛈 For details see **[Documentation: Volumes](doc/volumes.md)**
+
+| Docker                 | Short description |
+|------------------------|-------------------|
+| `/etc/httpd-custom.d/` | Nginx `*.conf` configs |
+| `/var/www/default/`    | Default virtual host base path |
+| `/shared/httpd/`       | Mass virtual host root directory |
+| `/etc/vhost-gen.d/`    | [vhost-gen](https://github.com/devilbox/vhost-gen) directory |
 
 
 ## 🖧 Exposed Ports
@@ -279,7 +238,7 @@ $ docker run -d \
     -p 3306:3306 \
     -e MYSQL_ROOT_PASSWORD=my-secret-pw \
     --name mysql \
-    -t cytopia/mysql-5.5
+    -t devilbox/mysql:mysql-5.5
 
 # Start the PHP-FPM docker, mounting the same diectory.
 # Also make sure to
