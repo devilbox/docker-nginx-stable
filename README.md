@@ -79,34 +79,29 @@ The following Docker image tags are built once and can be used for reproducible 
 
 ## ✰ Features
 
-### Automated virtual hosts
+> 🛈 For details see **[Documentation: Features](doc/features.md)**
 
-> 🛈 For details see **[Features: Automated virtual hosts](doc/features.md#automated-virtual-hosts)**
+#### Automated virtual hosts
 
 
-### Automated SSL certificate generation
 
-> 🛈 For details see **[Features: Automated SSL certificate generation](doc/features.md#automated-ssl-certificate-generation)
+#### Automated SSL certificate generation
 
-### Automatically trusted HTTPS
 
-> 🛈 For details see **[Features: Automatically trusted HTTPS](doc/features.md#automatically-trusted-https)**
+#### Automatically trusted HTTPS
 
-### Customization per virtual host
 
-> 🛈 For details see **[Features: Customization per virtual host](doc/features.md#customization-per-virtual-host)**
+#### Customization per virtual host
 
-### Customization for the default virtual host
 
-> 🛈 For details see **[Features: Customization for the default virtual host](doc/features.md#customization-for-the-default-virtual-host)**
+#### Customization for the default virtual host
 
-### Automated PHP-FPM setup
 
-> 🛈 For details see **[Features: Automated PHP-FPM setup](doc/features.md#automated-php-fpm-setup)**
+#### Automated PHP-FPM setup
 
-### Local file system permission sync
 
-> 🛈 For details see **[Features: Local file system permission sync](doc/features.md#local-file-system-permission-sync)**
+#### Local file system permission sync
+
 
 
 
@@ -175,17 +170,32 @@ The provided Docker images add a lot of injectables in order to customize it to 
 
 ## 📂 Volumes
 
+The provided Docker images offer the following internal paths to be mounted to your local file system.
+
 > 🛈 For details see **[Documentation: Volumes](doc/volumes.md)**
 
-| Docker                 | Short description |
-|------------------------|-------------------|
-| `/etc/httpd-custom.d/` | Nginx `*.conf` configs |
-| `/var/www/default/`    | Default virtual host base path |
-| `/shared/httpd/`       | Mass virtual host root directory |
-| `/etc/vhost-gen.d/`    | [vhost-gen](https://github.com/devilbox/vhost-gen) directory |
-
+<table>
+ <tr>
+  <th>Data dir</th>
+  <th>Config dir</th>
+ </tr>
+ <tr valign="top" style="vertical-align:top">
+  <td>
+   <code>/var/www/default/</code><br/>
+   <code>/shared/httpd/</code><br/>
+  </td>
+  <td>
+   <code>/etc/httpd-custom.d/</code><br/>
+   <code>/etc/vhost-gen.d/</code><br/>
+  </td>
+  </td>
+ </tr>
+</table>
+ 
 
 ## 🖧 Exposed Ports
+
+When you plan on using `443` you should enable automated SSL certificate generation.
 
 | Docker | Description |
 |--------|-------------|
@@ -195,18 +205,21 @@ The provided Docker images add a lot of injectables in order to customize it to 
 
 ## 💡 Examples
 
-### 1. Serve static files
+### Serve static files
 
-Mount your local directort `~/my-host-www` into the docker and server those files.
+Mount your local directort `~/my-host-www` into the container and server those files.
 
 **Note:** Files will be server from `~/my-host-www/htdocs`.
 ```bash
-$ docker run -d -p 80:80 -v ~/my-host-www:/var/www/default -t devilbox/nginx-stable
+docker run -d -it \
+    -p 80:80 \
+    -v ~/my-host-www:/var/www/default \
+    devilbox/nginx-stable
 ```
 
-### 2. Serve PHP files with PHP-FPM
+### Serve PHP files with PHP-FPM
 
-Note, for this to work, the `~/my-host-www` dir must be mounted into the Nginx Docker as well as into the php-fpm docker.
+Note, for this to work, the `~/my-host-www` dir must be mounted into the Nginx container as well as into the php-fpm container.
 
 | PHP-FPM Reference Images |
 |--------------------------|
@@ -215,45 +228,49 @@ Note, for this to work, the `~/my-host-www` dir must be mounted into the Nginx D
 Each PHP-FPM container also has the option to enable Xdebug and more, see their respective Readme files for futher settings.
 
 ```bash
-# Start the PHP-FPM docker, mounting the same diectory
-$ docker run -d -p 9000 -v ~/my-host-www:/var/www/default --name php devilbox/php-fpm:5.6-prod
+# Start the PHP-FPM container, mounting the same diectory
+docker run -d -it \
+    --name php \
+    -p 9000 \
+    -v ~/my-host-www:/var/www/default \
+    devilbox/php-fpm:5.6-prod
 
-# Start the Nginx Docker, linking it to the PHP-FPM docker
-$ docker run -d \
+# Start the Nginx Docker, linking it to the PHP-FPM container
+docker run -d -it \
     -p 80:80 \
     -v ~/my-host-www:/var/www/default \
     -e PHP_FPM_ENABLE=1 \
     -e PHP_FPM_SERVER_ADDR=php \
     -e PHP_FPM_SERVER_PORT=9000 \
     --link php \
-    -t devilbox/nginx-stable
+    devilbox/nginx-stable
 ```
 
-### 3. Fully functional LEMP stack
+### Fully functional LEMP stack
 
-Same as above, but also add a MySQL docker and link it into Nginx.
+Same as above, but also add a MySQL container and link it into Nginx.
 ```bash
-# Start the MySQL docker
-$ docker run -d \
+# Start the MySQL container
+docker run -d -it \
+    --name mysql \
     -p 3306:3306 \
     -e MYSQL_ROOT_PASSWORD=my-secret-pw \
-    --name mysql \
-    -t devilbox/mysql:mysql-5.5
+    devilbox/mysql:mysql-5.5
 
-# Start the PHP-FPM docker, mounting the same diectory.
+# Start the PHP-FPM container, mounting the same diectory.
 # Also make sure to
 #   forward the remote MySQL port 3306 to 127.0.0.1:3306 within the
-#   PHP-FPM docker in order to be able to use `127.0.0.1` for mysql
-#   connections from within the php docker.
-$ docker run -d \
+#   PHP-FPM container in order to be able to use `127.0.0.1` for mysql
+#   connections from within the php container.
+docker run -d -it \
+    --name php \
     -p 9000:9000 \
     -v ~/my-host-www:/var/www/default \
     -e FORWARD_PORTS_TO_LOCALHOST=3306:mysql:3306 \
-    --name php \
     devilbox/php-fpm:5.6-prod
 
-# Start the Nginx Docker, linking it to the PHP-FPM docker
-$ docker run -d \
+# Start the Nginx Docker, linking it to the PHP-FPM container
+docker run -d -it \
     -p 80:80 \
     -v ~/my-host-www:/var/www/default \
     -e PHP_FPM_ENABLE=1 \
@@ -261,16 +278,8 @@ $ docker run -d \
     -e PHP_FPM_SERVER_PORT=9000 \
     --link php \
     --link mysql \
-    -t devilbox/nginx-stable
+    devilbox/nginx-stable
 ```
-
-### 4. Docker Compose reference implementation
-
-If you want a fully functional Docker Compose setup, which allows to switch PHP versions easily, comes with web servers, database servers and much more, then head over to the **[Devilbox](https://github.com/cytopia/devilbox)** rerefence implementation :
-
-| Reference Implementation |
-|--------------------------|
-| <a title="Devilbox" href="https://github.com/cytopia/devilbox" ><img title="Devilbox" height="82px" src="https://raw.githubusercontent.com/devilbox/artwork/master/submissions_banner/cytopia/01/png/banner_256_trans.png" /></a> |
 
 
 ## 🖤 Sister Projects
@@ -328,7 +337,7 @@ In case you seek help, go and visit the community pages.
 <table width="100%" style="width:100%; display:table;">
  <thead>
   <tr>
-   <th width="33%" style="width:33%;"><h3><a target="_blank" href="https://devilbox.readthedocs.io">📘	Documentation</a></h3></th>
+   <th width="33%" style="width:33%;"><h3><a target="_blank" href="https://devilbox.readthedocs.io">📘 Documentation</a></h3></th>
    <th width="33%" style="width:33%;"><h3><a target="_blank" href="https://discord.gg/2wP3V6kBj4">🎮 Discord</a></h3></th>
    <th width="33%" style="width:33%;"><h3><a target="_blank" href="https://devilbox.discourse.group">🗪 Forum</a></h3></th>
   </tr>
