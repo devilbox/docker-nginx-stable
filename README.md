@@ -249,13 +249,15 @@ $ docker run -d -p 80:80 -v ~/my-host-www:/var/www/default -t devilbox/nginx-sta
 
 Note, for this to work, the `~/my-host-www` dir must be mounted into the Nginx Docker as well as into the php-fpm docker.
 
-You can also attach other PHP-FPM version: [PHP-FPM 5.4](https://github.com/cytopia/docker-php-fpm-5.4), [PHP-FPM 5.5](https://github.com/cytopia/docker-php-fpm-5.5), [PHP-FPM 5.6](https://github.com/cytopia/docker-php-fpm-5.6), [PHP-FPM 7.0](https://github.com/cytopia/docker-php-fpm-7.0), [PHP-FPM 7.1](https://github.com/cytopia/docker-php-fpm-7.1), [PHP-FPM 7.2](https://github.com/cytopia/docker-php-fpm-7.2) or [HHVM](https://github.com/cytopia/docker-hhvm-latest).
+| PHP-FPM Reference Images |
+|--------------------------|
+| <a title="PHP-FPM Reference Images" href="https://github.com/devilbox/docker-php-fpm" ><img title="Devilbox" height="82px" src="https://raw.githubusercontent.com/devilbox/artwork/master/submissions_banner/cytopia/02/png/banner_256_trans.png" /></a> |
 
-Each PHP-FPM docker also has the option to enable Xdebug and more, see their respective Readme files for futher settings.
+Each PHP-FPM container also has the option to enable Xdebug and more, see their respective Readme files for futher settings.
 
 ```bash
 # Start the PHP-FPM docker, mounting the same diectory
-$ docker run -d -p 9000 -v ~/my-host-www:/var/www/default --name php cytopia/php-fpm-5.6
+$ docker run -d -p 9000 -v ~/my-host-www:/var/www/default --name php devilbox/php-fpm:5.6-prod
 
 # Start the Nginx Docker, linking it to the PHP-FPM docker
 $ docker run -d \
@@ -289,7 +291,7 @@ $ docker run -d \
     -v ~/my-host-www:/var/www/default \
     -e FORWARD_PORTS_TO_LOCALHOST=3306:mysql:3306 \
     --name php \
-    cytopia/php-fpm-5.6
+    devilbox/php-fpm:5.6-prod
 
 # Start the Nginx Docker, linking it to the PHP-FPM docker
 $ docker run -d \
