@@ -122,7 +122,7 @@ The provided Docker images add a lot of injectables in order to customize it to 
   <th>Logging</th>
   <th>Features</th>
  </tr>
- <tr style="vertical-align:top">
+ <tr valign="top" style="vertical-align:top">
   <td>
    <code>WORKER_CONNECTIONS</code><br/>
    <code>WORKER_PROCESSES</code><br/>
@@ -144,7 +144,7 @@ The provided Docker images add a lot of injectables in order to customize it to 
   <th>Mass vHost</th>
   <th>PHP</th>
  </tr>
- <tr style="vertical-align:top">
+ <tr valign="top" style="vertical-align:top">
   <td>
    <code>MAIN_VHOST_ENABLE</code><br/>
    <code>MAIN_VHOST_SSL_TYPE</code><br/>
