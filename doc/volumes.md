@@ -18,6 +18,13 @@ Mount this directory to your local file system in order to add html, js, php, et
 
 **Note:** You can disable the default virtual host and then don't need to mount this directory.
 
+```bash
+docker run -d -it \
+    -v $(pwd)/default:/var/www/default \
+    -e MAIN_VHOST_ENABLE=1 \
+    devilbox/nginx-stable
+```
+
 
 ## `/shared/httpd/`
 
@@ -29,6 +36,13 @@ This directory contains all your projects. When a new directory is created insid
 Mount this directory to your local file system in order to add html, js, php, etc files and edit them with your local IDE/editor.
 
 **Note:** You can disable mass virtual hosts and then don't need to mount this directory.
+
+```bash
+docker run -d -it \
+    -v $(pwd)/projects:/shared/httpd \
+    -e MASS_VHOST_ENABLE=1 \
+    devilbox/nginx-stable
+```
 
 
 ## `/etc/httpd-custom.d/`
