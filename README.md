@@ -57,8 +57,8 @@ The following Docker image tags are rolling releases and are built and updated e
 | Docker Tag                       | Git Ref      |  Available Architectures                      |
 |----------------------------------|--------------|-----------------------------------------------|
 | **[`latest`][tag_latest]**       | master       |  `amd64`, `i386`, `arm64`, `arm/v7`, `arm/v6` |
-| **[`debian`][tag_debian]**       | master       |  `amd64`, `i386`, `arm64`, `arm/v7`, `arm/v6` |
-| **[`alpine`][tag_alpine]**       | master       |  `amd64`, `i386`, `arm64`, `arm/v7`, `arm/v6` |
+| [`debian`][tag_debian]           | master       |  `amd64`, `i386`, `arm64`, `arm/v7`, `arm/v6` |
+| [`alpine`][tag_alpine]           | master       |  `amd64`, `i386`, `arm64`, `arm/v7`, `arm/v6` |
 
 
 #### Point in time releases
@@ -70,8 +70,8 @@ The following Docker image tags are built once and can be used for reproducible 
 | Docker Tag                       | Git Ref      |  Available Architectures                      |
 |----------------------------------|--------------|-----------------------------------------------|
 | **[`<tag>`][tag_latest]**        | git: `<tag>` |  `amd64`, `i386`, `arm64`, `arm/v7`, `arm/v6` |
-| **[`<tag>-debian`][tag_debian]** | git: `<tag>` |  `amd64`, `i386`, `arm64`, `arm/v7`, `arm/v6` |
-| **[`<tag>-alpine`][tag_alpine]** | git: `<tag>` |  `amd64`, `i386`, `arm64`, `arm/v7`, `arm/v6` |
+| [`<tag>-debian`][tag_debian]     | git: `<tag>` |  `amd64`, `i386`, `arm64`, `arm/v7`, `arm/v6` |
+| [`<tag>-alpine`][tag_alpine]     | git: `<tag>` |  `amd64`, `i386`, `arm64`, `arm/v7`, `arm/v6` |
 
 > 🛈 Where `<tag>` refers to the chosen git tag from this repository.<br/>
 > ⚠ **Warning:** The latest available git tag is also build every night and considered a rolling tag.
@@ -81,28 +81,37 @@ The following Docker image tags are built once and can be used for reproducible 
 
 > 🛈 For details see **[Documentation: Features](doc/features.md)**
 
-#### Automated virtual hosts
+### Automated virtual hosts
 
+Virtual hosts are created automatically, simply by creating a new project directory (inside or outside of the container). This allows you to quickly create new projects and work on them in your IDE without the hassle of configuring the web server.
 
+### Automated PHP-FPM setup
 
-#### Automated SSL certificate generation
+PHP is not included in the provided images, but you can link the Docker container to a PHP-FPM image with any PHP version. This allows you to easily switch PHP versions and choose one which is currently required.
 
+### Automated SSL certificate generation
 
-#### Automatically trusted HTTPS
+SSL certificates are generated automatically for each virtual host to allow you to develop over HTTP and HTTPS.
 
+### Automatically trusted HTTPS
 
-#### Customization per virtual host
+SSL certificates are signed by a certificate authority (which is also being generated). The CA file can be mounted locally and imported into your browser, which allows you to automatically treat all generated virtual host certificates as trusted.
 
+### Customization per virtual host
 
-#### Customization for the default virtual host
+Each virtual host can individually be fully customized via `vhost-gen` templates.
 
+### Customization for the default virtual host
 
-#### Automated PHP-FPM setup
+The default virtual host is also treated differently from the auto-generated mass virtual hosts. You can choose to disable it or use it for a generic overview page for all of your created projects.
 
+### Reverse Proxy integration
 
-#### Local file system permission sync
+Through virtual host customization, any project can also be served with a reverse proxy. This is useful if you want to run NodeJS or Python projects which require a reverse proxy and still want to benefit with a custom domain and auto-generated SSL certificates.
 
+### Local file system permission sync
 
+File system permissions of files/dirs inside the running Docker container are synced with the permission on your host system. This is accomplished by specifying a user- and group-id to the `docker run` command.
 
 
 ## ∑ Environment Variables
@@ -219,12 +228,11 @@ docker run -d -it \
 
 ### Serve PHP files with PHP-FPM
 
-Note, for this to work, the `~/my-host-www` dir must be mounted into the Nginx container as well as into the php-fpm container.
-
 | PHP-FPM Reference Images |
 |--------------------------|
 | <a title="PHP-FPM Reference Images" href="https://github.com/devilbox/docker-php-fpm" ><img title="Devilbox" height="82px" src="https://raw.githubusercontent.com/devilbox/artwork/master/submissions_banner/cytopia/02/png/banner_256_trans.png" /></a> |
 
+Note, for this to work, the `~/my-host-www` dir must be mounted into the Nginx container as well as into the php-fpm container.
 Each PHP-FPM container also has the option to enable Xdebug and more, see their respective Readme files for futher settings.
 
 ```bash
