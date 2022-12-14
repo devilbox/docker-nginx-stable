@@ -2,7 +2,7 @@
 name: "\U0001F41B Bug report"
 description: File a bug report
 title: "[Bug]: "
-labels: ["bug", "triage"]
+labels: ["bug", "status:triage"]
 assignees:
   - cytopia
 
