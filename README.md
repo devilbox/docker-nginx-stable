@@ -200,7 +200,7 @@ The provided Docker images offer the following internal paths to be mounted to y
   </td>
  </tr>
 </table>
- 
+
 
 ## 🖧 Exposed Ports
 
