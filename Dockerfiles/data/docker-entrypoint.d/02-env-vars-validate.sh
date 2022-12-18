@@ -5,8 +5,7 @@ set -u
 set -o pipefail
 
 ###
-### [SECTION 1]
-### This file holds a function to validate the given environment variables.
+### This file holds functions to validate the given environment variables
 ###
 
 
@@ -692,8 +691,6 @@ _log_env_valid() {
 	local message="${4:-}"     # Message: what will happen (valid) or expected format (invalid)
 	local message_val="${5:-}" # value for message
 
-	local debug="${DEBUG_ENTRYPOINT}"       # 0: only warn and error, >0: ok and info
-
 	local clr_valid="\033[0;32m"    # green
 	local clr_invalid="\033[0;31m"  # red
 
@@ -704,33 +701,37 @@ _log_env_valid() {
 	local clr_fail="\033[0;31m"     # red
 	local clr_rst="\033[0m"
 
-	if [ "${debug}" -gt "0" ]; then
-		if [ "${state}" = "valid" ]; then
+	if [ "${state}" = "valid" ]; then
+		log "ok" "$( \
 			printf "${clr_ok}%-11s${clr_rst}%-8s${clr_valid}\$%-27s${clr_rst}%-20s${clr_valid}%s${clr_rst}\n" \
 				"[OK]" \
 				"Valid" \
 				"${name}" \
 				"${message}" \
-				"${message_val}"
-		elif [ "${state}" = "ignore" ]; then
+				"${message_val}" \
+		)" "1"
+	elif [ "${state}" = "ignore" ]; then
+		log "ok" "$( \
 			printf "${clr_ok}%-11s${clr_rst}%-8s${clr_rst}\$%-27s${clr_ignore}%-20s${clr_rst}%s\n" \
 				"[OK]" \
 				"Valid" \
 				"${name}" \
 				"ignored" \
-				"${message}"
-		elif [ "${state}" = "invalid" ]; then
+				"${message}" \
+		)" "1"
+	elif [ "${state}" = "invalid" ]; then
+		log "err" "$( \
 			printf "${clr_fail}%-11s${clr_rst}%-8s${clr_invalid}\$%-27s${clr_rst}${clr_invalid}'%s'${clr_rst}. %s${clr_expect}%s${clr_rst}\n" \
 				"[ERR]" \
 				"Invalid" \
 				"${name}" \
 				"${value}" \
 				"${message}" \
-				"${message_val}"
-		else
-			log "????" "Internal: Wrong value given to _log_env_valid"
-			exit 1
-		fi
+				"${message_val}" \
+		)" "1"
+	else
+		log "????" "Internal: Wrong value given to _log_env_valid"
+		exit 1
 	fi
 }
 
@@ -765,5 +766,3 @@ _log_backend_examples() {
 		log "err" "Example: file:config.txt"
 	fi
 }
-
-

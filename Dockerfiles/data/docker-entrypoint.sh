@@ -51,14 +51,14 @@ WATCHERD_STARTUP_DELAY="3"
 
 
 # -------------------------------------------------------------------------------------------------
-# DEFAULT VALUES
+# DEFAULT LOGGER
 # -------------------------------------------------------------------------------------------------
 
 ###
 ### Set the default debug level for entrypoint and runtime
 ###
 DEFAULT_DEBUG_ENTRYPOINT="2"
-DEFAULT_DEBUG_RUNTIME="0"
+DEFAULT_DEBUG_RUNTIME="1"
 
 ###
 ### Ensure that the following globals have a value:
@@ -97,8 +97,15 @@ fi
 if [ -z "${DEBUG_RUNTIME:-}" ]; then
 	DEBUG_RUNTIME="${DEFAULT_DEBUG_RUNTIME}"
 fi
-if [ "${DEBUG_RUNTIME}" != "0" ] && [ "${DEBUG_RUNTIME}" != "1" ]; then
-	DEBUG_RUNTIME="${DEFAULT_DEBUG_RUNTIME}"
+if [ "${DEBUG_RUNTIME}" != "0" ] \
+	&& [ "${DEBUG_RUNTIME}" != "1" ] \
+	&& [ "${DEBUG_RUNTIME}" != "2" ]; then
+	# Arbitrary integer (set to highest value
+	if [ -n "${DEBUG_RUNTIME##*[!0-9]*}" ]; then
+		DEBUG_RUNTIME=2
+	else
+		DEBUG_RUNTIME="${DEFAULT_DEBUG_RUNTIME}"
+	fi
 fi
 
 export "DEBUG_ENTRYPOINT"
@@ -277,55 +284,11 @@ set_timezone "${TIMEZONE}"
 vhost_gen_copy_custom_template "${VHOST_GEN_CUST_DIR}" "${VHOST_GEN_DIR}" "nginx.yml" "${DEBUG_LEVEL}"
 
 
-###
-### Configure Backend
-###
-#MAIN_BACKEND_HOST="$( get_backend_conf_host "${MAIN_VHOST_BACKEND}" )"
-#MAIN_BACKEND_PORT="$( get_backend_conf_port "${MAIN_VHOST_BACKEND}" )"
-#MAIN_PHP_FPM_ENABLE=1
-#if [ "$( get_backend_conf_type "${MAIN_VHOST_BACKEND}" )" != "phpfpm" ]; then
-#	MAIN_PHP_FPM_ENABLE=0
-#	# Remove directory index.php if we are not serving php
-#	run "sed -i'' 's/.*- index\.php//g' \"/etc/vhost-gen/main.yml\""
-#fi
-
-MASS_BACKEND_HOST="$( get_backend_conf_host "${MASS_VHOST_BACKEND}" )"
-MASS_BACKEND_PORT="$( get_backend_conf_port "${MASS_VHOST_BACKEND}" )"
-MASS_PHP_FPM_ENABLE=1
-if [ "$( get_backend_conf_type "${MASS_VHOST_BACKEND}" )" != "phpfpm" ]; then
-	MASS_PHP_FPM_ENABLE=0
-	# Remove directory index.php if we are not serving php
-	run "sed -i'' 's/.*- index\.php//g' \"/etc/vhost-gen/mass.yml\""
-fi
-#vhost_gen_php_fpm "${MAIN_PHP_FPM_ENABLE}" "${MAIN_BACKEND_HOST}" "${MAIN_BACKEND_PORT}" "${MAIN_VHOST_BACKEND_TIMEOUT}" "/etc/vhost-gen/main.yml"
-vhost_gen_php_fpm "${MASS_PHP_FPM_ENABLE}" "${MASS_BACKEND_HOST}" "${MASS_BACKEND_PORT}" "${MASS_VHOST_BACKEND_TIMEOUT}" "/etc/vhost-gen/mass.yml"
-
-
-###
-### Configure Docker logs
-###
-#vhost_gen_docker_logs "${DOCKER_LOGS}" "/etc/vhost-gen/main.yml"
-vhost_gen_docker_logs "${DOCKER_LOGS}" "/etc/vhost-gen/mass.yml"
-
-###
-### Set HTTP2 support
-###
-#vhost_gen_http2 "${HTTP2_ENABLE}"  "/etc/vhost-gen/main.yml"
-vhost_gen_http2 "${HTTP2_ENABLE}"  "/etc/vhost-gen/mass.yml"
-
-
 
 # -------------------------------------------------------------------------------------------------
 # VHOST-GEN: MAIN
 # -------------------------------------------------------------------------------------------------
 
-###
-### vhost settings
-###
-#vhost_gen_main_vhost_httpd_status \
-#	"${MAIN_VHOST_STATUS_ENABLE}" \
-#	"${MAIN_VHOST_STATUS_ALIAS}" \
-#	"/etc/vhost-gen/main.yml"
 
 ###
 ### Generate
@@ -347,27 +310,6 @@ vhost_gen_main_generate \
 	"/etc/vhost-gen/main.yml" \
 	"${MAIN_DOCROOT_BASE}/${MAIN_VHOST_TPL}" \
 	"${MAIN_VHOST_SSL_TYPE}"
-
-
-# -------------------------------------------------------------------------------------------------
-# VHOST-GEN: MASS
-# -------------------------------------------------------------------------------------------------
-
-###
-### vhost tld suffix
-###
-vhost_gen_mass_vhost_tld \
-	"${MASS_VHOST_ENABLE}" \
-	"${MASS_VHOST_TLD_SUFFIX}" \
-	"/etc/vhost-gen/mass.yml"
-
-###
-### vhost docroot settings
-###
-vhost_gen_mass_vhost_docroot \
-	"${MASS_VHOST_ENABLE}" \
-	"${MASS_VHOST_DOCROOT}" \
-	"/etc/vhost-gen/mass.yml"
 
 
 
@@ -419,17 +361,22 @@ nginx_set_worker_connections "${WORKER_CONNECTIONS}"
 
 
 # -------------------------------------------------------------------------------------------------
-# NGINX-SPECIFIC BASIC SETTINGS
+# MAIN ENTRYPOINT
 # -------------------------------------------------------------------------------------------------
 
-###
-### Supervisor or plain
-###
 _HTTPD_VERSION="$( nginx -V 2>&1 | head -1 | awk '{print $3}' )"
 _SUPVD_VERSION="$( supervisord -v )"
 
+log "info" "-------------------------------------------------------------------------"
+log "info" "Main Entrypoint"
+log "info" "-------------------------------------------------------------------------"
+
+###
+### MASS_VHOST requires supervisor to run (watcherd)
+###
 if [ "${MASS_VHOST_ENABLE}" -eq "1" ]; then
-	verbose=""
+	# watcherd always starts with '-v' regardless of DEBUG_RUNTIME
+	verbose="-v"
 	if [ "${DEBUG_RUNTIME}" -gt "0" ]; then
 		verbose="-v"
 	fi
@@ -456,13 +403,17 @@ if [ "${MASS_VHOST_ENABLE}" -eq "1" ]; then
 
 	supervisord_create \
 		"${HTTPD_START}" \
-		"bash -c 'sleep ${WATCHERD_STARTUP_DELAY} && exec watcherd -v -p ${MASS_DOCROOT_BASE} -a \"${watcherd_add}\" -d \"${watcherd_del}\" -t \"${watcherd_tri}\"'" \
+		"bash -c 'sleep ${WATCHERD_STARTUP_DELAY} && exec watcherd -c ${verbose} -p ${MASS_DOCROOT_BASE} -a \"${watcherd_add}\" -d \"${watcherd_del}\" -t \"${watcherd_tri}\"'" \
 		"/etc/supervisord.conf"
 
-	log "info" "Starting supervisord: ${_SUPVD_VERSION} [HTTPD: ${_HTTPD_VERSION}]"
+	log "done" "Starting supervisord: ${_SUPVD_VERSION} [HTTPD: ${_HTTPD_VERSION}]"
 	exec /usr/bin/supervisord -c /etc/supervisord.conf
+
+###
+### No MASS_VHOST: just start HTTPD as process 1.
+###
 else
 	_HTTPD_VERSION="$( nginx -V 2>&1 | head -1 | awk '{print $3}' )"
-	log "info" "Starting webserver: ${_HTTPD_VERSION}"
+	log "done" "Starting webserver: ${_HTTPD_VERSION}"
 	exec "${HTTPD_START}"
 fi

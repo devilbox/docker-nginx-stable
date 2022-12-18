@@ -4,6 +4,10 @@ set -e
 set -u
 set -o pipefail
 
+###
+### This file holds functions to change user id/gid
+###
+
 
 # -------------------------------------------------------------------------------------------------
 # [SET] FUNCTIONS

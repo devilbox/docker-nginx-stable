@@ -27,6 +27,8 @@ VERBOSE="${14:-}"     # "-v" or empty
 ###
 ### This allows us to be able to access all entrypoint functions
 ###
+DEFAULT_DEBUG_ENTRYPOINT="2"
+DEFAULT_DEBUG_RUNTIME="1"
 
 ###
 ### DEBUG_ENTRYPOINT
@@ -53,12 +55,20 @@ fi
 if [ -z "${DEBUG_RUNTIME:-}" ]; then
 	DEBUG_RUNTIME="${DEFAULT_DEBUG_RUNTIME}"
 fi
-if [ "${DEBUG_RUNTIME}" != "0" ] && [ "${DEBUG_RUNTIME}" != "1" ]; then
-	DEBUG_RUNTIME="${DEFAULT_DEBUG_RUNTIME}"
+if [ "${DEBUG_RUNTIME}" != "0" ] \
+	&& [ "${DEBUG_RUNTIME}" != "1" ] \
+	&& [ "${DEBUG_RUNTIME}" != "2" ]; then
+	# Arbitrary integer (set to highest value
+	if [ -n "${DEBUG_RUNTIME##*[!0-9]*}" ]; then
+		DEBUG_RUNTIME=2
+	else
+		DEBUG_RUNTIME="${DEFAULT_DEBUG_RUNTIME}"
+	fi
 fi
 
 export "DEBUG_ENTRYPOINT"
 export "DEBUG_RUNTIME"
+
 
 ENTRYPOINT_DIR="/docker-entrypoint.d"          # All entrypoint scripts
 
@@ -108,8 +118,9 @@ if [ "${GENERATE_SSL}" = "1" ]; then
 	_out_key="/etc/httpd/cert/mass/${VHOST_NAME}${VHOST_TLD}.key"
 	_out_csr="/etc/httpd/cert/mass/${VHOST_NAME}${VHOST_TLD}.csr"
 	_out_crt="/etc/httpd/cert/mass/${VHOST_NAME}${VHOST_TLD}.crt"
-	if ! cert-gen -v -c DE -s Berlin -l Berlin -o Devilbox -u Devilbox -n "${_domain}" -e "${_email}" -a "${_domains}" "${CA_KEY}" "${CA_CRT}" "${_out_key}" "${_out_csr}" "${_out_crt}"; then
-		echo "[FAILED] Failed to add SSL certificate for ${VHOST_NAME}${VHOST_TLD}"
+	if ! runtime \
+		"cert-gen -v -c DE -s Berlin -l Berlin -o Devilbox -u Devilbox -n \"${_domain}\" -e \"${_email}\" -a \"${_domains}\" \"${CA_KEY}\" \"${CA_CRT}\" \"${_out_key}\" \"${_out_csr}\" \"${_out_crt}\"" \
+		"Failed to add SSL certificate for ${VHOST_NAME}${VHOST_TLD}"; then
 		exit 1
 	fi
 fi
@@ -131,17 +142,17 @@ if [ -n "${BACKEND}" ]; then
 		# No need to validate backend string, has been done already in entrypoint
 		BACKEND_FILE_NAME="$( echo "${BACKEND}" | awk -F':' '{print $2}' )"
 		BACKEND_FILE_PATH="${VHOST_TPL}${BACKEND_FILE_NAME}"
-		log "info" "[Project: ${VHOST_NAME}] Backend config specified via file: ${VHOST_TPL}${BACKEND_FILE_NAME}"
+		log "info" "[${VHOST_NAME}${VHOST_TLD}] Backend config specified via file: ${VHOST_TPL}${BACKEND_FILE_NAME}"
 		if [ ! -f "${BACKEND_FILE_PATH}" ]; then
-			log "info" "[Project: ${VHOST_NAME}] Backend file does not exist: ${VHOST_TPL}${BACKEND_FILE_NAME}"
-			log "info" "[Project: ${VHOST_NAME}] Backend defaulting to: serve static files only"
+			log "info" "[${VHOST_NAME}${VHOST_TLD}] Backend file does not exist: ${VHOST_TPL}${BACKEND_FILE_NAME}"
+			log "info" "[${VHOST_NAME}${VHOST_TLD}] Backend defaulting to: serve static files only"
 			BACKEND="" # Empty the backend
 		else
 			BACKEND_CONFIG="$( cat "${BACKEND_FILE_PATH}" )"
-			log "info" "[Project: ${VHOST_NAME}] Backend config file contents: ${BACKEND_CONFIG}"
+			log "info" "[${VHOST_NAME}${VHOST_TLD}] Backend config file contents: ${BACKEND_CONFIG}"
 			if ! BACKEND_ERROR="$( backend_conf_is_valid "${BACKEND_CONFIG}" )"; then
-				log "warn" "[Project: ${VHOST_NAME}] Backend config is invalid: ${BACKEND_ERROR}"
-				log "warn" "[Project: ${VHOST_NAME}] Backend defaulting to: serve static files only"
+				log "warn" "[${VHOST_NAME}${VHOST_TLD}] Backend config is invalid: ${BACKEND_ERROR}"
+				log "warn" "[${VHOST_NAME}${VHOST_TLD}] Backend defaulting to: serve static files only"
 				BACKEND="" # Empty the backend
 			else
 				BACKEND="${BACKEND_CONFIG}" # Use config from file
@@ -151,11 +162,11 @@ if [ -n "${BACKEND}" ]; then
 	### Backend=conf:<type>:<proto>:<host>:<port>
 	###
 	else
-		log "info" "[Project: ${VHOST_NAME}] Backend config specified via env: ${BACKEND}"
+		log "info" "[${VHOST_NAME}${VHOST_TLD}] Backend config specified via env: ${BACKEND}"
 		# No need to validate backend string, has been done already in entrypoint
 	fi
 else
-	log "info" "[Project: ${VHOST_NAME}] No Backend specified: Serving static files only"
+	log "info" "[${VHOST_NAME}${VHOST_TLD}] No Backend specified: Serving static files only"
 fi
 
 
@@ -168,10 +179,10 @@ if [ -n "${BACKEND}" ]; then
 	be_host="$( get_backend_conf_host "${BACKEND}" )"     # <host>
 	be_port="$( get_backend_conf_port "${BACKEND}" )"     # <port>
 	if [ "${be_type}" = "phpfpm" ]; then
-		log "info" "[Project: ${VHOST_NAME}] Backend PHP-FPM Remote: ${be_prot}://${be_host}:${be_port}"
+		log "info" "[${VHOST_NAME}${VHOST_TLD}] Backend PHP-FPM Remote: ${be_prot}://${be_host}:${be_port}"
 		# TODO: Generate cmd
 	elif [ "${be_type}" = "rproxy" ]; then
-		log "info" "[Project: ${VHOST_NAME}] Backend Reverse Proxy: ${be_prot}://${be_host}:${be_port}"
+		log "info" "[${VHOST_NAME}${VHOST_TLD}] Backend Reverse Proxy: ${be_prot}://${be_host}:${be_port}"
 		# TODO: Generate cmd
 	fi
 else
@@ -198,63 +209,59 @@ VHOST_GEN_CONFIG_PATH="/etc/vhost-gen/${VHOST_GEN_CONFIG_NAME}"
 ###
 # TODO: variablize nginx
 # TODO: variablize alias
-generate_vhostgen_conf \
-	"nginx" \
-	"/etc/httpd/vhost.d" \
-	"${VHOST_TLD}" \
-	"${MASS_VHOST_DOCROOT}" \
-	"${INDICES}" \
-	"$( to_python_bool "${HTTP2_ENABLE}" )" \
-	"/etc/httpd/cert/mass" \
-	"/etc/httpd/cert/mass" \
-	"" \
-	"$( to_python_bool "${DOCKER_LOGS}" )" \
-	"$( to_python_bool "${PHP_FPM_ENABLE}" )" \
-	"${be_host}" \
-	"${be_port}" \
-	"${TIMEOUT}" \
-	'/devilbox-api/:/var/www/default/api:http(s)?://(.*)$' \
-	"no" \
-	"/httpd-status" > "${VHOST_GEN_CONFIG_PATH}"
-
-
-###
-### Default vhost-gen command
-###
-
-if [ "${DEBUG_ENTRYPOINT}" -gt "1" ]; then
-	verbose="-v"
-else
-	verbose=""
-fi
-
-
-if [ "${be_type}" = "rproxy" ]; then
-	cmd="vhost-gen -r \"${be_prot}://${be_host}:${be_port}\" -l / -n \"${VHOST_NAME}\" -c \"${VHOST_GEN_CONFIG_PATH}\" -o \"${VHOST_TPL}\" -s ${verbose} -m ${GEN_MODE}"
-else
-	cmd="vhost-gen -p \"${VHOST_PATH}\" -n \"${VHOST_NAME}\" -c \"${VHOST_GEN_CONFIG_PATH}\" -o \"${VHOST_TPL}\" -s ${verbose} -m ${GEN_MODE}"
-fi
-
-# TODO: do we use tempalte-main/ ? Check other nginx images
-#run "vhost-gen -n localhost -r ${be_prot}://${be_host}:${be_port} -l / -t /etc/vhost-gen/templates-main/ -c ${config} -o ${template} ${verbose} -d -s -m ${ssl_type}"
+VHOST_GEN_TEMPLATE="$( \
+	generate_vhostgen_conf \
+		"nginx" \
+		"/etc/httpd/vhost.d" \
+		"${VHOST_TLD}" \
+		"${MASS_VHOST_DOCROOT}" \
+		"${INDICES}" \
+		"$( to_python_bool "${HTTP2_ENABLE}" )" \
+		"/etc/httpd/cert/mass" \
+		"/etc/httpd/cert/mass" \
+		"" \
+		"$( to_python_bool "${DOCKER_LOGS}" )" \
+		"$( to_python_bool "${PHP_FPM_ENABLE}" )" \
+		"${be_host}" \
+		"${be_port}" \
+		"${TIMEOUT}" \
+		'/devilbox-api/:/var/www/default/api:http(s)?://(.*)$' \
+		"no" \
+		"/httpd-status" \
+)"
+echo "${VHOST_GEN_TEMPLATE}" > "${VHOST_GEN_CONFIG_PATH}"
+log "trace" "${VHOST_GEN_TEMPLATE}"
 
 
 # -------------------------------------------------------------------------------------------------
 # VHOST-GEN
 # -------------------------------------------------------------------------------------------------
 
+###
+### Default vhost-gen command
+###
 
-###
-### Verbose output?
-###
-if [ -n "${VERBOSE}" ]; then
-	echo "\$ ${cmd}"
+# vhost-gen always runs with at least INFO level verbosity
+verbose="-v"
+if [ "${DEBUG_ENTRYPOINT}" -gt "1" ]; then
+	verbose="-v"
 fi
 
-###
-### Execute
-###
-if ! eval "${cmd}"; then
-	echo "[FAILED] Failed to add vhost for ${VHOST_NAME}${VHOST_TLD}"
-	exit 1
+
+if [ "${be_type}" = "rproxy" ]; then
+	if ! runtime \
+		"vhost-gen -r \"${be_prot}://${be_host}:${be_port}\" -l / -n \"${VHOST_NAME}\" -c \"${VHOST_GEN_CONFIG_PATH}\" -o \"${VHOST_TPL}\" -s ${verbose} -m ${GEN_MODE}" \
+		"Failed to add vhost for ${VHOST_NAME}${VHOST_TLD}"; then
+		exit 1
+	fi
+else
+	if ! runtime \
+		"vhost-gen -p \"${VHOST_PATH}\" -n \"${VHOST_NAME}\" -c \"${VHOST_GEN_CONFIG_PATH}\" -o \"${VHOST_TPL}\" -s ${verbose} -m ${GEN_MODE}" \
+		"Failed to add vhost for ${VHOST_NAME}${VHOST_TLD}"; then
+		exit 1
+	fi
 fi
+log "trace" "$( grep -v '^[[:blank:]]*$' "/etc/httpd/vhost.d/${VHOST_NAME}.conf" )"
+
+# TODO: do we use tempalte-main/ ? Check other nginx images
+#run "vhost-gen -n localhost -r ${be_prot}://${be_host}:${be_port} -l / -t /etc/vhost-gen/templates-main/ -c ${config} -o ${template} ${verbose} -d -s -m ${ssl_type}"
