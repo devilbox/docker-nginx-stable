@@ -11,9 +11,9 @@ LABEL \
 ###
 ### Build arguments
 ###
-ARG VHOST_GEN_GIT_REF=1.0.3
-ARG WATCHERD_GIT_REF=v1.0.2
-ARG CERT_GEN_GIT_REF=0.7
+ARG VHOST_GEN_GIT_REF=1.0.5
+ARG WATCHERD_GIT_REF=v1.0.6
+ARG CERT_GEN_GIT_REF=0.9
 
 ENV BUILD_DEPS \
 	make \
@@ -31,7 +31,7 @@ ENV RUN_DEPS \
 ENV MY_USER=nginx
 ENV MY_GROUP=nginx
 ENV HTTPD_START="/usr/sbin/nginx"
-ENV HTTPD_RELOAD="nginx -s stop"
+ENV HTTPD_RELOAD="nginx -s stop 2>/dev/null"
 
 
 ###
@@ -58,7 +58,7 @@ RUN set -eux \
 	&& chmod +x /usr/bin/cert-gen \
 	\
 	# Install watcherd
-	&& wget --no-check-certificate -O /usr/bin/watcherd https://raw.githubusercontent.com/devilbox/watcherd/${WATCHERD_GIT_REF}/watcherd \
+	&& wget --no-check-certificate -O /usr/bin/watcherd https://raw.githubusercontent.com/devilbox/watcherd/${WATCHERD_GIT_REF}/bin/watcherd \
 	&& chmod +x /usr/bin/watcherd \
 	\
 	# Clean-up
@@ -90,13 +90,24 @@ RUN set -eux \
 
 
 ###
+### Set timezone
+###
+RUN set -eux \
+	&& if [ -f /etc/localtime ]; then rm /etc/localtime; fi \
+	&& ln -s /usr/share/zoneinfo/UTC /etc/localtime
+
+
+###
 ### Copy files
 ###
 COPY ./data/nginx/nginx.conf /etc/nginx/nginx.conf
+
 COPY ./data/vhost-gen/main.yml /etc/vhost-gen/main.yml
 COPY ./data/vhost-gen/mass.yml /etc/vhost-gen/mass.yml
+
 COPY ./data/vhost-gen/templates-main /etc/vhost-gen/templates-main
 COPY ./data/create-vhost.sh /usr/local/bin/create-vhost.sh
+
 COPY ./data/docker-entrypoint.d /docker-entrypoint.d
 COPY ./data/docker-entrypoint.sh /docker-entrypoint.sh
 

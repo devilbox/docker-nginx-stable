@@ -11,7 +11,7 @@
 
 1. Automated virtual hosts can be enabled by providing `-e MASS_VHOST_ENABLE=1`.
 2. You should mount a local project directory into the Docker under `/shared/httpd` (`-v /local/path:/shared/httpd`).
-3. You can optionally specify a global server name suffix via e.g.: `-e MASS_VHOST_TLD=.loc`
+3. You can optionally specify a global server name suffix via e.g.: `-e MASS_VHOST_TLD_SUFFIX=.loc`
 4. You can optionally specify a global subdirectory from which the virtual host will servve the documents via e.g.: `-e MASS_VHOST_DOCROOT=www`
 5. Allow the Docker to expose its port via `-p 80:80`.
 6. Have DNS names point to the IP address the container runs on (e.g. via `/etc/hosts`)
@@ -19,30 +19,30 @@
 With the above described settings, whenever you create a local directory under your projects dir
 such as `/local/path/mydir`, there will be a new virtual host created by the same name
 `http://mydir`. You can also specify a global suffix for the vhost names via
-`-e MASS_VHOST_TLD=.loc`, afterwards your above created vhost would be reachable via
+`-e MASS_VHOST_TLD_SUFFIX=.loc`, afterwards your above created vhost would be reachable via
 `http://mydir.loc`.
 
 Just to give you a few examples:
 
 **Assumption:** `/local/path` is mounted to `/shared/httpd`
 
-| Directory | `MASS_VHOST_DOCROOT` | `MASS_VHOST_TLD` | Serving from <sup>(*)</sup> | Via                  |
-|-----------|----------------------|------------------|--------------------------|----------------------|
-| work1/    | htdocs/              |                  | /local/path/work1/htdocs | http://work1         |
-| work1/    | www/                 |                  | /local/path/work1/www    | http://work1         |
-| work1/    | htdocs/              | .loc             | /local/path/work1/htdocs | http://work1.loc     |
-| work1/    | www/                 | .loc             | /local/path/work1/www    | http://work1.loc     |
+| Directory | `MASS_VHOST_DOCROOT` | `MASS_VHOST_TLD_SUFFIX` | Serving from <sup>(*)</sup> | Via                  |
+|-----------|----------------------|-------------------------|--------------------------|----------------------|
+| work1/    | htdocs/              |                         | /local/path/work1/htdocs | http://work1         |
+| work1/    | www/                 |                         | /local/path/work1/www    | http://work1         |
+| work1/    | htdocs/              | .loc                    | /local/path/work1/htdocs | http://work1.loc     |
+| work1/    | www/                 | .loc                    | /local/path/work1/www    | http://work1.loc     |
 
 <sub>(*) This refers to the directory on your host computer</sub>
 
 **Assumption:** `/tmp` is mounted to `/shared/httpd`
 
-| Directory | `MASS_VHOST_DOCROOT` | `MASS_VHOST_TLD` | Serving from <sup>(*)</sup> | Via                  |
-|-----------|----------------------|------------------|--------------------------|----------------------|
-| api/      | htdocs/              |                  | /tmp/api/htdocs          | http://api           |
-| api/      | www/                 |                  | /tmp/api/www             | http://api           |
-| api/      | htdocs/              | .test.com        | /tmp/api/htdocs          | http://api.test.com  |
-| api/      | www/                 | .test.com        | /tmp/api/www             | http://api.test.com  |
+| Directory | `MASS_VHOST_DOCROOT` | `MASS_VHOST_TLD_SUFFIX` | Serving from <sup>(*)</sup> | Via                  |
+|-----------|----------------------|-------------------------|--------------------------|----------------------|
+| api/      | htdocs/              |                         | /tmp/api/htdocs          | http://api           |
+| api/      | www/                 |                         | /tmp/api/www             | http://api           |
+| api/      | htdocs/              | .test.com               | /tmp/api/htdocs          | http://api.test.com  |
+| api/      | www/                 | .test.com               | /tmp/api/www             | http://api.test.com  |
 
 <sub>(*) This refers to the directory on your host computer</sub>
 
@@ -53,7 +53,7 @@ docker run -it \
     -p 80:80 \
     -e MASS_VHOST_ENABLE=1 \
     -e MASS_VHOST_DOCROOT=www \
-    -e MASS_VHOST_TLD=.loc \
+    -e MASS_VHOST_TLD_SUFFIX=.loc \
     -v /local/path:/shared/httpd \
     devilbox/nginx-stable
 ```

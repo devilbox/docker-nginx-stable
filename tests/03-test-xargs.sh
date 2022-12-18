@@ -27,7 +27,7 @@ RAND_NAME="$( get_random_name )"
 ###
 FILES="$( \
 run "docker run --rm --platform ${ARCH} \
- -e DEBUG_ENTRYPOINT=2 \
+ -e DEBUG_ENTRYPOINT=4 \
  -e DEBUG_RUNTIME=1 \
  -e NEW_UID=$( id -u ) \
  -e NEW_GID=$( id -g ) \

@@ -1,0 +1,28 @@
+---
+version: '2.3'
+
+services:
+
+  # HTTPD Server
+  httpd:
+    image: devilbox/nginx-stable:alpine
+    build:
+      context: ../../Dockerfiles
+      dockerfile: Dockerfile.alpine
+    hostname: httpd
+    environment:
+      - MAIN_VHOST_BACKEND=conf:rproxy:http:python:3000
+      - MAIN_VHOST_SSL_TYPE=both
+    ports:
+      - "8000:80"
+      - "8443:443"
+    depends_on:
+      - python
+
+  # Python Server
+  python:
+    image: python:3-alpine
+    hostname: python
+    command: sh -c "pip install aiohttp==3.8.3; python -u /app/server.py"
+    volumes:
+      - ./www:/app

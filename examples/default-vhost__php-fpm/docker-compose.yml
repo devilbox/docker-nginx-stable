@@ -1,0 +1,32 @@
+---
+version: '2.3'
+
+services:
+
+  # HTTPD Server
+  httpd:
+    image: devilbox/nginx-stable:alpine
+    build:
+      context: ../../Dockerfiles
+      dockerfile: Dockerfile.alpine
+    hostname: httpd
+    environment:
+      - NEW_UID=1000
+      - NEW_GID=1000
+      - MAIN_VHOST_BACKEND=conf:phpfpm:tcp:php:9000
+    ports:
+      - "8000:80"
+    volumes:
+      - ./www:/var/www/default/htdocs
+    depends_on:
+      - php
+
+  # PHP-FPM Server
+  php:
+    image: devilbox/php-fpm:8.2-base
+    hostname: php
+    environment:
+      - NEW_UID=1000
+      - NEW_GID=1000
+    volumes:
+      - ./www:/var/www/default/htdocs

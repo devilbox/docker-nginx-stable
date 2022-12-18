@@ -37,7 +37,7 @@ run "echo \"hello world via html\" > ${RAND_DIR}/index.html"
 run "docker run --rm --platform ${ARCH} \
  -v ${RAND_DIR}:/var/www/default/htdocs \
  -p 127.0.0.1:${HOST_PORT}:80 \
- -e DEBUG_ENTRYPOINT=2 \
+ -e DEBUG_ENTRYPOINT=4 \
  -e DEBUG_RUNTIME=1 \
  -e NEW_UID=$( id -u ) \
  -e NEW_GID=$( id -g ) \

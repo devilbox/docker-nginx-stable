@@ -1,0 +1,28 @@
+---
+version: '2.3'
+
+services:
+
+  # HTTPD Server
+  httpd:
+    image: devilbox/nginx-stable:alpine
+    build:
+      context: ../../Dockerfiles
+      dockerfile: Dockerfile.alpine
+    hostname: httpd
+    environment:
+      - MAIN_VHOST_BACKEND=conf:rproxy:http:node:3000
+      - MAIN_VHOST_SSL_TYPE=both
+    ports:
+      - "8000:80"
+      - "8443:443"
+    depends_on:
+      - node
+
+  # NodeJS Server
+  node:
+    image: node:19-alpine
+    hostname: node
+    command: node /app/app.js
+    volumes:
+      - ./www:/app

@@ -163,7 +163,7 @@ The provided Docker images add a lot of injectables in order to customize it to 
    <code>MASS_VHOST_ENABLE</code><br/>
    <code>MASS_VHOST_SSL_TYPE</code><br/>
    <code>MASS_VHOST_SSL_GEN</code><br/>
-   <code>MASS_VHOST_TLD</code><br/>
+   <code>MASS_VHOST_TLD_SUFFIX</code><br/>
    <code>MASS_VHOST_DOCROOT</code><br/>
    <code>MASS_VHOST_TPL</code><br/>
   </td>

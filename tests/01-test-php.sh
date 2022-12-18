@@ -44,13 +44,11 @@ run "docker run -d --rm --platform ${ARCH} \
 run "docker run --rm --platform ${ARCH} \
  -v ${RAND_DIR}:/var/www/default/htdocs \
  -p 127.0.0.1:${HOST_PORT}:80 \
- -e DEBUG_ENTRYPOINT=2 \
+ -e DEBUG_ENTRYPOINT=4 \
  -e DEBUG_RUNTIME=1 \
  -e NEW_UID=$( id -u ) \
  -e NEW_GID=$( id -g ) \
- -e PHP_FPM_ENABLE=1 \
- -e PHP_FPM_SERVER_ADDR=${RAND_NAME1} \
- -e PHP_FPM_SERVER_PORT=9000 \
+ -e MAIN_VHOST_BACKEND=phpfpm:${RAND_NAME1}:9000 \
  --link ${RAND_NAME1} \
  --name ${RAND_NAME2} \
  ${IMAGE}:${TAG} &"

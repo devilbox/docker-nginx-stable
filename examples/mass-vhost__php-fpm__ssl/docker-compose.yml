@@ -1,0 +1,38 @@
+---
+version: '2.3'
+
+services:
+
+  # HTTPD Server
+  httpd:
+    image: devilbox/nginx-stable:alpine
+    build:
+      context: ../../Dockerfiles
+      dockerfile: Dockerfile.alpine
+    hostname: httpd
+    environment:
+      - NEW_UID=1000
+      - NEW_GID=1000
+      - MAIN_VHOST_ENABLE=0
+      - MASS_VHOST_ENABLE=1
+      - MASS_VHOST_BACKEND=conf:phpfpm:tcp:php:9000
+      - MASS_VHOST_TLD_SUFFIX=.loc
+      - MASS_VHOST_SSL_TYPE=both
+    ports:
+      - "8000:80"
+      - "8443:443"
+    volumes:
+      - ./projects:/shared/httpd
+      - ./ca:/ca
+    depends_on:
+      - php
+
+  # PHP-FPM Server
+  php:
+    image: devilbox/php-fpm:8.2-base
+    hostname: php
+    environment:
+      - NEW_UID=1000
+      - NEW_GID=1000
+    volumes:
+      - ./projects:/shared/httpd
