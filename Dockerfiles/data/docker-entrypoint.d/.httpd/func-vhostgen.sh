@@ -17,7 +17,7 @@ set -o pipefail
 ### Generate vhost-gen config file (not template)
 ###
 generate_vhostgen_conf() {
-	local server="${1}"   # nginx, apache22, apache24
+	local httpd_server="${1}"   # nginx, apache22, apache24
 	local conf_dir="${2}" # Store generated httpd.conf in this directory
 	local tld_suffix="${3}"
 	local docroot_subdir="${4}"
@@ -55,7 +55,7 @@ generate_vhostgen_conf() {
 	# https://github.com/devilbox/vhost-gen/blob/master/etc/conf.yml
 	OUT=$(cat <<EOF
 ---
-server: ${server}
+server: ${httpd_server}
 conf_dir: ${conf_dir}
 vhost:
   port: 80
@@ -82,7 +82,7 @@ vhost:
       stderr: ${docker_logs}
     dir:
       create: yes
-      path: /var/log/nginx-stable
+      path: /var/log/httpd
   php_fpm:
     enable: ${php_fpm_enable}
     address: "${php_fpm_addr}"

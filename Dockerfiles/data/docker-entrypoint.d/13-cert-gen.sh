@@ -19,8 +19,6 @@ set -o pipefail
 cert_gen_generate_ca() {
 	local key="${1}"
 	local crt="${2}"
-	# ca-gen always starts with '-v' regardless of DEBUG_RUNTIME
-	local verbose="-v"
 
 	# Create directories
 	if [ ! -d "$( dirname "${key}" )" ]; then
@@ -30,18 +28,11 @@ cert_gen_generate_ca() {
 		run "mkdir -p $( dirname "${crt}" )"
 	fi
 
-	# increase ca-gen verbosity?
-	if [ "${DEBUG_RUNTIME}" -gt "1" ]; then
-		verbose="-v"
-	elif [ "${DEBUG_RUNTIME}" -gt "0" ]; then
-		verbose="-v"
-	fi
-
 	# Generate CA if it does not exist yet
 	if [ ! -f "${key}" ] || [ ! -f "${crt}" ]; then
-		log "warn" "(Re)creating Certificate Authority. You need to (Re)import it into your browser."
+		log "warn" "(Re)creating Certificate Authority. You may need to (re)import it into your browser."
 		if ! run \
-			"ca-gen ${verbose} -c DE -s Berlin -l Berlin -o Devilbox -u Devilbox -n 'Devilbox Root CA' -e 'cytopia@devilbox.org' \"${key}\" \"${crt}\"" \
+			"ca-gen -v -c DE -s Berlin -l Berlin -o Devilbox -u Devilbox -n 'Devilbox Root CA' -e 'cytopia@devilbox.org' \"${key}\" \"${crt}\"" \
 			"Failed to create Certificate Authority."; then
 			exit 1
 		fi
@@ -63,8 +54,6 @@ cert_gen_generate_cert() {
 	local csr="${6}"
 	local crt="${7}"
 	local domains="${8}"
-	# cert-gen always starts with '-v' regardless of DEBUG_RUNTIME
-	local verbose="-v"
 
 	# If not enabled, skip SSL certificate eneration
 	if [ "${enable}" != "1" ]; then
@@ -87,13 +76,6 @@ cert_gen_generate_cert() {
 		run "mkdir -p $( dirname "${crt}" )"
 	fi
 
-	# increase cert-gen verbosity?
-	if [ "${DEBUG_RUNTIME}" -gt "1" ]; then
-		verbose="-v"
-	elif [ "${DEBUG_RUNTIME}" -gt "0" ]; then
-		verbose="-v"
-	fi
-
 	# Get domain name and alt_names
 	cn=
 	alt_names=
@@ -110,7 +92,7 @@ cert_gen_generate_cert() {
 	alt_names="$( echo "${alt_names}" | xargs )" # tim
 
 	if ! run \
-		"cert-gen ${verbose} -c DE -s Berlin -l Berlin -o Devilbox -u Devilbox -n '${cn}' -e 'admin@${cn}' -a '${alt_names}' \"${ca_key}\" \"${ca_crt}\" \"${key}\" \"${csr}\" \"${crt}\"" \
+		"cert-gen -v -c DE -s Berlin -l Berlin -o Devilbox -u Devilbox -n '${cn}' -e 'admin@${cn}' -a '${alt_names}' \"${ca_key}\" \"${ca_crt}\" \"${key}\" \"${csr}\" \"${crt}\"" \
 		"Failed to create SSL certificate"; then
 		exit 1
 	fi

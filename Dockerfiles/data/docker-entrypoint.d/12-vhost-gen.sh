@@ -14,9 +14,9 @@ set -o pipefail
 # -------------------------------------------------------------------------------------------------
 
 ###
-### Copy custom vhost-gen override template
+### Copy custom vhost-gen override template (user-mounted)
 ###
-vhost_gen_copy_custom_template() {
+vhostgen_copy_custom_template() {
 	local input_dir="${1}"
 	local output_dir="${2}"
 	local template_name="${3}"
@@ -42,8 +42,8 @@ vhost_gen_copy_custom_template() {
 ###
 ### Generate config for MAIN_VHOST
 ###
-vhost_gen_main_generate_config() {
-	local server_type="${1}"  # nginx, apache22 or apache24
+vhostgen_main_generate_config() {
+	local httpd_server="${1}"  # nginx, apache22 or apache24
 	local backend_string="${2}"
 	local http2_enable="${3}"
 	local status_enable="${4}"
@@ -66,7 +66,7 @@ vhost_gen_main_generate_config() {
 		directory_index="index.php, index.html, index.htm"
 	fi
 	generate_vhostgen_conf \
-		"${server_type}" \
+		"${httpd_server}" \
 		"/etc/httpd/conf.d" \
 		"" \
 		"" \
@@ -90,7 +90,7 @@ vhost_gen_main_generate_config() {
 ###
 ### Generate vhost for MAIN_VHOST (if enabled)
 ###
-vhost_gen_main_generate() {
+vhostgen_main_generate() {
 	local enable="${1}"
 	local docroot="${2}"
 	local backend="${3}"

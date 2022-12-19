@@ -12,15 +12,17 @@ set -o pipefail
 ###################################################################################################
 ###################################################################################################
 
-# -------------------------------------------------------------------------------------------------
-# GENERAL GLOBAL VARIABLES
-# -------------------------------------------------------------------------------------------------
-
 ### The following env variables are set inside the Dockerfiles
 ###   MY_USER
 ###   MY_GROUP
 ###   HTTPD_START
 ###   HTTPD_RELOAD
+
+###
+### Can be any of 'nginx', 'apache22' or 'apache24'
+###
+VHOSTGEN_HTTPD_SERVER="nginx"
+VHOSTGEN_HTTPD_SERVER_TEMPLATE="${VHOSTGEN_HTTPD_SERVER}.yml"
 
 ###
 ### Base path for main (default) document root
@@ -34,82 +36,20 @@ MASS_DOCROOT_BASE="/shared/httpd"
 ### If the /ca directory is mounted and those files already exist
 ### a new ca will not be generated, but reused.
 ###
-CA_KEY=/ca/devilbox-ca.key
-CA_CRT=/ca/devilbox-ca.crt
+CA_KEY_FILE=/ca/devilbox-ca.key
+CA_CRT_FILE=/ca/devilbox-ca.crt
 
 ###
 ### Path to scripts to source
 ###
-ENTRYPOINT_DIR="/docker-entrypoint.d"          # All entrypoint scripts
-VHOST_GEN_DIR="/etc/vhost-gen/templates"   # vhost-gen default templates
-VHOST_GEN_CUST_DIR="/etc/vhost-gen.d"      # vhost-gen custom templates (must be mounted to add)
+ENTRYPOINT_DIR="/docker-entrypoint.d"              # All entrypoint scripts
+VHOSTGEN_TEMPLATE_DIR="/etc/vhost-gen/templates"   # vhost-gen default templates
+VHOSTGEN_CUST_TEMPLATE_DIR="/etc/vhost-gen.d"      # vhost-gen custom templates (must be mounted to add)
 
 ###
 ### Wait this many seconds to start watcherd after httpd has been started
 ###
 WATCHERD_STARTUP_DELAY="3"
-
-
-# -------------------------------------------------------------------------------------------------
-# DEFAULT LOGGER
-# -------------------------------------------------------------------------------------------------
-
-###
-### Set the default debug level for entrypoint and runtime
-###
-DEFAULT_DEBUG_ENTRYPOINT="2"
-DEFAULT_DEBUG_RUNTIME="1"
-
-###
-### Ensure that the following globals have a value:
-###
-###    DEBUG_ENTRYPOINT
-###    DEBUG_RUNTIME
-###
-### If not, fall back to these
-###
-###    DEFAULT_DEBUG_ENTRYPOINT
-###    DEFAULT_DEBUG_RUNTIME
-###
-
-###
-### DEBUG_ENTRYPOINT
-###
-if [ -z "${DEBUG_ENTRYPOINT:-}" ]; then
-	DEBUG_ENTRYPOINT="${DEFAULT_DEBUG_ENTRYPOINT}"
-fi
-if [ "${DEBUG_ENTRYPOINT}" != "0" ] \
-	&& [ "${DEBUG_ENTRYPOINT}" != "1" ] \
-	&& [ "${DEBUG_ENTRYPOINT}" != "2" ] \
-	&& [ "${DEBUG_ENTRYPOINT}" != "3" ] \
-	&& [ "${DEBUG_ENTRYPOINT}" != "4" ]; then
-	# Arbitrary integer (set to highest value
-	if [ -n "${DEBUG_ENTRYPOINT##*[!0-9]*}" ]; then
-		DEBUG_ENTRYPOINT=4
-	else
-		DEBUG_ENTRYPOINT="${DEFAULT_DEBUG_ENTRYPOINT}"
-	fi
-fi
-
-###
-### DEBUG_RUNTIME
-###
-if [ -z "${DEBUG_RUNTIME:-}" ]; then
-	DEBUG_RUNTIME="${DEFAULT_DEBUG_RUNTIME}"
-fi
-if [ "${DEBUG_RUNTIME}" != "0" ] \
-	&& [ "${DEBUG_RUNTIME}" != "1" ] \
-	&& [ "${DEBUG_RUNTIME}" != "2" ]; then
-	# Arbitrary integer (set to highest value
-	if [ -n "${DEBUG_RUNTIME##*[!0-9]*}" ]; then
-		DEBUG_RUNTIME=2
-	else
-		DEBUG_RUNTIME="${DEFAULT_DEBUG_RUNTIME}"
-	fi
-fi
-
-export "DEBUG_ENTRYPOINT"
-export "DEBUG_RUNTIME"
 
 
 
@@ -122,22 +62,12 @@ export "DEBUG_RUNTIME"
 ###################################################################################################
 
 ###
-### Source available library functions
+### Bootstrap
 ###
-# shellcheck disable=SC2012
-for f in $( ls -1 "${ENTRYPOINT_DIR}/.lib/"*.sh | sort -u ); do
-	# shellcheck disable=SC1090
-	. "${f}"
-done
+# shellcheck disable=SC1090,SC1091
+. "${ENTRYPOINT_DIR}/bootstrap/bootstrap.sh"
 
-###
-### Source available HTTPD functions
-###
-# shellcheck disable=SC2012
-for f in $( ls -1 "${ENTRYPOINT_DIR}/.httpd/"*.sh | sort -u ); do
-	# shellcheck disable=SC1090
-	. "${f}"
-done
+
 
 ###
 ### Source available entrypoint scripts
@@ -159,23 +89,19 @@ done
 ###################################################################################################
 
 # -------------------------------------------------------------------------------------------------
-# LOG SETTINGS
-# -------------------------------------------------------------------------------------------------
-
-###
-### Set Debug level
-###
-DEBUG_LEVEL="$( env_get "DEBUG_ENTRYPOINT" "${DEFAULT_DEBUG_ENTRYPOINT}" )"
-log "info" "Debug level: ${DEBUG_LEVEL}"
-
-DEBUG_RUNTIME="$( env_get "DEBUG_RUNTIME" "${DEFAULT_DEBUG_RUNTIME}" )"
-log "info" "Runtime debug: ${DEBUG_RUNTIME}"
-
-
-# -------------------------------------------------------------------------------------------------
 # SET ENVIRONMENT VARIABLES AND DEFAULT VALUES
 # -------------------------------------------------------------------------------------------------
 
+###
+### Show Debug level
+###
+log "info" "Entrypoint debug: $( env_get "DEBUG_ENTRYPOINT" )"
+log "info" "Runtime debug: $( env_get "DEBUG_RUNTIME" )"
+
+
+###
+### Show environment vars
+###
 log "info" "-------------------------------------------------------------------------"
 log "info" "Environment Variables (set/default)"
 log "info" "-------------------------------------------------------------------------"
@@ -207,10 +133,6 @@ env_var_export "WORKER_PROCESSES" "auto"
 env_var_export "HTTP2_ENABLE" "1"
 env_var_export "DOCKER_LOGS" "1"
 
-export MAIN_VHOST_SSL_GEN=0
-export MASS_VHOST_SSL_GEN=0
-if [ "${MAIN_VHOST_SSL_TYPE}" != "plain" ]; then export MAIN_VHOST_SSL_GEN=1; fi
-if [ "${MASS_VHOST_SSL_TYPE}" != "plain" ]; then export MASS_VHOST_SSL_GEN=1; fi
 
 
 # -------------------------------------------------------------------------------------------------
@@ -253,6 +175,7 @@ env_var_validate "HTTP2_ENABLE"
 env_var_validate "DOCKER_LOGS"
 
 
+
 # -------------------------------------------------------------------------------------------------
 # APPLY SETTINGS
 # -------------------------------------------------------------------------------------------------
@@ -272,29 +195,19 @@ set_gid "${NEW_GID}" "${MY_USER}" "${MY_GROUP}"
 ###
 set_timezone "${TIMEZONE}"
 
-
-
-# -------------------------------------------------------------------------------------------------
-# VHOST-GEN: ALL
-# -------------------------------------------------------------------------------------------------
+###
+### Copy custom user-mounted vhost-gen template (if they are mounted and exist)
+###
+vhostgen_copy_custom_template \
+	"${VHOSTGEN_CUST_TEMPLATE_DIR}" \
+	"${VHOSTGEN_TEMPLATE_DIR}" \
+	"${VHOSTGEN_HTTPD_SERVER_TEMPLATE}"
 
 ###
-### Copy custom vhost-gen template (if they are mounted and exist)
+### Generate vhost-gen config file (MAIN_VHOST)
 ###
-vhost_gen_copy_custom_template "${VHOST_GEN_CUST_DIR}" "${VHOST_GEN_DIR}" "nginx.yml" "${DEBUG_LEVEL}"
-
-
-
-# -------------------------------------------------------------------------------------------------
-# VHOST-GEN: MAIN
-# -------------------------------------------------------------------------------------------------
-
-
-###
-### Generate
-###
-vhost_gen_main_generate_config \
-	"nginx" \
+vhostgen_main_generate_config \
+	"${VHOSTGEN_HTTPD_SERVER}" \
 	"${MAIN_VHOST_BACKEND}" \
 	"${HTTP2_ENABLE}" \
 	"${MAIN_VHOST_STATUS_ENABLE}" \
@@ -303,7 +216,10 @@ vhost_gen_main_generate_config \
 	"${MAIN_VHOST_BACKEND_TIMEOUT}" \
 	"/etc/vhost-gen/main.yml"
 
-vhost_gen_main_generate \
+###
+### Generate vhost (MAIN_VHOST)
+###
+vhostgen_main_generate \
 	"${MAIN_VHOST_ENABLE}" \
 	"${MAIN_DOCROOT_BASE}/${MAIN_VHOST_DOCROOT}" \
 	"${MAIN_VHOST_BACKEND}" \
@@ -311,39 +227,28 @@ vhost_gen_main_generate \
 	"${MAIN_DOCROOT_BASE}/${MAIN_VHOST_TPL}" \
 	"${MAIN_VHOST_SSL_TYPE}"
 
-
-
-# -------------------------------------------------------------------------------------------------
-# CERT-GEN CONFIGURATION
-# -------------------------------------------------------------------------------------------------
-
-
 ###
 ### Create Certificate Signing request
 ###
-cert_gen_generate_ca "${CA_KEY}" "${CA_CRT}"
-
+cert_gen_generate_ca "${CA_KEY_FILE}" "${CA_CRT_FILE}"
 
 ###
-### Generate main vhost ssl certificate
+### Generate main vhost ssl certificate (MAIN_VHOST)
 ###
 # shellcheck disable=SC2153
 cert_gen_generate_cert \
 	"${MAIN_VHOST_ENABLE}" \
 	"${MAIN_VHOST_SSL_TYPE}" \
-	"${CA_KEY}" \
-	"${CA_CRT}" \
+	"${CA_KEY_FILE}" \
+	"${CA_CRT_FILE}" \
 	"/etc/httpd/cert/main/localhost.key" \
 	"/etc/httpd/cert/main/localhost.csr" \
 	"/etc/httpd/cert/main/localhost.crt" \
 	"${MAIN_VHOST_SSL_CN}"
 
-
-
-# -------------------------------------------------------------------------------------------------
-# FIX DIRECTORY PERMISSIONS
-# -------------------------------------------------------------------------------------------------
-
+###
+### Fix CA directory/file permissions (in case it is mounted)
+###
 fix_perm "/ca" "1"
 
 
@@ -355,8 +260,10 @@ fix_perm "/ca" "1"
 ###
 ### Nginx settings
 ###
-nginx_set_worker_processess "${WORKER_PROCESSES}"
-nginx_set_worker_connections "${WORKER_CONNECTIONS}"
+if [ "${VHOSTGEN_HTTPD_SERVER}" = "nginx" ]; then
+	nginx_set_worker_processess "${WORKER_PROCESSES}"
+	nginx_set_worker_connections "${WORKER_CONNECTIONS}"
+fi
 
 
 
@@ -364,7 +271,8 @@ nginx_set_worker_connections "${WORKER_CONNECTIONS}"
 # MAIN ENTRYPOINT
 # -------------------------------------------------------------------------------------------------
 
-_HTTPD_VERSION="$( nginx -V 2>&1 | head -1 | awk '{print $3}' )"
+# shellcheck disable=SC2153
+_HTTPD_VERSION="$( eval "${HTTPD_VERSION}" )"  # Set via Dockerfile
 _SUPVD_VERSION="$( supervisord -v )"
 
 log "info" "-------------------------------------------------------------------------"
@@ -375,35 +283,28 @@ log "info" "--------------------------------------------------------------------
 ### MASS_VHOST requires supervisor to run (watcherd)
 ###
 if [ "${MASS_VHOST_ENABLE}" -eq "1" ]; then
-	# watcherd always starts with '-v' regardless of DEBUG_RUNTIME
-	verbose="-v"
-	if [ "${DEBUG_RUNTIME}" -gt "0" ]; then
-		verbose="-v"
-	fi
-
 	# Create watcherd sub commands
 	watcherd_add="create-vhost.sh"
-	watcherd_add+=" \\\"%%p\\\""
-	watcherd_add+=" \\\"%%n\\\""
-	watcherd_add+=" \\\"${MASS_VHOST_TLD_SUFFIX}\\\""
-	watcherd_add+=" \\\"%%p/${MASS_VHOST_TPL}/\\\""
+	watcherd_add+=" \\\"%%n\\\""  # vhost project directory name
+	watcherd_add+=" \\\"%%p\\\""  # vhost project directory path (absolute)
 	watcherd_add+=" \\\"${MASS_VHOST_DOCROOT}\\\""
-	watcherd_add+=" \\\"${HTTP2_ENABLE}\\\""
-	watcherd_add+=" \\\"${DOCKER_LOGS}\\\""
-	watcherd_add+=" \\\"${MASS_VHOST_BACKEND_TIMEOUT}\\\""
-	watcherd_add+=" \\\"${CA_KEY}\\\""
-	watcherd_add+=" \\\"${CA_CRT}\\\""
-	watcherd_add+=" \\\"${MASS_VHOST_SSL_GEN}\\\""
+	watcherd_add+=" \\\"${MASS_VHOST_TLD_SUFFIX}\\\""
 	watcherd_add+=" \\\"${MASS_VHOST_SSL_TYPE}\\\""
 	watcherd_add+=" \\\"${MASS_VHOST_BACKEND}\\\""
-	watcherd_add+=" \\\"${verbose}\\\""
+	watcherd_add+=" \\\"${MASS_VHOST_BACKEND_TIMEOUT}\\\""
+	watcherd_add+=" \\\"${HTTP2_ENABLE}\\\""
+	watcherd_add+=" \\\"${DOCKER_LOGS}\\\""
+	watcherd_add+=" \\\"${CA_KEY_FILE}\\\""
+	watcherd_add+=" \\\"${CA_CRT_FILE}\\\""
+	watcherd_add+=" \\\"%%p/${MASS_VHOST_TPL}/\\\""
+	watcherd_add+=" \\\"${VHOSTGEN_HTTPD_SERVER}\\\""
 
 	watcherd_del="rm /etc/httpd/vhost.d/%%n.conf"
 	watcherd_tri="${HTTPD_RELOAD}"
 
 	supervisord_create \
 		"${HTTPD_START}" \
-		"bash -c 'sleep ${WATCHERD_STARTUP_DELAY} && exec watcherd -c ${verbose} -p ${MASS_DOCROOT_BASE} -a \"${watcherd_add}\" -d \"${watcherd_del}\" -t \"${watcherd_tri}\"'" \
+		"bash -c 'sleep ${WATCHERD_STARTUP_DELAY} && exec watcherd -c -v -p ${MASS_DOCROOT_BASE} -a \"${watcherd_add}\" -d \"${watcherd_del}\" -t \"${watcherd_tri}\"'" \
 		"/etc/supervisord.conf"
 
 	log "done" "Starting supervisord: ${_SUPVD_VERSION} [HTTPD: ${_HTTPD_VERSION}]"
@@ -413,7 +314,6 @@ if [ "${MASS_VHOST_ENABLE}" -eq "1" ]; then
 ### No MASS_VHOST: just start HTTPD as process 1.
 ###
 else
-	_HTTPD_VERSION="$( nginx -V 2>&1 | head -1 | awk '{print $3}' )"
 	log "done" "Starting webserver: ${_HTTPD_VERSION}"
 	exec "${HTTPD_START}"
 fi

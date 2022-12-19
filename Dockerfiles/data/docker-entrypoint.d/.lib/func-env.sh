@@ -52,6 +52,6 @@ env_get() {
 ### The following commands are required and used in the current script.
 ###
 if ! command -v printenv >/dev/null 2>&1; then
-	>&2 "Error, printenv not found, but required."
+	>&2 echo "Error, printenv not found, but required."
 	exit 1
 fi
