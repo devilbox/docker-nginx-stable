@@ -48,7 +48,7 @@ run "docker run --rm --platform ${ARCH} \
  -e TIMEZONE=Europe/Berlin \
  -e NEW_UID=$( id -u ) \
  -e NEW_GID=$( id -g ) \
- -e MAIN_VHOST_BACKEND=phpfpm:${RAND_NAME1}:9000 \
+ -e MAIN_VHOST_BACKEND=conf:phpfpm:tcp:${RAND_NAME1}:9000 \
  --link ${RAND_NAME1} \
  --name ${RAND_NAME2} ${IMAGE}:${TAG} &"
 
