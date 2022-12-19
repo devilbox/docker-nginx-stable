@@ -17,11 +17,12 @@ set -o pipefail
 ###   MY_GROUP
 ###   HTTPD_START
 ###   HTTPD_RELOAD
+###   VHOSTGEN_HTTPD_SERVER  # 'nginx', 'apache22' or 'apache24'
 
 ###
 ### Can be any of 'nginx', 'apache22' or 'apache24'
 ###
-VHOSTGEN_HTTPD_SERVER="nginx"
+# VHOSTGEN_HTTPD_SERVER is set via Dockerfile
 VHOSTGEN_HTTPD_SERVER_TEMPLATE="${VHOSTGEN_HTTPD_SERVER}.yml"
 
 ###

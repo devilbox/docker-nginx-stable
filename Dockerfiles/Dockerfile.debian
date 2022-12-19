@@ -1,3 +1,4 @@
+# vi: ft=dockerfile
 FROM nginx:stable
 MAINTAINER "cytopia" <cytopia@everythingcli.org>
 
@@ -33,6 +34,7 @@ ENV MY_GROUP=nginx
 ENV HTTPD_START="/usr/sbin/nginx"
 ENV HTTPD_RELOAD="nginx -s stop 2>/dev/null"
 ENV HTTPD_VERSION="nginx -V 2>&1 | head -1 | awk '{print $3}'"
+ENV VHOSTGEN_HTTPD_SERVER="nginx"
 
 
 ###
