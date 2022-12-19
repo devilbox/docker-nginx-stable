@@ -17,7 +17,7 @@
 
 This image is based on the official **[Nginx](https://hub.docker.com/_/nginx)** Docker image and extends it with the ability to have **virtual hosts created automatically**, as well as **adding SSL certificates** when creating new directories. For that to work, it integrates two tools that will take care about the whole process: **[watcherd](https://github.com/devilbox/watcherd)** and **[vhost-gen](https://github.com/devilbox/vhost-gen)**.
 
-From a users perspective, you mount your local project directory into the container under `/shared/httpd`. Any directory then created in your local project directory wil spawn a new virtual host by the same name. Each virtual optionally supports a generic or custom backend configuration (**static files**, **PHP-FPM** or **reverse proxy**).
+From a users perspective, you mount your local project directory into the container under `/shared/httpd`. Any directory then created in your local project directory wil spawn a new virtual host by the same name. Each virtual host optionally supports a generic or custom backend configuration (**static files**, **PHP-FPM** or **reverse proxy**).
 
 **HTTP/2 is enabled by default for all SSL connections.**
 
@@ -222,7 +222,7 @@ When you plan on using `443` you should enable automated SSL certificate generat
 
 ### Docker Compose
 
-Have a look at the [examples](examples/) directory. It is packed with all kinds of examples:
+Have a look at the **[examples](examples/)** directory. It is packed with all kinds of examples:
 
 * SSL
 * PHP-FPM remote server
@@ -233,15 +233,22 @@ Have a look at the [examples](examples/) directory. It is packed with all kinds 
 
 ### Serve static files
 
-Mount your local directort `~/my-host-www` into the container and server those files.
-
-**Note:** Files will be server from `~/my-host-www/htdocs`.
-```bash
-docker run -d -it \
-    -p 80:80 \
-    -v ~/my-host-www:/var/www/default \
-    devilbox/nginx-stable
-```
+1. Create a static page
+   ```bash
+   mkdir -p www/htdocs
+   echo '<h1>It works</h1>' > www/htdocs/index.html
+   ```
+2. Start the webserver
+   ```bash
+   docker run -d -it \
+       -p 9090:80 \
+       -v $(pwd)/www:/var/www/default \
+       devilbox/nginx-stable:alpine
+   ```
+3. Verify
+   ```bash
+   curl http://localhost:9090
+   ```
 
 ### Serve PHP files with PHP-FPM
 
@@ -249,25 +256,34 @@ docker run -d -it \
 |--------------------------|
 | <a title="PHP-FPM Reference Images" href="https://github.com/devilbox/docker-php-fpm" ><img title="Devilbox" height="82px" src="https://raw.githubusercontent.com/devilbox/artwork/master/submissions_banner/cytopia/02/png/banner_256_trans.png" /></a> |
 
-Note, for this to work, the `~/my-host-www` dir must be mounted into the Nginx container as well as into the php-fpm container.
+Note, for this to work, the `$(pwd)/www` directory must be mounted into the webserver container as well as into the php-fpm container.
 Each PHP-FPM container also has the option to enable Xdebug and more, see their respective Readme files for futher settings.
 
-```bash
-# Start the PHP-FPM container, mounting the same diectory
-docker run -d -it \
-    --name php \
-    -p 9000 \
-    -v ~/my-host-www:/var/www/default \
-    devilbox/php-fpm:8.2-base
-
-# Start the Nginx Docker, linking it to the PHP-FPM container
-docker run -d -it \
-    -p 80:80 \
-    -v ~/my-host-www:/var/www/default \
-    -e MAIN_VHOST_BACKEND='conf:phpfpm:tcp:php:9000' \
-    --link php \
-    devilbox/nginx-stable
-```
+1. Create a helo world page
+   ```bash
+   mkdir -p www/htdocs
+   echo '<?php echo "hello from php";' > www/htdocs/index.php
+   ````
+2. Start the PHP-FPM container
+   ```bash
+   docker run -d -it \
+       --name php \
+       -v $(pwd)/www:/var/www/default \
+       devilbox/php-fpm:8.2-base
+   ```
+3. Start the webserve, linking it to the PHP-FPM container
+   ```bash
+   docker run -d -it \
+       -p 9090:80 \
+       -v $(pwd)/www:/var/www/default \
+       -e MAIN_VHOST_BACKEND='conf:phpfpm:tcp:php:9000' \
+       --link php \
+       devilbox/nginx-stable:alpine
+   ```
+4. Verify
+   ```bash
+   curl http://localhost:9090
+   ```
 
 ### Serve PHP files with PHP-FPM over HTTPS
 
@@ -275,81 +291,137 @@ Pretty much the same as in the previous example, just with an SSL addition.
 The SSL definition ensures that any request made to HTTP will receive a redirect to HTTPS.
 This was specified with type `redir`.
 
-Additionally it mounts the `~/ca` directory into the container. You can find the Certificate Authority files in there and import it into your browser for valid SSL.
+Additionally it mounts the `./ca` directory into the container. You can find the Certificate Authority files in there and import it into your browser for valid SSL.
 This probably makes more sense with `MASS_VHOST_ENABLE` as you have an unlimited number of projects.
 
-```bash
-# Start the PHP-FPM container, mounting the same diectory
-docker run -d -it \
-    --name php \
-    -p 9000 \
-    -v ~/my-host-www:/var/www/default \
-    devilbox/php-fpm:8.2-base
-
-# Start the Webserver container, linking it to the PHP-FPM container
-docker run -d -it \
-    -p 80:80 \
-    -v ~/my-host-www:/var/www/default \
-    -v ~/ca:/ca \
-    -e MAIN_VHOST_BACKEND='conf:phpfpm:tcp:php:9000' \
-    -e MAIN_VHOST_SSL_TYPE='redir' \
-    --link php \
-    devilbox/nginx-stable
-```
+1. Create a helo world page
+   ```bash
+   mkdir -p www/htdocs
+   echo '<?php echo "hello from php";' > www/htdocs/index.php
+   ````
+2. Start the PHP-FPM container
+   ```bash
+   docker run -d -it \
+       --name php \
+       -v $(pwd)/www:/var/www/default \
+       devilbox/php-fpm:8.2-base
+   ```
+3. Start the webserve, linking it to the PHP-FPM container
+   ```bash
+   docker run -d -it \
+       -p 80:80 \
+       -p 443:443 \
+       -v $(pwd)/www:/var/www/default \
+       -v $(pwd)/ca:/ca \
+       -e MAIN_VHOST_BACKEND='conf:phpfpm:tcp:php:9000' \
+       -e MAIN_VHOST_SSL_TYPE='redir' \
+       --link php \
+       devilbox/nginx-stable:alpine
+   ```
+4. Verify redirect
+   ```bash
+   curl -I http://localhost
+   ```
+5. Verify HTTPS
+   ```bash
+   curl -k https://localhost
+   ```
 
 ### Act as a Reverse Proxy for NodeJS
 
-Let's assume we have a working NodeJS application in our `./node-project/` directory called `app.js`.
-Lets also assume this app receives connections on port `3000`.
+This example creates a Reverse Proxy for a NodeJS project.
 
-```bash
-# Start the NodeJS container
-# Assuming it contains a working application.
-docker run -d -it \
-    --name nodejs \
-    -v ./node-project:/app \
-    -p 3000:3000 \
-    node:19-alpine node /app/app.js
+1. Create a NodeJS application
+   ```bash
+   mkdir -p src
+   cat << EOF > src/app.js
+   const http = require('http');
+   const server = http.createServer((req, res) => {
+           res.statusCode = 200;
+           res.setHeader('Content-Type', 'text/plain');
+           res.write('[OK]\n');
+           res.write('NodeJS is running\n');
+           res.end();
+   });
+   server.listen(3000, '0.0.0.0');
+   EOF
+   ```
+2. Start the NodeJS container
+   ```bash
+   docker run -d -it \
+       --name nodejs \
+       -v $(pwd)/src:/app \
+       node:19-alpine node /app/app.js
+   ```
+3. Start Reverse Proxy
+   ```bash
+   docker run -d -it \
+       -p 80:80 \
+       -e MAIN_VHOST_BACKEND='conf:rproxy:http:nodejs:3000' \
+       --link nodejs \
+       devilbox/nginx-stable:alpine
+   ```
+4. Verify
+   ```bash
+   curl http://localhost
+   ```
 
-docker run -d -it \
-    -p 80:80 \
-    -e MAIN_VHOST_BACKEND='conf:rproxy:http:nodejs:3000' \
-    --link nodejs \
-    devilbox/nginx-stable
-```
+### Fully functional LEMP stack with Mass vhosts
 
-### Fully functional LEMP stack
+The following example creates a dynamic setup. Each time you create a new project directory below `projects/`, a new virtual host is being created.
+Additionally all projects will have the `.com` suffix to their project name as their final domain.
 
-Same as above, but also add a MySQL container and link it into Nginx.
-```bash
-# Start the MySQL container
-docker run -d -it \
-    --name mysql \
-    -p 3306:3306 \
-    -e MYSQL_ROOT_PASSWORD=my-secret-pw \
-    devilbox/mysql:mysql-5.5
+1. Create the project base directory
+   ```bash
+   mkdir -p projects
+   ```
+2. Start the MySQL container
+   ```bash
+   docker run -d -it \
+       --name mysql \
+       -e MYSQL_ROOT_PASSWORD=my-secret-pw \
+       devilbox/mysql:mariadb-10.10
+   ```
+3. Start the PHP-FPM container
+   ```bash
+   docker run -d -it \
+       --name php \
+       -v $(pwd)/projects:/shared/httpd \
+       devilbox/php-fpm:8.2-base
+   ```
+4. Start the webserver container, linking it to the two above
+   ```bash
+   docker run -d -it \
+       -p 8080:80 \
+       -v $(pwd)/projects:/shared/httpd \
+       -e MAIN_VHOST_ENABLE=0 \
+       -e MASS_VHOST_ENABLE=1 \
+       -e MASS_VHOST_TLD_SUFFIX=.com \
+       -e MASS_VHOST_BACKEND='conf:phpfpm:tcp:php:9000' \
+       --link php \
+       --link mysql \
+       devilbox/nginx-stable:alpine
+   ```
+5. Create `project-1`
+   ```bash
+   mkdir -p projects/project-1/htdocs
+   echo '<?php echo "hello from project-1";' > projects/project-1/htdocs/index.php
+   ```
+6. Verify `project-1`
+   ```bash
+   curl -H 'Host: project-1.com' http://localhost:8080
+   ```
+7. Create `another`
+   ```bash
+   mkdir -p projects/another/htdocs
+   echo '<?php echo "hello from another";' > projects/another/htdocs/index.php
+   ```
+8. Verify `another`
+   ```bash
+   curl -H 'Host: another.com' http://localhost:8080
+   ```
+9. Add more projects as you wish...
 
-# Start the PHP-FPM container, mounting the same diectory.
-# Also make sure to
-#   forward the remote MySQL port 3306 to 127.0.0.1:3306 within the
-#   PHP-FPM container in order to be able to use `127.0.0.1` for mysql
-#   connections from within the php container.
-docker run -d -it \
-    --name php \
-    -p 9000:9000 \
-    -v ~/my-host-www:/var/www/default \
-    -e FORWARD_PORTS_TO_LOCALHOST=3306:mysql:3306 \
-    devilbox/php-fpm:8.2-prod
-
-# Start the Nginx Docker, linking it to the PHP-FPM container
-docker run -d -it \
-    -p 80:80 \
-    -v ~/my-host-www:/var/www/default \
-    -e MAIN_VHOST_BACKEND='conf:phpfpm:tcp:php:9000' \
-    --link php \
-    --link mysql \
-    devilbox/nginx-stable
-```
 
 
 ## 🖤 Sister Projects
@@ -396,6 +468,11 @@ Show some love for the following sister projects.
    <a href="https://hub.docker.com/r/devilbox/nginx-stable"><code>devilbox/nginx-stable</code></a><br/>
    <a href="https://hub.docker.com/r/devilbox/nginx-mainline"><code>devilbox/nginx-mainline</code></a>
   </td>
+ <tr>
+  <td><a title="Bind DNS Server" href="https://github.com/cytopia/docker-bind" ><img width="256px" src="https://raw.githubusercontent.com/devilbox/artwork/master/submissions_banner/cytopia/06/png/banner_256_trans.png" /></a></td>
+  <td><a href="https://github.com/cytopia/docker-bind"><code>docker-bind</code></a></td>
+  <td><a href="https://hub.docker.com/r/cytopia/bind"><code>cytopia/bind</code></a></td>
+ </tr>
  </tr>
 </table>
 
