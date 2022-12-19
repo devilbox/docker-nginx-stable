@@ -153,7 +153,7 @@ The provided Docker images add a lot of injectables in order to customize it to 
   <td>
    <strong>Main Vhost</strong><br/>
    <code><a href="doc/environment-variables.md#-main_vhost_enable" >MAIN_VHOST_ENABLE</a></code><br/>
-   <code><a href="doc/environment-variables.md#-main_vhost_docroot" >MAIN_VHOST_DOCROOT_DIR</a></code><br/>
+   <code><a href="doc/environment-variables.md#-main_vhost_docroot_dir" >MAIN_VHOST_DOCROOT_DIR</a></code><br/>
    <code><a href="doc/environment-variables.md#-main_vhost_template_dir" >MAIN_VHOST_TEMPLATE_DIR</a></code><br/>
    <code><a href="doc/environment-variables.md#-main_vhost_backend" >MAIN_VHOST_BACKEND</a></code><br/>
    <code><a href="doc/environment-variables.md#-main_vhost_backend_timeout" >MAIN_VHOST_BACKEND_TIMEOUT</a></code><br/>
@@ -165,7 +165,7 @@ The provided Docker images add a lot of injectables in order to customize it to 
   <td>
    <strong>Mass Vhost</strong><br/>
    <code><a href="doc/environment-variables.md#-mass_vhost_enable" >MASS_VHOST_ENABLE</a></code><br/>
-   <code><a href="doc/environment-variables.md#-mass_vhost_docroot" >MASS_VHOST_DOCROOT_DIR</a></code><br/>
+   <code><a href="doc/environment-variables.md#-mass_vhost_docroot_dir" >MASS_VHOST_DOCROOT_DIR</a></code><br/>
    <code><a href="doc/environment-variables.md#-mass_vhost_template_dir" >MASS_VHOST_TEMPLATE_DIR</a></code><br/>
    <code><a href="doc/environment-variables.md#-mass_vhost_backend" >MASS_VHOST_BACKEND</a></code><br/>
    <code><a href="doc/environment-variables.md#-mass_vhost_backend_timeout" >MASS_VHOST_BACKEND_TIMEOUT</a></code><br/>
