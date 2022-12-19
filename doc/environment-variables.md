@@ -13,48 +13,48 @@ The provided Docker images have a lot of injectables in order to customize it to
  <tr valign="top" style="vertical-align:top">
   <td>
    <strong>Verbosity</strong><br/>
-   <code><a href="#-debug-entrypoint" >DEBUG_ENTRYPOINT</a></code><br/>
-   <code><a href="#-debug-runtime" >DEBUG_RUNTIME</a></code><br/>
+   <code><a href="#-debug_entrypoint" >DEBUG_ENTRYPOINT</a></code><br/>
+   <code><a href="#-debug_runtime" >DEBUG_RUNTIME</a></code><br/>
   </td>
   <td>
    <strong>System</strong><br/>
-   <code><a href="#-new-uid" >NEW_UID</a></code><br/>
-   <code><a href="#-new-gid" >NEW_GID</a></code><br/>
+   <code><a href="#-new_uid" >NEW_UID</a></code><br/>
+   <code><a href="#-new_gid" >NEW_GID</a></code><br/>
    <code><a href="#-timezone" >TIMEZONE</a></code><br/>
   </td>
   <td>
    <strong>Nginx</strong><br/>
-   <code><a href="#-worker-connections" >WORKER_CONNECTIONS</a></code><br/>
-   <code><a href="#-worker-processes" >WORKER_PROCESSES</a></code><br/>
+   <code><a href="#-worker_connections" >WORKER_CONNECTIONS</a></code><br/>
+   <code><a href="#-worker_processes" >WORKER_PROCESSES</a></code><br/>
   </td>
  </tr>
  <tr valign="top" style="vertical-align:top">
   <td>
    <strong>Main Vhost</strong><br/>
-   <code><a href="#-main-vhost-enable" >MAIN_VHOST_ENABLE</a></code><br/>
-   <code><a href="#-main-vhost-docroot" >MAIN_VHOST_DOCROOT_DIR</a></code><br/>
-   <code><a href="#-main-vhost-tpl-dir" >MAIN_VHOST_TEMPLATE_DIR</a></code><br/>
-   <code><a href="#-main-vhost-backend" >MAIN_VHOST_BACKEND</a></code><br/>
-   <code><a href="#-main-vhost-backend-timeout" >MAIN_VHOST_BACKEND_TIMEOUT</a></code><br/>
-   <code><a href="#-main-vhost-ssl-type" >MAIN_VHOST_SSL_TYPE</a></code><br/>
-   <code><a href="#-main-vhost-ssl-cn" >MAIN_VHOST_SSL_CN</a></code><br/>
-   <code><a href="#-main-vhost-status-enable" >MAIN_VHOST_STATUS_ENABLE</a></code><br/>
-   <code><a href="#-main-vhost-status-alias" >MAIN_VHOST_STATUS_ALIAS</a></code><br/>
+   <code><a href="#-main_vhost_enable" >MAIN_VHOST_ENABLE</a></code><br/>
+   <code><a href="#-main_vhost_docroot" >MAIN_VHOST_DOCROOT_DIR</a></code><br/>
+   <code><a href="#-main_vhost_template_dir" >MAIN_VHOST_TEMPLATE_DIR</a></code><br/>
+   <code><a href="#-main_vhost_backend" >MAIN_VHOST_BACKEND</a></code><br/>
+   <code><a href="#-main_vhost_backend_timeout" >MAIN_VHOST_BACKEND_TIMEOUT</a></code><br/>
+   <code><a href="#-main_vhost_ssl_type" >MAIN_VHOST_SSL_TYPE</a></code><br/>
+   <code><a href="#-main_vhost_ssl_cn" >MAIN_VHOST_SSL_CN</a></code><br/>
+   <code><a href="#-main_vhost_status_enable" >MAIN_VHOST_STATUS_ENABLE</a></code><br/>
+   <code><a href="#-main_vhost_status_alias" >MAIN_VHOST_STATUS_ALIAS</a></code><br/>
   </td>
   <td>
    <strong>Mass Vhost</strong><br/>
-   <code><a href="#-mass-vhost-enable" >MASS_VHOST_ENABLE</a></code><br/>
-   <code><a href="#-mass-vhost-docroot" >MASS_VHOST_DOCROOT_DIR</a></code><br/>
-   <code><a href="#-mass-vhost-tpl-dir" >MASS_VHOST_TEMPLATE_DIR</a></code><br/>
-   <code><a href="#-mass-vhost-backend" >MASS_VHOST_BACKEND</a></code><br/>
-   <code><a href="#-mass-vhost-backend-timeout" >MASS_VHOST_BACKEND_TIMEOUT</a></code><br/>
-   <code><a href="#-mass-vhost-ssl-type" >MASS_VHOST_SSL_TYPE</a></code><br/>
-   <code><a href="#-mass-vhost-tld-suffix" >MASS_VHOST_TLD_SUFFIX</a></code><br/>
+   <code><a href="#-mass_vhost_enable" >MASS_VHOST_ENABLE</a></code><br/>
+   <code><a href="#-mass_vhost_docroot" >MASS_VHOST_DOCROOT_DIR</a></code><br/>
+   <code><a href="#-mass_vhost_template_dir" >MASS_VHOST_TEMPLATE_DIR</a></code><br/>
+   <code><a href="#-mass_vhost_backend" >MASS_VHOST_BACKEND</a></code><br/>
+   <code><a href="#-mass_vhost_backend_timeout" >MASS_VHOST_BACKEND_TIMEOUT</a></code><br/>
+   <code><a href="#-mass_vhost_ssl_type" >MASS_VHOST_SSL_TYPE</a></code><br/>
+   <code><a href="#-mass_vhost_tld_suffix" >MASS_VHOST_TLD_SUFFIX</a></code><br/>
   </td>
   <td>
    <strong>All Vhosts</strong><br/>
-   <code><a href="#-docker-logs" >DOCKER_LOGS</a></code><br/>
-   <code><a href="#-http2-enable" >HTTP2_ENABLE</a></code><br/>
+   <code><a href="#-docker_logs" >DOCKER_LOGS</a></code><br/>
+   <code><a href="#-http2_enable" >HTTP2_ENABLE</a></code><br/>
   </td>
  </tr>
 </table>
@@ -158,7 +158,7 @@ The given directory name will be appended to the current web server base path (`
 **Example:**
 
 | `MAIN_VHOST_DOCROOT_DIR` value | Full path where the main (default) vhost serves files from |
-|------------------    ----------|------------------------------------------------------------|
+|--------------------------------|------------------------------------------------------------|
 | `htdocs`                       | `/var/www/default/htdocs/`                                 |
 | `www`                          | `/var/www/default/www/`                                    |
 
@@ -334,37 +334,37 @@ If you would like a different URL, change it here.
 
 ## ∑ `MASS_VHOST_ENABLE`
 
-See [`MAIN_VHOST_ENABLE`](#-main-vhost-enable). It is the same concept.
+See [`MAIN_VHOST_ENABLE`](#-main_vhost_enable). It is the same concept.
 
 
 
 ## ∑ `MASS_VHOST_DOCROOT_DIR`
 
-See [`MAIN_VHOST_DOCROOT_DIR`](#-main-vhost-docroot-dir). It is the same concept.
+See [`MAIN_VHOST_DOCROOT_DIR`](#-main_vhost_docroot_dir). It is the same concept.
 
 
 
 ## ∑ `MASS_VHOST_TEMPLATE_DIR`
 
-See [`MAIN_VHOST_TEMPLATE_DIR`](#-main-vhost-template-dir). It is the same concept.
+See [`MAIN_VHOST_TEMPLATE_DIR`](#-main_vhost_template_dir). It is the same concept.
 
 
 
 ## ∑ `MASS_VHOST_BACKEND`
 
-See [`MAIN_VHOST_BACKEND`](#-main-vhost-backend). It is the same concept.
+See [`MAIN_VHOST_BACKEND`](#-main_vhost_backend). It is the same concept.
 
 
 
 ## ∑ `MASS_VHOST_BACKEND_TIMEOUT`
 
-See [`MAIN_VHOST_BACKEND_TIMEOUT`](#-main-vhost-backend-timeout). It is the same concept.
+See [`MAIN_VHOST_BACKEND_TIMEOUT`](#-main_vhost_backend-timeout). It is the same concept.
 
 
 
 ## ∑ `MASS_VHOST_SSL_TYPE`
 
-See [`MASS_VHOST_SSL_TYPE`](#-main-vhost-ssl-type). It is the same concept.
+See [`MASS_VHOST_SSL_TYPE`](#-main_vhost_ssl-type). It is the same concept.
 
 
 

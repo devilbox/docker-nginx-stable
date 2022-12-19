@@ -23,9 +23,9 @@ From a users perspective, you mount your local project directory into the contai
 
 For convenience the entrypoint script during `docker run` provides a pretty decent validation and documentation about wrong user input and suggests steps to fix it.
 
-<img style="height: 180px;" height="180" src="doc/img/httpd-backend-invalid-type.png" />
-<img style="height: 180px;" height="180" src="doc/img/httpd-backend-unsupported.png" />
-<img style="height: 180px;" height="180" src="doc/img/httpd-valid.png" />
+| <img style="height: 180px;" height="180" src="doc/img/httpd-backend-invalid-type.png" /> | <img style="height: 180px;" height="180" src="doc/img/httpd-backend-unsupported.png" /> | <img style="height: 180px;" height="180" src="doc/img/httpd-valid.png" /> |
+|:----------------------:|:----------:|:--------:|
+| Invalid backend string | Suggestion | Verified |
 
 
 > ##### 🐱 GitHub: [devilbox/docker-nginx-stable](https://github.com/devilbox/docker-nginx-stable)
@@ -134,48 +134,48 @@ The provided Docker images add a lot of injectables in order to customize it to 
  <tr valign="top" style="vertical-align:top">
   <td>
    <strong>Verbosity</strong><br/>
-   <code><a href="doc/environment-variables.md#-debug-entrypoint" >DEBUG_ENTRYPOINT</a></code><br/>
-   <code><a href="doc/environment-variables.md#-debug-runtime" >DEBUG_RUNTIME</a></code><br/>
+   <code><a href="doc/environment-variables.md#-debug_entrypoint" >DEBUG_ENTRYPOINT</a></code><br/>
+   <code><a href="doc/environment-variables.md#-debug_runtime" >DEBUG_RUNTIME</a></code><br/>
   </td>
   <td>
    <strong>System</strong><br/>
-   <code><a href="doc/environment-variables.md#-new-uid" >NEW_UID</a></code><br/>
-   <code><a href="doc/environment-variables.md#-new-gid" >NEW_GID</a></code><br/>
+   <code><a href="doc/environment-variables.md#-new_uid" >NEW_UID</a></code><br/>
+   <code><a href="doc/environment-variables.md#-new_gid" >NEW_GID</a></code><br/>
    <code><a href="doc/environment-variables.md#-timezone" >TIMEZONE</a></code><br/>
   </td>
   <td>
    <strong>Nginx</strong><br/>
-   <code><a href="doc/environment-variables.md#-worker-connections" >WORKER_CONNECTIONS</a></code><br/>
-   <code><a href="doc/environment-variables.md#-worker-processes" >WORKER_PROCESSES</a></code><br/>
+   <code><a href="doc/environment-variables.md#-worker_connections" >WORKER_CONNECTIONS</a></code><br/>
+   <code><a href="doc/environment-variables.md#-worker_processes" >WORKER_PROCESSES</a></code><br/>
   </td>
  </tr>
  <tr valign="top" style="vertical-align:top">
   <td>
    <strong>Main Vhost</strong><br/>
-   <code><a href="doc/environment-variables.md#-main-vhost-enable" >MAIN_VHOST_ENABLE</a></code><br/>
-   <code><a href="doc/environment-variables.md#-main-vhost-docroot" >MAIN_VHOST_DOCROOT_DIR</a></code><br/>
-   <code><a href="doc/environment-variables.md#-main-vhost-tpl-dir" >MAIN_VHOST_TEMPLATE_DIR</a></code><br/>
-   <code><a href="doc/environment-variables.md#-main-vhost-backend" >MAIN_VHOST_BACKEND</a></code><br/>
-   <code><a href="doc/environment-variables.md#-main-vhost-backend-timeout" >MAIN_VHOST_BACKEND_TIMEOUT</a></code><br/>
-   <code><a href="doc/environment-variables.md#-main-vhost-ssl-type" >MAIN_VHOST_SSL_TYPE</a></code><br/>
-   <code><a href="doc/environment-variables.md#-main-vhost-ssl-cn" >MAIN_VHOST_SSL_CN</a></code><br/>
-   <code><a href="doc/environment-variables.md#-main-vhost-status-enable" >MAIN_VHOST_STATUS_ENABLE</a></code><br/>
-   <code><a href="doc/environment-variables.md#-main-vhost-status-alias" >MAIN_VHOST_STATUS_ALIAS</a></code><br/>
+   <code><a href="doc/environment-variables.md#-main_vhost_enable" >MAIN_VHOST_ENABLE</a></code><br/>
+   <code><a href="doc/environment-variables.md#-main_vhost_docroot" >MAIN_VHOST_DOCROOT_DIR</a></code><br/>
+   <code><a href="doc/environment-variables.md#-main_vhost_template_dir" >MAIN_VHOST_TEMPLATE_DIR</a></code><br/>
+   <code><a href="doc/environment-variables.md#-main_vhost_backend" >MAIN_VHOST_BACKEND</a></code><br/>
+   <code><a href="doc/environment-variables.md#-main_vhost_backend_timeout" >MAIN_VHOST_BACKEND_TIMEOUT</a></code><br/>
+   <code><a href="doc/environment-variables.md#-main_vhost_ssl_type" >MAIN_VHOST_SSL_TYPE</a></code><br/>
+   <code><a href="doc/environment-variables.md#-main_vhost_ssl_cn" >MAIN_VHOST_SSL_CN</a></code><br/>
+   <code><a href="doc/environment-variables.md#-main_vhost_status_enable" >MAIN_VHOST_STATUS_ENABLE</a></code><br/>
+   <code><a href="doc/environment-variables.md#-main_vhost_status_alias" >MAIN_VHOST_STATUS_ALIAS</a></code><br/>
   </td>
   <td>
    <strong>Mass Vhost</strong><br/>
-   <code><a href="doc/environment-variables.md#-mass-vhost-enable" >MASS_VHOST_ENABLE</a></code><br/>
-   <code><a href="doc/environment-variables.md#-mass-vhost-docroot" >MASS_VHOST_DOCROOT_DIR</a></code><br/>
-   <code><a href="doc/environment-variables.md#-mass-vhost-tpl-dir" >MASS_VHOST_TEMPLATE_DIR</a></code><br/>
-   <code><a href="doc/environment-variables.md#-mass-vhost-backend" >MASS_VHOST_BACKEND</a></code><br/>
-   <code><a href="doc/environment-variables.md#-mass-vhost-backend-timeout" >MASS_VHOST_BACKEND_TIMEOUT</a></code><br/>
-   <code><a href="doc/environment-variables.md#-mass-vhost-ssl-type" >MASS_VHOST_SSL_TYPE</a></code><br/>
-   <code><a href="doc/environment-variables.md#-mass-vhost-tld-suffix" >MASS_VHOST_TLD_SUFFIX</a></code><br/>
+   <code><a href="doc/environment-variables.md#-mass_vhost_enable" >MASS_VHOST_ENABLE</a></code><br/>
+   <code><a href="doc/environment-variables.md#-mass_vhost_docroot" >MASS_VHOST_DOCROOT_DIR</a></code><br/>
+   <code><a href="doc/environment-variables.md#-mass_vhost_template_dir" >MASS_VHOST_TEMPLATE_DIR</a></code><br/>
+   <code><a href="doc/environment-variables.md#-mass_vhost_backend" >MASS_VHOST_BACKEND</a></code><br/>
+   <code><a href="doc/environment-variables.md#-mass_vhost_backend_timeout" >MASS_VHOST_BACKEND_TIMEOUT</a></code><br/>
+   <code><a href="doc/environment-variables.md#-mass_vhost_ssl_type" >MASS_VHOST_SSL_TYPE</a></code><br/>
+   <code><a href="doc/environment-variables.md#-mass_vhost_tld_suffix" >MASS_VHOST_TLD_SUFFIX</a></code><br/>
   </td>
   <td>
    <strong>All Vhosts</strong><br/>
-   <code><a href="doc/environment-variables.md#-docker-logs" >DOCKER_LOGS</a></code><br/>
-   <code><a href="doc/environment-variables.md#-http2-enable" >HTTP2_ENABLE</a></code><br/>
+   <code><a href="doc/environment-variables.md#-docker_logs" >DOCKER_LOGS</a></code><br/>
+   <code><a href="doc/environment-variables.md#-http2_enable" >HTTP2_ENABLE</a></code><br/>
   </td>
  </tr>
 </table>
