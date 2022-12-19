@@ -13,6 +13,7 @@ services:
     environment:
       - NEW_UID=1000
       - NEW_GID=1000
+      - DOCKER_LOGS=1
       - MAIN_VHOST_ENABLE=0
       - MASS_VHOST_ENABLE=1
       - MASS_VHOST_BACKEND=conf:phpfpm:tcp:php:9000

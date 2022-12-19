@@ -30,17 +30,6 @@ ENV RUN_DEPS \
 
 
 ###
-### Runtime arguments
-###
-ENV MY_USER=nginx
-ENV MY_GROUP=nginx
-ENV HTTPD_START="/usr/sbin/nginx"
-ENV HTTPD_RELOAD="nginx -s stop 2>/dev/null"
-ENV HTTPD_VERSION="nginx -V 2>&1 | head -1 | awk '{print $3}'"
-ENV VHOSTGEN_HTTPD_SERVER="nginx"
-
-
-###
 ### Install required packages
 ###
 RUN set -eux \
@@ -72,6 +61,17 @@ RUN set -eux \
 
 
 ###
+### Runtime arguments
+###
+ENV MY_USER=nginx
+ENV MY_GROUP=nginx
+ENV HTTPD_START="/usr/sbin/nginx"
+ENV HTTPD_RELOAD="nginx -s stop 2>/dev/null"
+ENV HTTPD_VERSION="nginx -V 2>&1 | head -1 | awk '{print $3}'"
+ENV VHOSTGEN_HTTPD_SERVER="nginx"
+
+
+###
 ### Create directories
 ###
 # /docker-entrypoint.d/10-ipv6* was added by nginx to do some IPv6 magic (which breaks the image)
@@ -81,6 +81,7 @@ RUN set -eux \
 	&& mkdir -p /etc/httpd/conf.d \
 	&& mkdir -p /etc/httpd/vhost.d \
 	&& mkdir -p /var/www/default/htdocs \
+	&& mkdir -p /var/log/httpd \
 	&& mkdir -p /shared/httpd \
 	&& chmod 0775 /shared/httpd \
 	&& chown ${MY_USER}:${MY_GROUP} /shared/httpd
