@@ -48,6 +48,12 @@ VHOSTGEN_TEMPLATE_DIR="/etc/vhost-gen/templates"   # vhost-gen default templates
 VHOSTGEN_CUST_TEMPLATE_DIR="/etc/vhost-gen.d"      # vhost-gen custom templates (must be mounted to add)
 
 ###
+### TODO: Hardcoded aliases. They need to be glued into env variables
+###
+MAIN_VHOST_ALIASES='/devilbox-api/:/var/www/default/api:http(s)?://(.*)$, /vhost.d/:/etc/httpd'
+MASS_VHOST_ALIASES='/devilbox-api/:/var/www/default/api:http(s)?://(.*)$'
+
+###
 ### Wait this many seconds to start watcherd after httpd has been started
 ###
 WATCHERD_STARTUP_DELAY="3"
@@ -211,6 +217,7 @@ vhostgen_main_generate_config \
 	"${VHOSTGEN_HTTPD_SERVER}" \
 	"${MAIN_VHOST_BACKEND}" \
 	"${HTTP2_ENABLE}" \
+	"${MAIN_VHOST_ALIASES}" \
 	"${MAIN_VHOST_STATUS_ENABLE}" \
 	"${MAIN_VHOST_STATUS_ALIAS}" \
 	"${DOCKER_LOGS}" \
@@ -220,13 +227,27 @@ vhostgen_main_generate_config \
 ###
 ### Generate vhost (MAIN_VHOST)
 ###
-vhostgen_main_generate \
-	"${MAIN_VHOST_ENABLE}" \
-	"${MAIN_DOCROOT_BASE}/${MAIN_VHOST_DOCROOT}" \
-	"${MAIN_VHOST_BACKEND}" \
-	"/etc/vhost-gen/main.yml" \
-	"${MAIN_DOCROOT_BASE}/${MAIN_VHOST_TPL}" \
-	"${MAIN_VHOST_SSL_TYPE}"
+if [ "${VHOSTGEN_HTTPD_SERVER}" = "nginx" ]; then
+	# Adding custom nginx vhost template to ensure paths like:
+	# /vendor/index.php/arg1/arg2 will also work (just like Apache)
+	# https://www.reddit.com/r/nginx/comments/a6pw31/phpfpm_does_not_handle_subpathindexphparg1arg2/
+	vhostgen_main_generate \
+		"${MAIN_VHOST_ENABLE}" \
+		"${MAIN_DOCROOT_BASE}/${MAIN_VHOST_DOCROOT}" \
+		"${MAIN_VHOST_BACKEND}" \
+		"/etc/vhost-gen/main.yml" \
+		"${MAIN_DOCROOT_BASE}/${MAIN_VHOST_TPL}" \
+		"${MAIN_VHOST_SSL_TYPE}" \
+		"/etc/vhost-gen/templates-main/"
+else
+	vhostgen_main_generate \
+		"${MAIN_VHOST_ENABLE}" \
+		"${MAIN_DOCROOT_BASE}/${MAIN_VHOST_DOCROOT}" \
+		"${MAIN_VHOST_BACKEND}" \
+		"/etc/vhost-gen/main.yml" \
+		"${MAIN_DOCROOT_BASE}/${MAIN_VHOST_TPL}" \
+		"${MAIN_VHOST_SSL_TYPE}"
+fi
 
 ###
 ### Create Certificate Signing request
@@ -290,6 +311,7 @@ if [ "${MASS_VHOST_ENABLE}" -eq "1" ]; then
 	watcherd_add+=" \\\"%%p\\\""  # vhost project directory path (absolute)
 	watcherd_add+=" \\\"${MASS_VHOST_DOCROOT}\\\""
 	watcherd_add+=" \\\"${MASS_VHOST_TLD_SUFFIX}\\\""
+	watcherd_add+=" \\\"${MASS_VHOST_ALIASES}\\\""
 	watcherd_add+=" \\\"${MASS_VHOST_SSL_TYPE}\\\""
 	watcherd_add+=" \\\"${MASS_VHOST_BACKEND}\\\""
 	watcherd_add+=" \\\"${MASS_VHOST_BACKEND_TIMEOUT}\\\""

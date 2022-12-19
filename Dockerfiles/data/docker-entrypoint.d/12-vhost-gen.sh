@@ -46,11 +46,12 @@ vhostgen_main_generate_config() {
 	local httpd_server="${1}"  # nginx, apache22 or apache24
 	local backend_string="${2}"
 	local http2_enable="${3}"
-	local status_enable="${4}"
-	local status_alias="${5}"
-	local docker_logs="${6}"
-	local timeout="${7}"
-	local outpath="${8}"
+	local aliases="${4}"
+	local status_enable="${5}"
+	local status_alias="${6}"
+	local docker_logs="${7}"
+	local timeout="${8}"
+	local outpath="${9}"
 
 	be_conf_type="$( get_backend_conf_type "${backend_string}" )"
 	be_conf_host="$( get_backend_conf_host "${backend_string}" )"
@@ -80,7 +81,7 @@ vhostgen_main_generate_config() {
 		"${be_conf_host}" \
 		"${be_conf_port}" \
 		"${timeout}" \
-		"/devilbox-api/:/var/www/default/api:http(s)?://(.*)$, /vhost.d/:/etc/httpd" \
+		"${aliases}" \
 		"$( to_python_bool "${status_enable}" )" \
 		"${status_alias}"  \
 		> "${outpath}"
@@ -97,6 +98,7 @@ vhostgen_main_generate() {
 	local config="${4}"
 	local template="${5}"
 	local ssl_type="${6}"
+	local custom_template_dir="${7}"  # Specifies a different vhost-gen template dir (Dockerfile might copy custom vhost-gen templates)
 
 	# Not using main virtual host, so no need to generate it
 	if [ "${enable}" -eq "0" ]; then
@@ -126,19 +128,33 @@ vhostgen_main_generate() {
 	fi
 
 	if [ "${reverse}" = "1" ]; then
-		if ! run \
-			"vhost-gen ${verbose} -d -n \"localhost\" -r \"${be_prot}://${be_host}:${be_port}\" -l / -c \"${config}\" -o \"${template}\" -s -m \"${ssl_type}\"" \
-			"Failed to create default vhost"; then
-			exit 1
+		if [ -n "${custom_template_dir}" ]; then
+			if ! run \
+				"vhost-gen ${verbose} -d -n \"localhost\" -r \"${be_prot}://${be_host}:${be_port}\" -l / -c \"${config}\" -o \"${template}\" -s -m \"${ssl_type}\" -t \"${custom_template_dir}\"" \
+				"Failed to create default vhost"; then
+				exit 1
+			fi
+		else
+			if ! run \
+				"vhost-gen ${verbose} -d -n \"localhost\" -r \"${be_prot}://${be_host}:${be_port}\" -l / -c \"${config}\" -o \"${template}\" -s -m \"${ssl_type}\"" \
+				"Failed to create default vhost"; then
+				exit 1
+			fi
 		fi
 	else
-		# Adding custom nginx vhost template to ensure paths like:
-		# /vendor/index.php/arg1/arg2 will also work (just like Apache)
-		# https://www.reddit.com/r/nginx/comments/a6pw31/phpfpm_does_not_handle_subpathindexphparg1arg2/
-		if ! run \
-			"vhost-gen ${verbose} -d -n \"localhost\" -p \"${docroot}\" -c \"${config}\" -o \"${template}\" -s -m \"${ssl_type}\" -t /etc/vhost-gen/templates-main/" \
-			"Failed to create default vhost"; then
-			exit 1
+		if [ -n "${custom_template_dir}" ]; then
+			if ! run \
+				"vhost-gen ${verbose} -d -n \"localhost\" -p \"${docroot}\" -c \"${config}\" -o \"${template}\" -s -m \"${ssl_type}\" -t \"${custom_template_dir}\"" \
+				"Failed to create default vhost"; then
+				exit 1
+			fi
+		else
+			if ! run \
+				"vhost-gen ${verbose} -d -n \"localhost\" -p \"${docroot}\" -c \"${config}\" -o \"${template}\" -s -m \"${ssl_type}\"" \
+				"Failed to create default vhost"; then
+				exit 1
+			fi
 		fi
 	fi
+	log "trace" "$( grep -v '^[[:blank:]]*$' "/etc/httpd/conf.d/localhost.conf" )"
 }

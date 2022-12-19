@@ -12,15 +12,16 @@ VHOST_NAME="${1}"             # vhost project directory name (via watcherd: "%n"
 VHOST_PATH="${2}"             # vhost project directory path (via watcherd: "%p")
 VHOST_DOCROOT_NAME="${3}"     # Document root subdir inside VHOST_PATH
 VHOST_TLD_SUFFIX="${4}"       # TLD_SUFFIX to append to VHOST_NAME
-VHOST_SSL_TYPE="${5}"         # SSL_TYPE: "plain", "ssl", "both", "redir"
-VHOST_BACKEND="${6}"          # Backend string: file:* or cfg:*
-VHOST_BACKEND_TIMEOUT="${7}"  # Timeout for backend in seconds
-HTTP2_ENABLE="${8}"           # Enable HTTP2?
-DOCKER_LOGS="${9}"            # Enable Docker logs?
-CA_KEY_FILE="${10}"           # Path to CA key file
-CA_CRT_FILE="${11}"           # Path to CA crt file
-VHOSTGEN_TEMPLATE_DIR="${12}" # vhost-gen template dir (via watcherd: "%p/${MASS_VHOST_TPL}")
-VHOSTGEN_HTTPD_SERVER="${13}" # nginx, apache22 or apache24 (determines the template to choose)
+VHOST_ALIASES="${5}"          # Additional aliases to generate (path:, url: cors:)
+VHOST_SSL_TYPE="${6}"         # SSL_TYPE: "plain", "ssl", "both", "redir"
+VHOST_BACKEND="${7}"          # Backend string: file:* or cfg:*
+VHOST_BACKEND_TIMEOUT="${8}"  # Timeout for backend in seconds
+HTTP2_ENABLE="${9}"           # Enable HTTP2?
+DOCKER_LOGS="${10}"           # Enable Docker logs?
+CA_KEY_FILE="${11}"           # Path to CA key file
+CA_CRT_FILE="${12}"           # Path to CA crt file
+VHOSTGEN_TEMPLATE_DIR="${13}" # vhost-gen template dir (via watcherd: "%p/${MASS_VHOST_TPL}")
+VHOSTGEN_HTTPD_SERVER="${14}" # nginx, apache22 or apache24 (determines the template to choose)
 
 
 
@@ -164,7 +165,7 @@ VHOSTGEN_TEMPLATE="$( \
 		"${be_host}" \
 		"${be_port}" \
 		"${VHOST_BACKEND_TIMEOUT}" \
-		'/devilbox-api/:/var/www/default/api:http(s)?://(.*)$' \
+		"${VHOST_ALIASES}" \
 		"no" \
 		"/httpd-status" \
 )"
