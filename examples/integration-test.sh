@@ -13,5 +13,7 @@ for test_dir in $(ls -1 -d */);do
 	echo "${test_dir}"
 	echo "################################################################################"
 	cd "${SCRIPTPATH}/${test_dir}"
-	./integration-test.sh
+	if ! ./integration-test.sh; then
+		exit 1
+	fi
 done
