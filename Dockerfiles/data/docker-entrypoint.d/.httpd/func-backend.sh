@@ -32,7 +32,7 @@ set -o pipefail
 ###
 ###   It must be a file in the project directory, as each project will probably use
 ###   a different backend host/port:
-###       File path: ${$MASS_VHOST_DOCROOT}/${$MASS_VHOST_TPL}/<file>
+###       File path: ${$MASS_VHOST_DOCROOT_DIR}/${$MASS_VHOST_TPL_DIR}/<file>
 ###       Default:   /shared/httpd/<project>/cfg/<file>
 ###
 ###   The file must have the following content format:

@@ -61,10 +61,8 @@ fi
 # 3. Not between 0 and 4 (gets highest value)
 if [ "${DEBUG_RUNTIME}" != "0" ] \
 	&& [ "${DEBUG_RUNTIME}" != "1" ] \
-	&& [ "${DEBUG_RUNTIME}" != "2" ] \
-	&& [ "${DEBUG_RUNTIME}" != "3" ] \
-	&& [ "${DEBUG_RUNTIME}" != "4" ]; then
-	DEBUG_RUNTIME=4
+	&& [ "${DEBUG_RUNTIME}" != "2" ]; then
+	DEBUG_RUNTIME=2
 fi
 
 ###

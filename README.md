@@ -17,9 +17,15 @@
 
 This image is based on the official **[Nginx](https://hub.docker.com/_/nginx)** Docker image and extends it with the ability to have **virtual hosts created automatically**, as well as **adding SSL certificates** when creating new directories. For that to work, it integrates two tools that will take care about the whole process: **[watcherd](https://github.com/devilbox/watcherd)** and **[vhost-gen](https://github.com/devilbox/vhost-gen)**.
 
-From a users perspective, you mount your local project directory into the container under `/shared/httpd`. Any directory then created in your local project directory wil spawn a new virtual host by the same name. Additional settings such as custom server names, PHP-FPM or even different Apache templates per project are supported as well.
+From a users perspective, you mount your local project directory into the container under `/shared/httpd`. Any directory then created in your local project directory wil spawn a new virtual host by the same name. Each virtual optionally supports a generic or custom backend configuration (**static files**, **PHP-FPM** or **reverse proxy**).
 
 **HTTP/2 is enabled by default for all SSL connections.**
+
+For convenience the entrypoint script during `docker run` provides a pretty decent validation and documentation about wrong user input and suggests steps to fix it.
+
+<img style="height: 180px;" height="180" src="doc/img/httpd-backend-invalid-type.png" />
+<img style="height: 180px;" height="180" src="doc/img/httpd-backend-unsupported.png" />
+<img style="height: 180px;" height="180" src="doc/img/httpd-valid.png" />
 
 
 > ##### 🐱 GitHub: [devilbox/docker-nginx-stable](https://github.com/devilbox/docker-nginx-stable)
@@ -89,6 +95,10 @@ Virtual hosts are created automatically, simply by creating a new project direct
 
 PHP is not included in the provided images, but you can link the Docker container to a PHP-FPM image with any PHP version. This allows you to easily switch PHP versions and choose one which is currently required.
 
+### Automated Reverse Proxy setup
+
+Each virtual host can specify its own custom backend. You could for instance serve two NodeJS applications, one Python service and 4 PHP projects, as well as a few that only provide static files. This configuration is applied automatically based on environment variables.
+
 ### Automated SSL certificate generation
 
 SSL certificates are generated automatically for each virtual host to allow you to develop over HTTP and HTTPS.
@@ -105,10 +115,6 @@ Each virtual host can individually be fully customized via `vhost-gen` templates
 
 The default virtual host is also treated differently from the auto-generated mass virtual hosts. You can choose to disable it or use it for a generic overview page for all of your created projects.
 
-### Reverse Proxy integration
-
-Through virtual host customization, any project can also be served with a reverse proxy. This is useful if you want to run NodeJS or Python projects which require a reverse proxy and still want to benefit with a custom domain and auto-generated SSL certificates.
-
 ### Local file system permission sync
 
 File system permissions of files/dirs inside the running Docker container are synced with the permission on your host system. This is accomplished by specifying a user- and group-id to the `docker run` command.
@@ -119,62 +125,61 @@ File system permissions of files/dirs inside the running Docker container are sy
 The provided Docker images add a lot of injectables in order to customize it to your needs. See the table below for a brief overview.
 
 > 🛈 For details see **[Documentation: Environment variables](doc/environment-variables.md)**
+>
+> If you don't feel like reading the documentation, simply try out your `docker run` command and add
+> any environment variables specified below. The validation will tell you what you might have done wrong,
+> how to fix it and what the meaning is.
 
 <table>
- <tr>
-  <th>Nginx</th>
-  <th>Logging</th>
-  <th>Features</th>
+ <tr valign="top" style="vertical-align:top">
+  <td>
+   <strong>Verbosity</strong><br/>
+   <code><a href="doc/environment-variables.md#-debug-entrypoint" >DEBUG_ENTRYPOINT</a></code><br/>
+   <code><a href="doc/environment-variables.md#-debug-runtime" >DEBUG_RUNTIME</a></code><br/>
+  </td>
+  <td>
+   <strong>System</strong><br/>
+   <code><a href="doc/environment-variables.md#-new-uid" >NEW_UID</a></code><br/>
+   <code><a href="doc/environment-variables.md#-new-gid" >NEW_GID</a></code><br/>
+   <code><a href="doc/environment-variables.md#-timezone" >TIMEZONE</a></code><br/>
+  </td>
+  <td>
+   <strong>Nginx</strong><br/>
+   <code><a href="doc/environment-variables.md#-worker-connections" >WORKER_CONNECTIONS</a></code><br/>
+   <code><a href="doc/environment-variables.md#-worker-processes" >WORKER_PROCESSES</a></code><br/>
+  </td>
  </tr>
  <tr valign="top" style="vertical-align:top">
   <td>
-   <code>WORKER_CONNECTIONS</code><br/>
-   <code>WORKER_PROCESSES</code><br/>
-   <code>HTTP2_ENABLE</code><br/>
+   <strong>Main Vhost</strong><br/>
+   <code><a href="doc/environment-variables.md#-main-vhost-enable" >MAIN_VHOST_ENABLE</a></code><br/>
+   <code><a href="doc/environment-variables.md#-main-vhost-docroot" >MAIN_VHOST_DOCROOT_DIR</a></code><br/>
+   <code><a href="doc/environment-variables.md#-main-vhost-tpl-dir" >MAIN_VHOST_TEMPLATE_DIR</a></code><br/>
+   <code><a href="doc/environment-variables.md#-main-vhost-backend" >MAIN_VHOST_BACKEND</a></code><br/>
+   <code><a href="doc/environment-variables.md#-main-vhost-backend-timeout" >MAIN_VHOST_BACKEND_TIMEOUT</a></code><br/>
+   <code><a href="doc/environment-variables.md#-main-vhost-ssl-type" >MAIN_VHOST_SSL_TYPE</a></code><br/>
+   <code><a href="doc/environment-variables.md#-main-vhost-ssl-cn" >MAIN_VHOST_SSL_CN</a></code><br/>
+   <code><a href="doc/environment-variables.md#-main-vhost-status-enable" >MAIN_VHOST_STATUS_ENABLE</a></code><br/>
+   <code><a href="doc/environment-variables.md#-main-vhost-status-alias" >MAIN_VHOST_STATUS_ALIAS</a></code><br/>
   </td>
   <td>
-   <code>DEBUG_ENTRYPOINT</code><br/>
-   <code>DEBUG_RUNTIME</code><br/>
-   <code>DOCKER_LOGS</code><br/>
+   <strong>Mass Vhost</strong><br/>
+   <code><a href="doc/environment-variables.md#-mass-vhost-enable" >MASS_VHOST_ENABLE</a></code><br/>
+   <code><a href="doc/environment-variables.md#-mass-vhost-docroot" >MASS_VHOST_DOCROOT_DIR</a></code><br/>
+   <code><a href="doc/environment-variables.md#-mass-vhost-tpl-dir" >MASS_VHOST_TEMPLATE_DIR</a></code><br/>
+   <code><a href="doc/environment-variables.md#-mass-vhost-backend" >MASS_VHOST_BACKEND</a></code><br/>
+   <code><a href="doc/environment-variables.md#-mass-vhost-backend-timeout" >MASS_VHOST_BACKEND_TIMEOUT</a></code><br/>
+   <code><a href="doc/environment-variables.md#-mass-vhost-ssl-type" >MASS_VHOST_SSL_TYPE</a></code><br/>
+   <code><a href="doc/environment-variables.md#-mass-vhost-tld-suffix" >MASS_VHOST_TLD_SUFFIX</a></code><br/>
   </td>
   <td>
-   <code>TIMEZONE</code><br/>
-   <code>NEW_UID</code><br/>
-   <code>NEW_GID</code><br/>
-  </td>
- </tr>
- <tr>
-  <th>Main vHost</th>
-  <th>Mass vHost</th>
-  <th>PHP</th>
- </tr>
- <tr valign="top" style="vertical-align:top">
-  <td>
-   <code>MAIN_VHOST_ENABLE</code><br/>
-   <code>MAIN_VHOST_SSL_TYPE</code><br/>
-   <code>MAIN_VHOST_SSL_GEN</code><br/>
-   <code>MAIN_VHOST_SSL_CN</code><br/>
-   <code>MAIN_VHOST_DOCROOT</code><br/>
-   <code>MAIN_VHOST_TPL</code><br/>
-   <code>MAIN_VHOST_STATUS_ENABLE</code><br/>
-   <code>MAIN_VHOST_STATUS_ALIAS</code><br/>
-  </td>
-  <td>
-   <code>MASS_VHOST_ENABLE</code><br/>
-   <code>MASS_VHOST_SSL_TYPE</code><br/>
-   <code>MASS_VHOST_SSL_GEN</code><br/>
-   <code>MASS_VHOST_TLD_SUFFIX</code><br/>
-   <code>MASS_VHOST_DOCROOT</code><br/>
-   <code>MASS_VHOST_TPL</code><br/>
-  </td>
-  <td>
-   <code>PHP_FPM_ENABLE</code><br/>
-   <code>PHP_FPM_SERVER_ADDR</code><br/>
-   <code>PHP_FPM_SERVER_PORT</code><br/>
-   <code>PHP_FPM_TIMEOUT</code><br/>
+   <strong>All Vhosts</strong><br/>
+   <code><a href="doc/environment-variables.md#-docker-logs" >DOCKER_LOGS</a></code><br/>
+   <code><a href="doc/environment-variables.md#-http2-enable" >HTTP2_ENABLE</a></code><br/>
   </td>
  </tr>
 </table>
+
 
 
 ## 📂 Volumes
@@ -192,6 +197,7 @@ The provided Docker images offer the following internal paths to be mounted to y
   <td>
    <code>/var/www/default/</code><br/>
    <code>/shared/httpd/</code><br/>
+   <code>/ca/</code><br/>
   </td>
   <td>
    <code>/etc/httpd-custom.d/</code><br/>
@@ -213,6 +219,17 @@ When you plan on using `443` you should enable automated SSL certificate generat
 
 
 ## 💡 Examples
+
+### Docker Compose
+
+Have a look at the [examples](examples/) directory. It is packed with all kinds of examples:
+
+* SSL
+* PHP-FPM remote server
+* Python and NodeJS Reverse Proxy
+* Mass virtual hosts
+* Mass virtual hosts with PHP-FPM, Python and NodeJS as backends
+
 
 ### Serve static files
 
@@ -241,16 +258,63 @@ docker run -d -it \
     --name php \
     -p 9000 \
     -v ~/my-host-www:/var/www/default \
-    devilbox/php-fpm:5.6-prod
+    devilbox/php-fpm:8.2-base
 
 # Start the Nginx Docker, linking it to the PHP-FPM container
 docker run -d -it \
     -p 80:80 \
     -v ~/my-host-www:/var/www/default \
-    -e PHP_FPM_ENABLE=1 \
-    -e PHP_FPM_SERVER_ADDR=php \
-    -e PHP_FPM_SERVER_PORT=9000 \
+    -e MAIN_VHOST_BACKEND='conf:phpfpm:tcp:php:9000' \
     --link php \
+    devilbox/nginx-stable
+```
+
+### Serve PHP files with PHP-FPM over HTTPS
+
+Pretty much the same as in the previous example, just with an SSL addition.
+The SSL definition ensures that any request made to HTTP will receive a redirect to HTTPS.
+This was specified with type `redir`.
+
+Additionally it mounts the `~/ca` directory into the container. You can find the Certificate Authority files in there and import it into your browser for valid SSL.
+This probably makes more sense with `MASS_VHOST_ENABLE` as you have an unlimited number of projects.
+
+```bash
+# Start the PHP-FPM container, mounting the same diectory
+docker run -d -it \
+    --name php \
+    -p 9000 \
+    -v ~/my-host-www:/var/www/default \
+    devilbox/php-fpm:8.2-base
+
+# Start the Webserver container, linking it to the PHP-FPM container
+docker run -d -it \
+    -p 80:80 \
+    -v ~/my-host-www:/var/www/default \
+    -v ~/ca:/ca \
+    -e MAIN_VHOST_BACKEND='conf:phpfpm:tcp:php:9000' \
+    -e MAIN_VHOST_SSL_TYPE='redir' \
+    --link php \
+    devilbox/nginx-stable
+```
+
+### Act as a Reverse Proxy for NodeJS
+
+Let's assume we have a working NodeJS application in our `./node-project/` directory called `app.js`.
+Lets also assume this app receives connections on port `3000`.
+
+```bash
+# Start the NodeJS container
+# Assuming it contains a working application.
+docker run -d -it \
+    --name nodejs \
+    -v ./node-project:/app \
+    -p 3000:3000 \
+    node:19-alpine node /app/app.js
+
+docker run -d -it \
+    -p 80:80 \
+    -e MAIN_VHOST_BACKEND='conf:rproxy:http:nodejs:3000' \
+    --link nodejs \
     devilbox/nginx-stable
 ```
 
@@ -275,15 +339,13 @@ docker run -d -it \
     -p 9000:9000 \
     -v ~/my-host-www:/var/www/default \
     -e FORWARD_PORTS_TO_LOCALHOST=3306:mysql:3306 \
-    devilbox/php-fpm:5.6-prod
+    devilbox/php-fpm:8.2-prod
 
 # Start the Nginx Docker, linking it to the PHP-FPM container
 docker run -d -it \
     -p 80:80 \
     -v ~/my-host-www:/var/www/default \
-    -e PHP_FPM_ENABLE=1 \
-    -e PHP_FPM_SERVER_ADDR=php \
-    -e PHP_FPM_SERVER_PORT=9000 \
+    -e MAIN_VHOST_BACKEND='conf:phpfpm:tcp:php:9000' \
     --link php \
     --link mysql \
     devilbox/nginx-stable

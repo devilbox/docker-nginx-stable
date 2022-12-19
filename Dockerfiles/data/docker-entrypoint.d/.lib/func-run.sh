@@ -23,7 +23,7 @@ set -o pipefail
 ### DEBUG_ENTRYPOINT=1 -
 ### DEBUG_ENTRYPOINT=2 show output
 ### DEBUG_ENTRYPOINT=3 show output and its command
-### DEBUG_ENTRYPOINT=3 show output and its command
+### DEBUG_ENTRYPOINT=4 show output and its command
 ###
 run() {
 	local cmd="${1}"

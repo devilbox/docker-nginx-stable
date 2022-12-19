@@ -134,13 +134,13 @@ validate_main_vhost_backend_timeout() {
 
 
 ###
-### Validate MAIN_VHOST_DOCROOT
+### Validate MAIN_VHOST_DOCROOT_DIR
 ###
-validate_main_vhost_docroot() {
+validate_main_vhost_docroot_dir() {
 	local name="${1}"
 	local value="${2}"
 	local base_path="${MAIN_DOCROOT_BASE}"
-	_validate_vhost_docroot "${name}" "${value}" "${MAIN_VHOST_ENABLE}" "${MAIN_VHOST_BACKEND}" "${base_path}/${value}"
+	_validate_vhost_docroot_dir "${name}" "${value}" "${MAIN_VHOST_ENABLE}" "${MAIN_VHOST_BACKEND}" "${base_path}/${value}"
 }
 
 
@@ -175,13 +175,13 @@ validate_main_vhost_ssl_cn() {
 
 
 ###
-### Validate MAIN_VHOST_TPL: vhost-gen template directory
+### Validate MAIN_VHOST_TEMPLATE_DIR: vhost-gen template directory
 ###
-validate_main_vhost_tpl() {
+validate_main_vhost_template_dir() {
 	local name="${1}"
 	local value="${2}"
 	local base_path="${MAIN_DOCROOT_BASE}"
-	_validate_vhost_tpl "${name}" "${value}" "${MAIN_VHOST_ENABLE}" "${base_path}/${value}"
+	_validate_vhost_template_dir "${name}" "${value}" "${MAIN_VHOST_ENABLE}" "${base_path}/${value}"
 }
 
 
@@ -271,13 +271,13 @@ validate_mass_vhost_backend_timeout() {
 
 
 ###
-### Validate MASS_VHOST_DOCROOT
+### Validate MASS_VHOST_DOCROOT_DIR
 ###
-validate_mass_vhost_docroot() {
+validate_mass_vhost_docroot_dir() {
 	local name="${1}"
 	local value="${2}"
 	local base_path="${MASS_DOCROOT_BASE}"
-	_validate_vhost_docroot "${name}" "${value}" "${MASS_VHOST_ENABLE}" "${MASS_VHOST_BACKEND}" "${base_path}/<project>/${value}"
+	_validate_vhost_docroot_dir "${name}" "${value}" "${MASS_VHOST_ENABLE}" "${MASS_VHOST_BACKEND}" "${base_path}/<project>/${value}"
 }
 
 
@@ -325,13 +325,13 @@ validate_mass_vhost_ssl_type() {
 
 
 ###
-### Validate MASS_VHOST_TPL: vhost-gen template directory
+### Validate MASS_VHOST_TEMPLATE_DIR: vhost-gen template directory
 ###
-validate_mass_vhost_tpl() {
+validate_mass_vhost_template_dir() {
 	local name="${1}"
 	local value="${2}"
 	local base_path="${MASS_DOCROOT_BASE}"
-	_validate_vhost_tpl "${name}" "${value}" "${MASS_VHOST_ENABLE}" "${base_path}/<project>/${value}"
+	_validate_vhost_template_dir "${name}" "${value}" "${MASS_VHOST_ENABLE}" "${base_path}/<project>/${value}"
 }
 
 
@@ -544,7 +544,7 @@ _validate_vhost_backend() {
 			log "err" ""
 			log "err" "What should I do?"
 			log "err" "    Use 'MASS_VHOST_BACKEND=file:config.txt' instead!"
-			log "err" "    This allows you to add a config file to every project at: ${MASS_DOCROOT_BASE}/<project>/${MASS_VHOST_TPL}/config.txt"
+			log "err" "    This allows you to add a config file to every project at: ${MASS_DOCROOT_BASE}/<project>/${MASS_VHOST_TEMPLATE_DIR}/config.txt"
 			log "err" "    Then every project can define its own reverse proxy backend."
 			log "err" ""
 			log "err" "What is in that file?"
@@ -566,9 +566,9 @@ _validate_vhost_backend() {
 	# 12. Show settings (file)
 	if [ "${backend_prefix}" = "file" ]; then
 		if [ "${vhost}" = "main" ]; then
-			_log_env_valid "valid" "${name}" "${value}" "Backend set in file" "${MAIN_DOCROOT_BASE}/${MAIN_VHOST_TPL}/${backend_file_name}"
+			_log_env_valid "valid" "${name}" "${value}" "Backend set in file" "${MAIN_DOCROOT_BASE}/${MAIN_VHOST_TEMPLATE_DIR}/${backend_file_name}"
 		else
-			_log_env_valid "valid" "${name}" "${value}" "Backend set in file" "${MASS_DOCROOT_BASE}/<project>/${MASS_VHOST_TPL}/${backend_file_name}"
+			_log_env_valid "valid" "${name}" "${value}" "Backend set in file" "${MASS_DOCROOT_BASE}/<project>/${MASS_VHOST_TEMPLATE_DIR}/${backend_file_name}"
 		fi
 	# 13. Show settings (conf)
 	elif [ "${backend_prefix}" = "conf" ]; then
@@ -603,9 +603,9 @@ _validate_vhost_backend_timeout() {
 
 
 ###
-### Validate *_VHOST_DOCROOT
+### Validate *_VHOST_DOCROOT_DIR
 ###
-_validate_vhost_docroot() {
+_validate_vhost_docroot_dir() {
 	local name="${1}"
 	local value="${2}"
 	local vhost_enabled="${3}"
@@ -660,9 +660,9 @@ _validate_vhost_ssl_type() {
 
 
 ###
-### Validate *_VHOST_TPL: vhost-gen template directory
+### Validate *_VHOST_TEMPLATE_DIR: vhost-gen template directory
 ###
-_validate_vhost_tpl() {
+_validate_vhost_template_dir() {
 	local name="${1}"
 	local value="${2}"
 	local vhost_enabled="${3}"

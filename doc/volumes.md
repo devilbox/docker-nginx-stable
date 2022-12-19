@@ -45,6 +45,16 @@ docker run -d -it \
 ```
 
 
+## `/ca/`
+
+* **type:** data directory
+* **purpose:** populated with CA certificate files
+
+This directory will be populated by a Certificate Authority, which signs every vhost SSL certificate. If you want to have valid SSL in your browser for every current and future project, simply import the CA files into your browser and/or system.
+
+**Note:** CA files are not being regenerated if they already exist. You could also place your own CA files in here.
+
+
 ## `/etc/httpd-custom.d/`
 
 * **type:** config directory

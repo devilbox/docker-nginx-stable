@@ -20,7 +20,7 @@ HTTP2_ENABLE="${9}"           # Enable HTTP2?
 DOCKER_LOGS="${10}"           # Enable Docker logs?
 CA_KEY_FILE="${11}"           # Path to CA key file
 CA_CRT_FILE="${12}"           # Path to CA crt file
-VHOSTGEN_TEMPLATE_DIR="${13}" # vhost-gen template dir (via watcherd: "%p/${MASS_VHOST_TPL}")
+VHOSTGEN_TEMPLATE_DIR="${13}" # vhost-gen template dir (via watcherd: "%p/${MASS_VHOST_TPL_DIR}")
 VHOSTGEN_HTTPD_SERVER="${14}" # nginx, apache22 or apache24 (determines the template to choose)
 
 
@@ -148,7 +148,6 @@ VHOSTGEN_CONFIG_PATH="/etc/vhost-gen/${VHOSTGEN_CONFIG_NAME}"
 ###
 ### Generate vhost-gen config file (not template)
 ###
-# FIXME/TODO: variablize alias
 VHOSTGEN_TEMPLATE="$( \
 	generate_vhostgen_conf \
 		"${VHOSTGEN_HTTPD_SERVER}" \

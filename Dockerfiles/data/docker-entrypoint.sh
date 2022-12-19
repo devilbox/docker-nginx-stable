@@ -118,22 +118,22 @@ env_var_export "NEW_GID"
 env_var_export "TIMEZONE" "UTC"
 
 env_var_export "MAIN_VHOST_ENABLE" "1"
+env_var_export "MAIN_VHOST_DOCROOT_DIR" "htdocs"
+env_var_export "MAIN_VHOST_TEMPLATE_DIR" "cfg"
 env_var_export "MAIN_VHOST_BACKEND"
 env_var_export "MAIN_VHOST_BACKEND_TIMEOUT" "180"
-env_var_export "MAIN_VHOST_DOCROOT" "htdocs"
 env_var_export "MAIN_VHOST_SSL_TYPE" "plain"
 env_var_export "MAIN_VHOST_SSL_CN" "localhost"
-env_var_export "MAIN_VHOST_TPL" "cfg"
 env_var_export "MAIN_VHOST_STATUS_ENABLE" "0"
 env_var_export "MAIN_VHOST_STATUS_ALIAS" "/httpd-status"
 
 env_var_export "MASS_VHOST_ENABLE" "0"
+env_var_export "MASS_VHOST_DOCROOT_DIR" "htdocs"
+env_var_export "MASS_VHOST_TEMPLATE_DIR" "cfg"
 env_var_export "MASS_VHOST_BACKEND"
 env_var_export "MASS_VHOST_BACKEND_TIMEOUT" "180"
-env_var_export "MASS_VHOST_DOCROOT" "htdocs"
-env_var_export "MASS_VHOST_TLD_SUFFIX" ".loc"
 env_var_export "MASS_VHOST_SSL_TYPE" "plain"
-env_var_export "MASS_VHOST_TPL" "cfg"
+env_var_export "MASS_VHOST_TLD_SUFFIX" ".loc"
 
 env_var_export "WORKER_CONNECTIONS" "1024"
 env_var_export "WORKER_PROCESSES" "auto"
@@ -157,23 +157,23 @@ env_var_validate "TIMEZONE"
 
 log "info" "Settings: Main Vhost:"
 env_var_validate "MAIN_VHOST_ENABLE"
+env_var_validate "MAIN_VHOST_DOCROOT_DIR"
+env_var_validate "MAIN_VHOST_TEMPLATE_DIR"
 env_var_validate "MAIN_VHOST_BACKEND"
 env_var_validate "MAIN_VHOST_BACKEND_TIMEOUT"
-env_var_validate "MAIN_VHOST_DOCROOT"
 env_var_validate "MAIN_VHOST_SSL_TYPE"
 env_var_validate "MAIN_VHOST_SSL_CN"
-env_var_validate "MAIN_VHOST_TPL"
 env_var_validate "MAIN_VHOST_STATUS_ENABLE"
 env_var_validate "MAIN_VHOST_STATUS_ALIAS"
 
 log "info" "Settings: Mass Vhost:"
 env_var_validate "MASS_VHOST_ENABLE"
+env_var_validate "MASS_VHOST_DOCROOT_DIR"
+env_var_validate "MASS_VHOST_TEMPLATE_DIR"
 env_var_validate "MASS_VHOST_BACKEND"
 env_var_validate "MASS_VHOST_BACKEND_TIMEOUT"
-env_var_validate "MASS_VHOST_DOCROOT"
-env_var_validate "MASS_VHOST_TLD_SUFFIX"
 env_var_validate "MASS_VHOST_SSL_TYPE"
-env_var_validate "MASS_VHOST_TPL"
+env_var_validate "MASS_VHOST_TLD_SUFFIX"
 
 log "info" "Settings: Misc:"
 env_var_validate "WORKER_CONNECTIONS"
@@ -233,19 +233,19 @@ if [ "${VHOSTGEN_HTTPD_SERVER}" = "nginx" ]; then
 	# https://www.reddit.com/r/nginx/comments/a6pw31/phpfpm_does_not_handle_subpathindexphparg1arg2/
 	vhostgen_main_generate \
 		"${MAIN_VHOST_ENABLE}" \
-		"${MAIN_DOCROOT_BASE}/${MAIN_VHOST_DOCROOT}" \
+		"${MAIN_DOCROOT_BASE}/${MAIN_VHOST_DOCROOT_DIR}" \
 		"${MAIN_VHOST_BACKEND}" \
 		"/etc/vhost-gen/main.yml" \
-		"${MAIN_DOCROOT_BASE}/${MAIN_VHOST_TPL}" \
+		"${MAIN_DOCROOT_BASE}/${MAIN_VHOST_TEMPLATE_DIR}" \
 		"${MAIN_VHOST_SSL_TYPE}" \
 		"/etc/vhost-gen/templates-main/"
 else
 	vhostgen_main_generate \
 		"${MAIN_VHOST_ENABLE}" \
-		"${MAIN_DOCROOT_BASE}/${MAIN_VHOST_DOCROOT}" \
+		"${MAIN_DOCROOT_BASE}/${MAIN_VHOST_DOCROOT_DIR}" \
 		"${MAIN_VHOST_BACKEND}" \
 		"/etc/vhost-gen/main.yml" \
-		"${MAIN_DOCROOT_BASE}/${MAIN_VHOST_TPL}" \
+		"${MAIN_DOCROOT_BASE}/${MAIN_VHOST_TEMPLATE_DIR}" \
 		"${MAIN_VHOST_SSL_TYPE}"
 fi
 
@@ -309,7 +309,7 @@ if [ "${MASS_VHOST_ENABLE}" -eq "1" ]; then
 	watcherd_add="create-vhost.sh"
 	watcherd_add+=" \\\"%%n\\\""  # vhost project directory name
 	watcherd_add+=" \\\"%%p\\\""  # vhost project directory path (absolute)
-	watcherd_add+=" \\\"${MASS_VHOST_DOCROOT}\\\""
+	watcherd_add+=" \\\"${MASS_VHOST_DOCROOT_DIR}\\\""
 	watcherd_add+=" \\\"${MASS_VHOST_TLD_SUFFIX}\\\""
 	watcherd_add+=" \\\"${MASS_VHOST_ALIASES}\\\""
 	watcherd_add+=" \\\"${MASS_VHOST_SSL_TYPE}\\\""
@@ -319,7 +319,7 @@ if [ "${MASS_VHOST_ENABLE}" -eq "1" ]; then
 	watcherd_add+=" \\\"${DOCKER_LOGS}\\\""
 	watcherd_add+=" \\\"${CA_KEY_FILE}\\\""
 	watcherd_add+=" \\\"${CA_CRT_FILE}\\\""
-	watcherd_add+=" \\\"%%p/${MASS_VHOST_TPL}/\\\""
+	watcherd_add+=" \\\"%%p/${MASS_VHOST_TEMPLATE_DIR}/\\\""
 	watcherd_add+=" \\\"${VHOSTGEN_HTTPD_SERVER}\\\""
 
 	watcherd_del="rm /etc/httpd/vhost.d/%%n.conf"
