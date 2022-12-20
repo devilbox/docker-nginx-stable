@@ -224,13 +224,10 @@ When you plan on using `443` you should enable automated SSL certificate generat
 
 ## 💡 Examples
 
-In order to get you started easily, the documentation provides many examples about common use cases.
-
 ### Examples: Docker
 
 Get inspired by the following copy/paste examples to get you up and running in no time.
 
-> See **[Documentation: Examples](doc/examples.md)** or click any link below.
 
 <table>
  <tr valign="top" style="vertical-align:top">
@@ -250,11 +247,11 @@ Get inspired by the following copy/paste examples to get you up and running in n
  </tr>
 </table>
 
+> See **[Documentation: Examples](doc/examples.md)** or click any link above.
+
 ### Examples: Docker Compose
 
-Have a look at the Docker Compose **[examples](examples/)** directory. It provides fully functional `docker-compose.yml` files and example projects that are ready to be run.
-
-> See **[Docker Compose: Examples](examples/)** or click any link below.
+If you prefer Docker Compose, fully functional examples including dummy projects are provided and ready to be run.
 
 <table>
  <tr valign="top" style="vertical-align:top">
@@ -275,6 +272,7 @@ Have a look at the Docker Compose **[examples](examples/)** directory. It provid
  </tr>
 </table>
 
+> See **[Docker Compose: Examples](examples/)** or click any link above.
 
 
 ## 🖤 Sister Projects
