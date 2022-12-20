@@ -226,63 +226,54 @@ When you plan on using `443` you should enable automated SSL certificate generat
 
 In order to get you started easily, the documentation provides many examples about common use cases.
 
-### Serve static files
+### Examples: Docker
 
-This example creates the main (default) vhost, which only serves static files.
+Get inspired by the following copy/paste examples to get you up and running in no time.
 
-> See [**Documentation:** Serve static files](doc/examples.md#-serve-staticfiles)
+> See **[Documentation: Examples](doc/examples.md)** or click any link below.
 
+<table>
+ <tr valign="top" style="vertical-align:top">
+  <td><strong>Default vhost</strong></td><td><strong>Unlimited vhosts</strong></td>
+ </tr>
+ <tr valign="top" style="vertical-align:top">
+  <td>
+   <a href="doc/examples.md" >Serve static files</a><br/>
+   <a href="doc/examples.md" >Serve PHP files</a><br/>
+   <a href="doc/examples.md" >Sync local filestem permission</a><br/>
+   <a href="doc/examples.md" >Serve PHP files over HTTPS</a><br/>
+   <a href="doc/examples.md" >Reverse Proxy NodeJS</a><br/>
+  </td>
+  <td>
+   <a href="doc/examples.md" >LEMP stack</a><br/>
+  </td>
+ </tr>
+</table>
 
-### Serve PHP files with PHP-FPM
+### Examples: Docker Compose
 
-This example creates the main (default) vhost, which contacts a remote PHP-FPM host to serve PHP files.
+Have a look at the Docker Compose **[examples](examples/)** directory. It provides fully functional `docker-compose.yml` files and example projects that are ready to be run.
 
-> See [**Documentation:** Serve PHP files with PHP-FPM](doc/examples.md#-serve-php-files-with-php-fpm)
+> See **[Docker Compose: Examples](examples/)** or click any link below.
 
-
-### Serve PHP files with PHP-FPM and sync local permissions
-
-The same as the previous example, but also ensures that you can edit files locally and have file ownerships synced with webserver and PHP-FPM container.
-
-> See [**Documentation**: Serve PHP files with PHP-FPM over HTTPS](doc/examples.md#-serve-php-files-with-php-fpm-over-https)
-
-
-### Serve PHP files with PHP-FPM over HTTPS
-
-The same as the previous example, just with the addition of enabling SSL (HTTPS).
-
-This example shows the SSL type `redir`, which makes the webserver redirect any HTTP requests to HTTPS.
-
-Additionally we are mounting the `./ca` directory into the container under `/ca`. After startup you will find generated Certificate Authority files in there, which you could import into your browser.
-
-> See [**Documentation:** Serve PHP files with PHP-FPM over HTTPS](doc/examples.md#-serve-php-files-with-php-fpm-over-https)
-
-
-### Act as a Reverse Proxy for NodeJS
-
-This example creates a NodeJS application running in a Node container and uses the webserver to proxy all requests to the NodeJS application.  You could also enable SSL on the webserver in order to access NodeJS via HTTPS.
-
-> See [**Documentation:** Act as a Reverse Proxy for NodeJS](doc/examples.md#-act-as-a-reverse-proxy-for-nodejs)
-
-
-### Fully functional LEMP stack with Mass vhosts
-
-The following example creates a dynamic setup. Each time you create a new project directory below the `www/` directory, a new virtual host is automatically being created.
-
-Additionally all projects will have the `.com` suffix added to their domain name, which results in `<project>.com` as the final domain _(Where `<project>` is a placeholder for the created project directory)_.
-
-> See [**Documentation:** Fully functional LEMP stack with Mass vhosts](doc/examples.md#-fully-functional-lemp-stack-with-mass-vhosts)
-
-
-### Docker Compose
-
-Have a look at the **[examples](examples/)** directory. It is packed with all kinds of `Docker Compose` examples:
-
-* SSL
-* PHP-FPM remote server
-* Python and NodeJS Reverse Proxy
-* Mass virtual hosts
-* Mass virtual hosts with PHP-FPM, Python and NodeJS as backends
+<table>
+ <tr valign="top" style="vertical-align:top">
+  <td><strong>Default vhost</strong></td><td><strong>Unlimited vhosts</strong></td>
+ </tr>
+ <tr valign="top" style="vertical-align:top">
+  <td>
+   <a href="examples/" >Serve static files</a><br/>
+   <a href="examples/" >Serve PHP files</a><br/>
+   <a href="examples/" >Serve PHP files over HTTPS</a><br/>
+   <a href="examples/" >Reverse Proxy NodeJS</a><br/>
+   <a href="examples/" >Reverse Proxy Python</a><br/>
+  </td>
+  <td>
+   <a href="examples/" >Serve PHP files over HTTPS</a><br/>
+   <a href="examples/" >Reverse Proxy <strong>and</strong> PHP-FPM</a><br/>
+  </td>
+ </tr>
+</table>
 
 
 
@@ -405,3 +396,78 @@ Ansible: [cytopia](https://galaxy.ansible.com/cytopia)
 **[MIT License](LICENSE)**
 
 Copyright (c) 2016 [cytopia](https://github.com/cytopia)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Serve static files
+
+This example creates the main (default) vhost, which only serves static files.
+
+> See [**Documentation:** Serve static files](doc/examples.md#-serve-staticfiles)
+
+
+### Serve PHP files with PHP-FPM
+
+This example creates the main (default) vhost, which contacts a remote PHP-FPM host to serve PHP files.
+
+> See [**Documentation:** Serve PHP files with PHP-FPM](doc/examples.md#-serve-php-files-with-php-fpm)
+
+
+### Serve PHP files with PHP-FPM and sync local permissions
+
+The same as the previous example, but also ensures that you can edit files locally and have file ownerships synced with webserver and PHP-FPM container.
+
+> See [**Documentation**: Serve PHP files with PHP-FPM over HTTPS](doc/examples.md#-serve-php-files-with-php-fpm-over-https)
+
+
+### Serve PHP files with PHP-FPM over HTTPS
+
+The same as the previous example, just with the addition of enabling SSL (HTTPS).
+
+This example shows the SSL type `redir`, which makes the webserver redirect any HTTP requests to HTTPS.
+
+Additionally we are mounting the `./ca` directory into the container under `/ca`. After startup you will find generated Certificate Authority files in there, which you could import into your browser.
+
+> See [**Documentation:** Serve PHP files with PHP-FPM over HTTPS](doc/examples.md#-serve-php-files-with-php-fpm-over-https)
+
+
+### Act as a Reverse Proxy for NodeJS
+
+This example creates a NodeJS application running in a Node container and uses the webserver to proxy all requests to the NodeJS application.  You could also enable SSL on the webserver in order to access NodeJS via HTTPS.
+
+> See [**Documentation:** Act as a Reverse Proxy for NodeJS](doc/examples.md#-act-as-a-reverse-proxy-for-nodejs)
+
+
+### Fully functional LEMP stack with Mass vhosts
+
+The following example creates a dynamic setup. Each time you create a new project directory below the `www/` directory, a new virtual host is automatically being created.
+
+Additionally all projects will have the `.com` suffix added to their domain name, which results in `<project>.com` as the final domain _(Where `<project>` is a placeholder for the created project directory)_.
+
+> See [**Documentation:** Fully functional LEMP stack with Mass vhosts](doc/examples.md#-fully-functional-lemp-stack-with-mass-vhosts)
+
+
+
