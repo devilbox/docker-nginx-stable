@@ -38,7 +38,8 @@ generate_vhostgen_conf() {
 	alias_block="alias: []"
 	if [ -n "${alias}" ]; then
 		alias_block="alias:\n"
-		for item in ${alias//,/}; do
+		# Ensure to convert ',' to space, to have items to iterate over
+		for item in ${alias//,/ }; do
 			item_alias="$( echo "${item}" | awk -F':' '{print $1}' )"
 			item_path="$(  echo "${item}" | awk -F':' '{print $2}' )"
 			item_cors="$(  echo "${item}" | awk -F':' -v OFS=':' '{$1="";$2="";print}' | sed -e 's/^://g' -e 's/^://g' )"

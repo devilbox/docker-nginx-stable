@@ -114,7 +114,17 @@ validate_main_vhost_enable() {
 
 
 ###
-### Validate MAIN_VHOST_BACKEND: <type>:<addr>:<port>
+### Validate MAIN_VHOST_ALIASES_ALLOW: <alias>:<path>[:<cors>]
+###
+validate_main_vhost_aliases_allow() {
+	local name="${1}"
+	local value="${2}"
+	_validate_vhost_aliases_allow "${name}" "${value}" "${MAIN_VHOST_ENABLE}"
+}
+
+
+###
+### Validate MAIN_VHOST_BACKEND: <prefix>:<type>:<proto>:<addr>:<port>
 ###
 validate_main_vhost_backend() {
 	local name="${1}"
@@ -251,7 +261,17 @@ validate_mass_vhost_enable() {
 
 
 ###
-### Validate MASS_VHOST_BACKEND <type>:<addr>:<port>
+### Validate MASS_VHOST_ALIASES_ALLOW: <alias>:<path>[:<cors>]
+###
+validate_mass_vhost_aliases_allow() {
+	local name="${1}"
+	local value="${2}"
+	_validate_vhost_aliases_allow "${name}" "${value}" "${MASS_VHOST_ENABLE}"
+}
+
+
+###
+### Validate MASS_VHOST_BACKEND <prefix>:<type>:<proto>:<addr>:<port>
 ###
 validate_mass_vhost_backend() {
 	local name="${1}"
@@ -414,6 +434,82 @@ _validate_bool() {
 	else
 		_log_env_valid "valid" "${name}" "${value}" "${message}" "${on}"
 	fi
+}
+
+
+###
+### Validate *_VHOST_ALIASES_ALLOW  <alias>:<path>[:<cors>]
+###
+_validate_vhost_aliases_allow() {
+	local name="${1}"
+	local value="${2}"
+	local vhost_enabled="${3}"
+
+	# Empty value means no alias configuration
+	if [ -z "${value}" ]; then
+		# Check if vhost is disabled
+		if [ "${vhost_enabled}" = "0" ]; then
+			_log_env_valid "ignore" "${name}" "${value}" "(vhost disabled)"
+			return
+		fi
+		_log_env_valid "valid" "${name}" "${value}" "No Aliases defined"
+		return
+	fi
+
+	# Aliases can be comma separated
+	alias_urls=   # This is used to show valid output
+	for item in ${value//,/ }; do
+		item_alias="$( echo "${item}" | awk -F':' '{print $1}' )"
+		item_path="$(  echo "${item}" | awk -F':' '{print $2}' )"
+		item_cors="$(  echo "${item}" | awk -F':' -v OFS=':' '{$1="";$2="";print}' | sed -e 's/^://g' -e 's/^://g' )"
+
+		# Validate <alias> part
+		if ! echo "${item_alias}" | grep -E '^/(.+)/$' >/dev/null; then
+			_log_env_valid "invalid" "${name}" "${value}" "Invalid format"
+			_log_env_valid "invalid" "${name}" "${item}" "Invalid item"
+			_log_env_valid "invalid" "${name}" "${item_alias}" "Invalid <alias> part"
+			log "err" "The <alias> definition is invalid. It must start and end with a '/'"
+			log "err" "I.e., it must pass the following regex check: ^/(.+)/\$"
+			_log_aliases_allow_examples
+			exit 1
+		fi
+		# Validate <path> part
+		if ! echo "${item_path}" | grep -E '^/(.*)[^/]$' >/dev/null; then
+			_log_env_valid "invalid" "${name}" "${value}" "Invalid format"
+			_log_env_valid "invalid" "${name}" "${item}" "Invalid item"
+			_log_env_valid "invalid" "${name}" "${item_path}" "Invalid <path> part"
+			log "err" "The <path> definition is invalid. It must start with a '/' and can't have a trailing '/'"
+			log "err" "I.e., it must pass the following regex check: ^/(.*)[^/]\$"
+			_log_aliases_allow_examples
+			exit 1
+		fi
+		# Validate <cors> part
+		if [ -n "${item_cors}" ]; then
+			if ! echo "${item_cors}" | grep -E '(http|https|http\(s\)\?):\/\/(.+)$' >/dev/null; then
+				_log_env_valid "invalid" "${name}" "${value}" "Invalid format"
+				_log_env_valid "invalid" "${name}" "${item}" "Invalid item"
+				_log_env_valid "invalid" "${name}" "${item_cors}" "Invalid <cors> part"
+				log "err" "The <cors> definition is invalid. It must be a valid regex in the form of:"
+				log "err" "    http://<regex>\$"
+				log "err" "    https://<regex>\$"
+				log "err" "    http(s)?://<regex>\$"
+				log "err" "I.e., it must pass the following regex check: (http|https|http\(s\)\?):\/\/(.+)\$"
+				_log_aliases_allow_examples
+				exit 1
+			fi
+		fi
+		alias_urls="${alias_urls}, ${item_alias}"
+	done
+	alias_urls="${alias_urls:2}" # Remove leading comma and leading space
+
+	# Check if vhost is disabled
+	if [ "${vhost_enabled}" = "0" ]; then
+		_log_env_valid "ignore" "${name}" "${value}" "(vhost disabled)"
+		return
+	fi
+
+	# Display settings
+	_log_env_valid "valid" "${name}" "${value}" "Defined Aliases" "${alias_urls}"
 }
 
 
@@ -733,6 +829,25 @@ _log_env_valid() {
 		log "????" "Internal: Wrong value given to _log_env_valid"
 		exit 1
 	fi
+}
+
+
+###
+### Log aliases examples as error messages
+###
+_log_aliases_allow_examples() {
+	log "err" ""
+	log "err" "Format (single): <alias>:<path>"
+	log "err" "Format (single): <alias>:<path>:<cors>"
+	log "err" ""
+	log "err" "Format (multi):  <alias>:<path>[:<cors>] [,<alias>:<path>[:<cors>]]"
+	log "err" ""
+
+	log "err" ""
+	log "err" "Example: /my-api-url/:/var/www/default/api"
+	log "err" "Example: /my-api-url/:/var/www/default/api:http(s)?://(.*)$"
+	log "err" ""
+	log "err" "Example: /img/:/var/www/img, /css/:/var/www/css, /js/:/var/www/js"
 }
 
 

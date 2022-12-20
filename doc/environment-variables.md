@@ -32,10 +32,11 @@ The provided Docker images have a lot of injectables in order to customize it to
   <td>
    <strong>Main Vhost</strong><br/>
    <code><a href="#-main_vhost_enable" >MAIN_VHOST_ENABLE</a></code><br/>
-   <code><a href="#-main_vhost_docroot_dir" >MAIN_VHOST_DOCROOT_DIR</a></code><br/>
-   <code><a href="#-main_vhost_template_dir" >MAIN_VHOST_TEMPLATE_DIR</a></code><br/>
+   <code><a href="#-main_vhost_aliases_allow" >MAIN_VHOST_ALIASES_ALLOW</a></code><br/>
    <code><a href="#-main_vhost_backend" >MAIN_VHOST_BACKEND</a></code><br/>
    <code><a href="#-main_vhost_backend_timeout" >MAIN_VHOST_BACKEND_TIMEOUT</a></code><br/>
+   <code><a href="#-main_vhost_docroot_dir" >MAIN_VHOST_DOCROOT_DIR</a></code><br/>
+   <code><a href="#-main_vhost_template_dir" >MAIN_VHOST_TEMPLATE_DIR</a></code><br/>
    <code><a href="#-main_vhost_ssl_type" >MAIN_VHOST_SSL_TYPE</a></code><br/>
    <code><a href="#-main_vhost_ssl_cn" >MAIN_VHOST_SSL_CN</a></code><br/>
    <code><a href="#-main_vhost_status_enable" >MAIN_VHOST_STATUS_ENABLE</a></code><br/>
@@ -44,10 +45,11 @@ The provided Docker images have a lot of injectables in order to customize it to
   <td>
    <strong>Mass Vhost</strong><br/>
    <code><a href="#-mass_vhost_enable" >MASS_VHOST_ENABLE</a></code><br/>
-   <code><a href="#-mass_vhost_docroot_dir" >MASS_VHOST_DOCROOT_DIR</a></code><br/>
-   <code><a href="#-mass_vhost_template_dir" >MASS_VHOST_TEMPLATE_DIR</a></code><br/>
+   <code><a href="#-mass_vhost_aliases_allow" >MASS_VHOST_ALIASES_ALLOW</a></code><br/>
    <code><a href="#-mass_vhost_backend" >MASS_VHOST_BACKEND</a></code><br/>
    <code><a href="#-mass_vhost_backend_timeout" >MASS_VHOST_BACKEND_TIMEOUT</a></code><br/>
+   <code><a href="#-mass_vhost_docroot_dir" >MASS_VHOST_DOCROOT_DIR</a></code><br/>
+   <code><a href="#-mass_vhost_template_dir" >MASS_VHOST_TEMPLATE_DIR</a></code><br/>
    <code><a href="#-mass_vhost_ssl_type" >MASS_VHOST_SSL_TYPE</a></code><br/>
    <code><a href="#-mass_vhost_tld_suffix" >MASS_VHOST_TLD_SUFFIX</a></code><br/>
   </td>
@@ -195,6 +197,79 @@ The following Docker logs output shows settings for `*_VHOST_TEMPLATE_DIR` set t
 
 
 
+## ∑ `MAIN_VHOST_ALIASES_ALLOW`
+
+This variable defines one or more URL aliases pointing to a file system path. Optional CORS settings can be set as well.
+
+* **Default:** `` _(no aliases)_
+* **Allowed:** valid aliases string
+* **Var type:** `string`
+* **Requies:** `MAIN_VHOST_ENABLE=1`
+
+### Format string
+```bash
+# Single alias
+<alias>:<path>[:<cors>]
+
+# Multiple aliases are comma separated
+<alias>:<path>[:<cors>][,<alias>:<path>[:<cors>]]
+```
+
+### Format string examples
+```bash
+# Single alias
+# Ensures that http://server/url/path/ points to filesystem /var/www/default/img
+/url/path/:/var/www/default/img
+
+# Single alias with CORS
+# Ensures that http://server/url/path/ points to filesystem /var/www/default/img
+# And allows cross domain request from these hosts: http(s)?://(.+)?
+/url/path/:/var/www/default/img:http(s)?://(.+)$
+
+# Mutiple aliases
+# Ensures that http://server/devilbox-api/ points to filesystem /var/www/default/api
+# Ensures that http://server/vhost.d/      points to filesystem /etc/httpd
+/devilbox-api/:/var/www/default/api, /vhost.d/:/etc/httpd
+
+# Mutiple aliases with CORS
+# Ensures that http://server/devilbox-api/ points to filesystem /var/www/default/api
+# Ensures that http://server/vhost.d/      points to filesystem /etc/httpd
+# And allows cross domain request from these hosts: http(s)?://(.+)? on http://server/devilbox-api/
+/devilbox-api/:/var/www/default/api:http(s)?://(.+)$, /vhost.d/:/etc/httpd
+```
+
+### Generation example
+
+Let's assume you have provided the following environment variable to the docker image:
+```bash
+MAIN_VHOST_ALIASES_ALLOW='/vhost.d/:/etc/httpd'
+```
+In _Nginx Speak_ it would generate the following configuration block:
+```conf
+location ~ /vhost.d/ {
+    root  /etc/httpd;
+}
+```
+In _Apache Speak_ it would generate the following configuration block:
+```conf
+Alias "/vhost.d/" "/etc/httpd/vhost.d/"
+<Location "/vhost.d/">
+</Location>
+<Directory "/etc/httpd/vhost.d/">
+    Order allow,deny
+    Allow from all
+    Require all granted
+</Directory>
+```
+
+### Validation
+
+During docker startup, the entrypoint validator tries the best guess on what has gone wrong and gives valid examples.
+
+<img style="height: 380px;" height="180" src="img/httpd-alias-validation.png" />
+
+
+
 ## ∑ `MAIN_VHOST_BACKEND`
 
 The given value determines the backend (potentia remote/reveres hosts) for the main (default vhost).
@@ -258,6 +333,14 @@ conf:phpfpm:tcp:10.0.0.1:9000
 
 See the following Docker logs output for how `*_VHOST_TEMPLATE_DIR` affects the configuration file specified in `*_VHOST_BACKEND`<br/>
 <img style="height: 380px;" height="180" src="img/httpd-dir-docroot-template.png" />
+
+### Validation
+
+During docker startup, the entrypoint validator tries the best guess on what has gone wrong and gives valid examples.
+
+| <img style="height: 380px;" height="180" src="img/httpd-backend-invalid-type.png" /> | <img style="height: 380px;" height="180" src="img/httpd-backend-unsupported.png" /> |
+|:-----------:|:-----------:|
+| Invalid `<type>` | Unsupported backend |
 
 
 
@@ -347,6 +430,12 @@ See [`MAIN_VHOST_DOCROOT_DIR`](#-main_vhost_docroot_dir). It is the same concept
 ## ∑ `MASS_VHOST_TEMPLATE_DIR`
 
 See [`MAIN_VHOST_TEMPLATE_DIR`](#-main_vhost_template_dir). It is the same concept.
+
+
+
+## ∑ `MASS_VHOST_ALIASES_ALLOW`
+
+See [`MAIN_VHOST_ALIASES_ALLOW`](#-main_vhost_aliases_allow). It is the same concept.
 
 
 

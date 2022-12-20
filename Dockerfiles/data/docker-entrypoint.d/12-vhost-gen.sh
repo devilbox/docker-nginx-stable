@@ -46,7 +46,7 @@ vhostgen_main_generate_config() {
 	local httpd_server="${1}"  # nginx, apache22 or apache24
 	local backend_string="${2}"
 	local http2_enable="${3}"
-	local aliases="${4}"
+	local aliases_allow="${4}"
 	local status_enable="${5}"
 	local status_alias="${6}"
 	local docker_logs="${7}"
@@ -81,7 +81,7 @@ vhostgen_main_generate_config() {
 		"${be_conf_host}" \
 		"${be_conf_port}" \
 		"${timeout}" \
-		"${aliases}" \
+		"${aliases_allow}" \
 		"$( to_python_bool "${status_enable}" )" \
 		"${status_alias}"  \
 		> "${outpath}"
