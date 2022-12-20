@@ -9,32 +9,6 @@
 # Documentation: Architecture
 
 
-## 👷 Execution Chain
-
-This is the execution chain for how the mass virtual hosting is achieved:
-```bash
-       docker-entrypoint.sh
-                |
-                ↓
-           supervisord
-          /     |
-         /      |
-       ↙        ↓
-  start       start
-  httpd      watcherd
-            /    |    \
-           /     |     \
-          ↓      ↓      ↘
-        kill    rm      create-vhost.sh
-       httpd   vhost     |           |
-                         |           |
-                         ↓           ↓
-                      cert-gen    vhost-gen
-```
-
-Whenver the httpd daemon is killed by `watcherd`, it is restarted by `supervisord`. This ensures that new/changed webserver configuration is automatically loaded and applied.
-
-
 ## 👷 Tools
 
 The following tools interact with each other and make this project possible:
@@ -48,9 +22,64 @@ The following tools interact with each other and make this project possible:
 
 
 
+## 👷 Execution Chain
+
+This is the execution chain for how the mass virtual hosting is achieved:
+```bash
+       docker-entrypoint.sh
+                |
+                ↓
+           supervisord (pid 1)
+          /     |
+         /      |
+       ↙        ↓
+  start       start
+  httpd      watcherd
+            /    |    \
+           /     |     \
+          ↓      ↓      ↘
+        sgn     rm      create-vhost.sh
+       httpd   vhost     |           |
+                         |           |
+                         ↓           ↓
+                      cert-gen    vhost-gen
+```
+
+1. The `docker-entrypoint.sh` script sets and validates given options
+2. It then passes over to `supervisord` via `exec`
+3. `supervisord` ensures the web server is running
+4. `supervisord` ensures `watcherd` is running
+5. `watcherd` listens for file system changed (directory created or directory removed)<sup>\[1\]</sup>
+
+> **\[1\]** A renamed directory is: directory removed and directory created
+
+#### What does `watcherd` do?
+
+* `watcherd` is setup with two events:
+    * event: directory created
+    * event: directory removed
+* `watcherd` is setup with two event actions (one for each event):
+    * directory created: call `create-vhost.sh`
+    * directory removed: remove webserver vhost config for this project
+* `watcherd` is setup with one *trigger* that acts after any event action has been executed:
+    * send a reload or stop signal to  webserver
+
+So in simple terms, when `watcherd` detects that a new directory was created, it calls `create-vhost.sh` and sends a reload or stop signal to the webserver. In case the webserver will shutdown gracefully, it will immediately be started by `supervisord`. In both cases, the new webserver configuration will be applied.<br/>
+When `watcherd` detects that a directory was removed, it will remove the corresponding webserver vhost configuration file and send a reload or stop signal to the webserver (In case of a stop signal, `supervisord` will again ensure the webserver will come up).
+
+#### What does `create-vhost.sh` do?
+
+`create-vhost.sh` is a minimalistic run-time version of the entrypoint script and does thorough validation on anything that could not be validated during startup-time.
+
+* `create-vhost.sh` will generate SSL certificates (signed by internal CA) via `cert-gen`
+* `create-vhost.sh` passes any customizations over to `vhost-gen`, which will then generate a virtual host configuration file.
+
+
+
+
 ## 👷 Directories and files
 
-The following files and directories are used:
+To get some insights on the internals, here is an overview about all directory paths and files that are being used:
 
 | Directories / Files              | Description |
 |----------------------------------|-------------|

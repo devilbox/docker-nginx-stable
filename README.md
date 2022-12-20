@@ -228,7 +228,7 @@ The documentation provides copy/paste examples about common use-cases including 
 
 ### Docker
 
-> See **[Documentation: Examples](doc/examples.md)** or click any link below.
+> 🛈 For details see **[Documentation: Examples](doc/examples.md)** or click any link below.
 
 <table>
  <tr valign="top" style="vertical-align:top">
@@ -250,7 +250,7 @@ The documentation provides copy/paste examples about common use-cases including 
 
 ### Docker Compose
 
-> See **[Docker Compose: Examples](examples/)** or click any link below.
+> 🛈 For details see **[Docker Compose: Examples](examples/)** or click any link below.
 
 <table>
  <tr valign="top" style="vertical-align:top">
@@ -277,7 +277,7 @@ The documentation provides copy/paste examples about common use-cases including 
 The following diagram shows the basic architecture of this docker image.
 
 
-> See **[Documentation: Architecture](doc/architecture.md)** for details.
+> 🛈 For details see **[Documentation: Architecture](doc/architecture.md)**
 
 ```bash
        docker-entrypoint.sh
@@ -292,7 +292,7 @@ The following diagram shows the basic architecture of this docker image.
             /    |    \
            /     |     \
           ↓      ↓      ↘
-        kill    rm      create-vhost.sh
+        sgn     rm      create-vhost.sh
        httpd   vhost     |           |
                          |           |
                          ↓           ↓
