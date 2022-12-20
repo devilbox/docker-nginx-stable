@@ -1,0 +1,70 @@
+**Architecture** |
+[Features](features.md) |
+[Examples](examples.md) |
+[Environment variables](environment-variables.md) |
+[Volumes](volumes.md)
+
+---
+
+# Documentation: Architecture
+
+
+## 👷 Execution Chain
+
+This is the execution chain for how the mass virtual hosting is achieved:
+```bash
+       docker-entrypoint.sh
+                |
+                ↓
+           supervisord
+          /     |
+         /      |
+       ↙        ↓
+  start       start
+  httpd      watcherd
+            /    |    \
+           /     |     \
+          ↓      ↓      ↘
+        kill    rm      create-vhost.sh
+       httpd   vhost     |           |
+                         |           |
+                         ↓           ↓
+                      cert-gen    vhost-gen
+```
+
+Whenver the httpd daemon is killed by `watcherd`, it is restarted by `supervisord`. This ensures that new/changed webserver configuration is automatically loaded and applied.
+
+
+## 👷 Tools
+
+The following tools interact with each other and make this project possible:
+
+| Tool | Usage |
+|------|-------|
+| [`vhost-gen`](https://github.com/devilbox/vhost-gen) | An arbitrary vhost generator for Nginx, Apache 2.2 and Apache 2.4 to ensure one config generates the same vhosts independently of underlying webserver |
+| [`cert-gen`](https://github.com/devilbox/cert-gen)   | A tool to generate and validate Certificate Authorities and SSL certificates which are signed by a Certificate Authority |
+| [`watcherd`](https://github.com/devilbox/watcherd)   | A file system change detecter (`inotify`-based or `bash`-based), which acts on changes (`add` or `delete` of directories) with custom commands and offers a trigger command on change. (in this configuration, it will call `vhost-gen`, when a new directory is added in order to make the mass vhost possible. It will call a generic `rm ...` commad for a `delete` and restarts the webserver as its trigger command. |
+| [`supervisord`](http://supervisord.org/)             | A daemon that manages the run-time of multiple other daemons. In this case it ensures that `watcherd` and the webserver are up and running. |
+
+
+
+## 👷 Directories and files
+
+The following files and directories are used:
+
+| Directories / Files              | Description |
+|----------------------------------|-------------|
+| `/var/www/default/`              | Main Vhost base directory |
+| `/shared/httpd/`                 | Mass Vhost base directory |
+| `/ca/`                           | Directory where generated Certificate Authoriy will be placed (You can mount this and place your own, if you prefer to use another one) |
+| `/etc/httpd/cert/`               | Directory where Vhost SSL certificates and keys are stored |
+| `/etc/httpd/conf.d/`             | Webserer configuration directory: Stores main vhost configuration file |
+| `/etc/httpd/vhost.d/`            | Webserver configuration directory: Stores mass vhost configuration files |
+| `/etc/httpd-custom.d/`           | Webserver configuration directory: Mount this and place your custom webserver configuration files in here |
+| `/var/logs/httpd/`               | Webserver log directory |
+| `/etc/vhost-gen/`                | Directory for [vhost-gen](https://github.com/devilbox/vhost-gen/): contains its default configuration (placed during install time) |
+| `/etc/vhost-gen.d/`              | Directory for [vhost-gen](https://github.com/devilbox/vhost-gen/): mount this and place custom `vhost-gen` templates to override `vhost-gen`'s behaviour. Templates can be found: [here](https://github.com/devilbox/vhost-gen/tree/master/etc/templates) |
+| [`/docker-entrypoint.sh`](../Dockerfiles/data/docker-entrypoint.sh)   | Entrypoint script that will be executed by the container during startup |
+| `/docker-entrypoint.d/`          | Entrypoint validators and functions that are used by `/docker-entrypoint.sh` |
+| [`/etc/supervisord.conf`](../Dockerfiles/data/docker-entrypoint.d/15-supervisord.sh) | Supervisord coniguration file. Supervisord will only be started, whenn `MASS_VHOST_ENABLE` is set to `1` |
+| [`/usr/local/bin/create-vhost.sh`](../Dockerfiles/data/create-vhost.sh) | A wrapper script to create a vhost (validation, ssl certificates and calls `vhost-gen` |

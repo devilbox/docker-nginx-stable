@@ -1,3 +1,4 @@
+[Architecture](architecture.md) |
 [Features](features.md) |
 **Examples]** |
 [Environment variables](environment-variables.md) |
