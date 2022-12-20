@@ -220,18 +220,16 @@ When you plan on using `443` you should enable automated SSL certificate generat
 
 ## 💡 Examples
 
-### Docker Compose
+> 🛈 For more Docker Compose examples see **[Examples: Overview](examples/)**
 
-Have a look at the **[examples](examples/)** directory. It is packed with all kinds of examples:
+### 1. Serve static files
 
-* SSL
-* PHP-FPM remote server
-* Python and NodeJS Reverse Proxy
-* Mass virtual hosts
-* Mass virtual hosts with PHP-FPM, Python and NodeJS as backends
+This example creates the main (default) vhost, which only serves static files.
 
+* **Vhost:** main (default)
+* **Backend:** none
 
-### Serve static files
+> 🛈 With no further configuration, the webserver expects files to be served by the main vhost in: `/var/www/default/htdocs`.
 
 1. Create a static page
    ```bash
@@ -250,14 +248,19 @@ Have a look at the **[examples](examples/)** directory. It is packed with all ki
    curl http://localhost:9090
    ```
 
-### Serve PHP files with PHP-FPM
+### 2. Serve PHP files with PHP-FPM
+
+This example creates the main (default) vhost, which contacts a remote PHP-FPM host to serve PHP files.
+
+* **Vhost:** main (default)
+* **Backend:** PHP-FPM
 
 | PHP-FPM Reference Images |
 |--------------------------|
 | <a title="PHP-FPM Reference Images" href="https://github.com/devilbox/docker-php-fpm" ><img title="Devilbox" height="82px" src="https://raw.githubusercontent.com/devilbox/artwork/master/submissions_banner/cytopia/02/png/banner_256_trans.png" /></a> |
 
-Note, for this to work, the `$(pwd)/www` directory must be mounted into the webserver container as well as into the php-fpm container.
-Each PHP-FPM container also has the option to enable Xdebug and more, see their respective Readme files for futher settings.
+> 🛈 For this to work, the `$(pwd)/www` directory must be mounted into the webserver container as well as into the php-fpm container.<br/>
+> 🛈 With no further configuration, the webserver expects files to be served by the main vhost in: `/var/www/default/htdocs`.
 
 1. Create a helo world page
    ```bash
@@ -285,14 +288,20 @@ Each PHP-FPM container also has the option to enable Xdebug and more, see their 
    curl http://localhost:9090
    ```
 
-### Serve PHP files with PHP-FPM over HTTPS
+### 3. Serve PHP files with PHP-FPM over HTTPS
 
-Pretty much the same as in the previous example, just with an SSL addition.
-The SSL definition ensures that any request made to HTTP will receive a redirect to HTTPS.
-This was specified with type `redir`.
+The same as the previous example, just with the addition of enabling SSL (HTTPS).
 
-Additionally it mounts the `./ca` directory into the container. You can find the Certificate Authority files in there and import it into your browser for valid SSL.
-This probably makes more sense with `MASS_VHOST_ENABLE` as you have an unlimited number of projects.
+This example shows the SSL type `redir`, which makes the webserver redirect any HTTP requests to HTTPS.
+
+Additionally we are mounting the `./ca` directory into the container under `/ca`. After startup you will find generated Certificate Authority files in there, which you could import into your browser.
+
+* **Vhost:** main (default)
+* **Backend:** Reverse Proxy
+* **Features:** SSL (redirect)
+
+> 🛈 For this to work, the `$(pwd)/www` directory must be mounted into the webserver container as well as into the php-fpm container.<br/>
+> 🛈 With no further configuration, the webserver expects files to be served by the main vhost in: `/var/www/default/htdocs`.
 
 1. Create a helo world page
    ```bash
@@ -327,9 +336,14 @@ This probably makes more sense with `MASS_VHOST_ENABLE` as you have an unlimited
    curl -k https://localhost
    ```
 
-### Act as a Reverse Proxy for NodeJS
+### 4. Act as a Reverse Proxy for NodeJS
 
-This example creates a Reverse Proxy for a NodeJS project.
+The following example proxies all HTTP requests to a NodeJS remote backend. You could also enable SSL on the webserver in order to access NodeJS via HTTPS.
+
+* **Vhost:** main (default)
+* **Backend:** Reverse Proxy
+
+> 🛈 No files need to be mounted into the webserver, as content is coming from the NodeJS server.
 
 1. Create a NodeJS application
    ```bash
@@ -366,16 +380,22 @@ This example creates a Reverse Proxy for a NodeJS project.
    curl http://localhost
    ```
 
-### Fully functional LEMP stack with Mass vhosts
+### 5. Fully functional LEMP stack with Mass vhosts
 
-The following example creates a dynamic setup. Each time you create a new project directory below `projects/`, a new virtual host is being created.
-Additionally all projects will have the `.com` suffix to their project name as their final domain.
+The following example creates a dynamic setup. Each time you create a new project directory below `www/`, a new virtual host is being created.
+Additionally all projects will have the `.com` suffix added to their domain name, which results in `<project>.com` as the final domain.
+
+* **Vhost:** mass (unlimited vhosts)
+* **Backend:** PHP-FPM
+
+> 🛈 For this to work, the `$(pwd)/www` directory must be mounted into the webserver container as well as into the php-fpm container.<br/>
+> 🛈 With no further configuration, the webserver expects files to be served by the **mass** vhost in: **`/shared/httpd/<project>/htdocs`**, where `<project>` is a placeholder for any directory.
 
 1. Create the project base directory
    ```bash
-   mkdir -p projects
+   mkdir -p www
    ```
-2. Start the MySQL container
+2. Start the MySQL container _(only for demonstration purposes)_
    ```bash
    docker run -d -it \
        --name mysql \
@@ -386,14 +406,14 @@ Additionally all projects will have the `.com` suffix to their project name as t
    ```bash
    docker run -d -it \
        --name php \
-       -v $(pwd)/projects:/shared/httpd \
+       -v $(pwd)/www:/shared/httpd \
        devilbox/php-fpm:8.2-base
    ```
 4. Start the webserver container, linking it to the two above
    ```bash
    docker run -d -it \
        -p 8080:80 \
-       -v $(pwd)/projects:/shared/httpd \
+       -v $(pwd)/www:/shared/httpd \
        -e MAIN_VHOST_ENABLE=0 \
        -e MASS_VHOST_ENABLE=1 \
        -e MASS_VHOST_TLD_SUFFIX=.com \
@@ -404,8 +424,8 @@ Additionally all projects will have the `.com` suffix to their project name as t
    ```
 5. Create `project-1`
    ```bash
-   mkdir -p projects/project-1/htdocs
-   echo '<?php echo "hello from project-1";' > projects/project-1/htdocs/index.php
+   mkdir -p www/project-1/htdocs
+   echo '<?php echo "hello from project-1";' > www/project-1/htdocs/index.php
    ```
 6. Verify `project-1`
    ```bash
@@ -413,14 +433,26 @@ Additionally all projects will have the `.com` suffix to their project name as t
    ```
 7. Create `another`
    ```bash
-   mkdir -p projects/another/htdocs
-   echo '<?php echo "hello from another";' > projects/another/htdocs/index.php
+   mkdir -p www/another/htdocs
+   echo '<?php echo "hello from another";' > www/another/htdocs/index.php
    ```
 8. Verify `another`
    ```bash
    curl -H 'Host: another.com' http://localhost:8080
    ```
 9. Add more projects as you wish...
+
+
+### 6. Docker Compose
+
+Have a look at the **[examples](examples/)** directory. It is packed with all kinds of `Docker Compose` examples:
+
+* SSL
+* PHP-FPM remote server
+* Python and NodeJS Reverse Proxy
+* Mass virtual hosts
+* Mass virtual hosts with PHP-FPM, Python and NodeJS as backends
+
 
 
 
