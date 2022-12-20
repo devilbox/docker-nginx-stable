@@ -24,7 +24,7 @@ From a users perspective, you mount your local project directory into the contai
 For convenience the entrypoint script during `docker run` provides a pretty decent **validation and documentation** about wrong user input and suggests steps to fix it.
 
 | <img style="height: 180px;" height="180" src="doc/img/httpd-backend-invalid-type.png" /> | <img style="height: 180px;" height="180" src="doc/img/httpd-backend-unsupported.png" /> | <img style="height: 180px;" height="180" src="doc/img/httpd-alias-validation.png" /> | <img style="height: 180px;" height="180" src="doc/img/httpd-valid.png" /> |
-|:----------------------:|:----------:|:--------:|
+|:----------------------:|:------------------:|:-------------:|:--------:|
 | Invalid backend string | Backend Suggestion | Invalid Alias | Verified |
 
 
