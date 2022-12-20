@@ -275,6 +275,36 @@ If you prefer Docker Compose, fully functional examples including dummy projects
 > See **[Docker Compose: Examples](examples/)** or click any link above.
 
 
+
+## 👷 Architecture
+
+The following diagram shows the basic architecture of this docker image.
+
+
+> See **[Documentation: Architecture](doc/architecture.md)** for details.
+
+```bash
+       docker-entrypoint.sh
+                |
+                ↓
+           supervisord (pid 1)
+          /     |
+         /      |
+       ↙        ↓
+  start       start
+  httpd      watcherd
+            /    |    \
+           /     |     \
+          ↓      ↓      ↘
+        kill    rm      create-vhost.sh
+       httpd   vhost     |           |
+                         |           |
+                         ↓           ↓
+                      cert-gen    vhost-gen
+```
+
+
+
 ## 🖤 Sister Projects
 
 Show some love for the following sister projects.
