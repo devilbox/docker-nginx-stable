@@ -109,7 +109,7 @@ SSL certificates are signed by a certificate authority (which is also being gene
 
 ### Customization per virtual host
 
-Each virtual host can individually be fully customized via `vhost-gen` templates.
+Each virtual host can individually be fully customized via [`vhost-gen`](https://github.com/devilbox/vhost-gen) templates.
 
 ### Customization for the default virtual host
 
