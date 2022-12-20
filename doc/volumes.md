@@ -7,7 +7,7 @@
 # Documentation: Volumes
 
 
-## `/var/www/default/`
+## 📂 `/var/www/default/`
 
 * **type:** data directory
 * **purpose:** website files for the default virtual host
@@ -26,7 +26,7 @@ docker run -d -it \
 ```
 
 
-## `/shared/httpd/`
+## 📂 `/shared/httpd/`
 
 * **type:** data directory
 * **purpose:** website files for the mass virtual hosts (your projects)
@@ -45,7 +45,7 @@ docker run -d -it \
 ```
 
 
-## `/ca/`
+## 📂 `/ca/`
 
 * **type:** data directory
 * **purpose:** populated with CA certificate files
@@ -55,7 +55,7 @@ This directory will be populated by a Certificate Authority, which signs every v
 **Note:** CA files are not being regenerated if they already exist. You could also place your own CA files in here.
 
 
-## `/etc/httpd-custom.d/`
+## 📂 `/etc/httpd-custom.d/`
 
 * **type:** config directory
 * **purpose:** Add `*.conf` files to alter the webserver behaviour
@@ -63,7 +63,7 @@ This directory will be populated by a Certificate Authority, which signs every v
 Mount this directory to your local file system and add any valid `*.conf` files to alter the web server behaviour.
 
 
-## `/etc/vhost-gen.d/`
+## 📂 `/etc/vhost-gen.d/`
 
 * **type:** config directory
 * **purpose:** Add [vhost-gen](https://github.com/devilbox/vhost-gen) templates to alter the webserver behaviour

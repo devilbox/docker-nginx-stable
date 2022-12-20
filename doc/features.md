@@ -7,9 +7,14 @@
 # Documentation: Features
 
 
-## Automated virtual hosts
+1. Automated mass Virtual Hosts
+2. Automated PHP-FPM setup
+3. Automated Reverse Proxy setup
 
-1. Automated virtual hosts can be enabled by providing `-e MASS_VHOST_ENABLE=1`.
+
+## ☆ Automated mass Virtual Hosts
+
+1. Automated virtual hosts can be enabled by providing the following environment variable to the docker container `MASS_VHOST_ENABLE=1`.
 2. You should mount a local project directory into the Docker under `/shared/httpd` (`-v /local/path:/shared/httpd`).
 3. You can optionally specify a global server name suffix via e.g.: `-e MASS_VHOST_TLD_SUFFIX=.loc`
 4. You can optionally specify a global subdirectory from which the virtual host will servve the documents via e.g.: `-e MASS_VHOST_DOCROOT_DIR=www`
@@ -48,7 +53,7 @@ Just to give you a few examples:
 
 You would start it as follows:
 
-```shell
+```bash
 docker run -it \
     -p 80:80 \
     -e MASS_VHOST_ENABLE=1 \
@@ -59,14 +64,36 @@ docker run -it \
 ```
 
 
-## Automated PHP-FPM setup
+## ☆ Automated PHP-FPM setup
 
-PHP-FPM is not included inside this Docker container, but can be enabled to contact a remote PHP-FPM server. To do so, you must enable it and at least specify the remote PHP-FPM server address (hostname or IP address). Additionally you must mount the data dir under the same path into the PHP-FPM docker container as it is mounted into the web server.
+PHP-FPM is not included inside this Docker image, but can be enabled to contact a remote PHP-FPM server. To do so, you need to configure one of the two backends (main or mass vhost).
+```bash
+# Create a test script
+mkdir -p www/htdocs
+echo '<?php echo "it works";' > www/htdocs/index.php
 
-**Note:** When PHP-FPM is enabled, it is enabled for the default virtual host as well as for all other automatically created mass virtual hosts.
+# Start a PHP-FPM server
+docker run -d -it \
+    --name phpserver \
+    -v $(pwd)/www:/var/www/default \
+    devilbox/php-fpm:8.2-base
+
+# Start the webserver
+# Where 'phpserver' is the hostname or IP address of the PHP-FPM server
+docker run -it \
+    -p 80:80 \
+    -v $(pwd)/www:/var/www/default \
+    -e MAIN_VHOST_BACKEND='conf:phpfpm:tcp:phpserver:9000' \
+    --link phpserver \
+    devilbox/nginx-stable
+```
 
 
-## Customization per virtual host
+## ☆ Automated Reverse Proxy Setup
+
+
+
+## ☆ Customization per virtual host
 
 Each virtual host is generated from templates by **[vhost-gen](https://github.com/devilbox/vhost-gen/tree/master/etc/templates)**. As `vhost-gen` is really flexible and allows combining multiple templates, you can copy and alter an existing template and then place it in a subdirectory of your project folder. The subdirectory is specified by `MASS_VHOST_TEMPLATE_DIR`.
 
@@ -82,11 +109,11 @@ Each virtual host is generated from templates by **[vhost-gen](https://github.co
 <sub>(*) This refers to the directory on your host computer</sub>
 
 
-## Customization for the default virtual host
+## ☆ Customization for the default virtual host
 
 The default virtual host can also be overwritten with a custom template. Use `MAIN_VHOST_TEMPLATE_DIR` variable in order to set the subdirectory to look for template files.
 
 
-## Disabling the default virtual host
+## ☆ Disabling the default virtual host
 
 If you only want to server you custom projects and don't need the default virtual host, you can disable it by `-e MAIN_VHOST_ENABLE=0`.
