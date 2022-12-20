@@ -224,17 +224,16 @@ When you plan on using `443` you should enable automated SSL certificate generat
 
 ## 💡 Examples
 
-### Examples: Docker
+The documentation provides copy/paste examples about common use-cases including dummy projects.
 
-Get inspired by the following copy/paste examples to get you up and running in no time.
+### Docker
 
+> See **[Documentation: Examples](doc/examples.md)** or click any link below.
 
 <table>
  <tr valign="top" style="vertical-align:top">
-  <td><strong>Default vhost</strong></td><td><strong>Unlimited vhosts</strong></td>
- </tr>
- <tr valign="top" style="vertical-align:top">
   <td>
+   <strong>Default vhost</strong><br/>
    <a href="doc/examples.md" >Serve static files</a><br/>
    <a href="doc/examples.md" >Serve PHP files</a><br/>
    <a href="doc/examples.md" >Sync local filestem permission</a><br/>
@@ -242,23 +241,21 @@ Get inspired by the following copy/paste examples to get you up and running in n
    <a href="doc/examples.md" >Reverse Proxy NodeJS</a><br/>
   </td>
   <td>
+   <strong>Unlimited vhosts</strong><br/>
    <a href="doc/examples.md" >LEMP stack</a><br/>
   </td>
  </tr>
 </table>
 
-> See **[Documentation: Examples](doc/examples.md)** or click any link above.
 
-### Examples: Docker Compose
+### Docker Compose
 
-If you prefer Docker Compose, fully functional examples including dummy projects are provided and ready to be run.
+> See **[Docker Compose: Examples](examples/)** or click any link below.
 
 <table>
  <tr valign="top" style="vertical-align:top">
-  <td><strong>Default vhost</strong></td><td><strong>Unlimited vhosts</strong></td>
- </tr>
- <tr valign="top" style="vertical-align:top">
   <td>
+   <strong>Default vhost</strong><br/>
    <a href="examples/" >Serve static files</a><br/>
    <a href="examples/" >Serve PHP files</a><br/>
    <a href="examples/" >Serve PHP files over HTTPS</a><br/>
@@ -266,13 +263,12 @@ If you prefer Docker Compose, fully functional examples including dummy projects
    <a href="examples/" >Reverse Proxy Python</a><br/>
   </td>
   <td>
+   <strong>Unlimited vhosts</strong><br/>
    <a href="examples/" >Serve PHP files over HTTPS</a><br/>
    <a href="examples/" >Reverse Proxy <strong>and</strong> PHP-FPM</a><br/>
   </td>
  </tr>
 </table>
-
-> See **[Docker Compose: Examples](examples/)** or click any link above.
 
 
 
