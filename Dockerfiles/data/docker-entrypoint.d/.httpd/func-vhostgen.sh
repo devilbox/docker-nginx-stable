@@ -31,27 +31,38 @@ generate_vhostgen_conf() {
 	local php_fpm_addr="${12}"
 	local php_fpm_port="${13}"
 	local timeout="${14}"
-	local alias="${15}"   # alias1:path1[:cors], alias2:path2[:cors]
-	local server_status_enable="${16}"
-	local server_status_alias="${17}"
+	local alias_allow="${15}"   # alias1:path1[:cors], alias2:path2[:cors]
+	local alias_deny="${16}"    # alias1[,alias2]
+	local server_status_enable="${17}"
+	local server_status_alias="${18}"
 
-	alias_block="alias: []"
-	if [ -n "${alias}" ]; then
-		alias_block="alias:\n"
+	alias_allow_block="alias: []"
+	if [ -n "${alias_allow}" ]; then
+		alias_allow_block="alias:\n"
 		# Ensure to convert ',' to space, to have items to iterate over
-		for item in ${alias//,/ }; do
+		for item in ${alias_allow//,/ }; do
 			item_alias="$( echo "${item}" | awk -F':' '{print $1}' )"
 			item_path="$(  echo "${item}" | awk -F':' '{print $2}' )"
 			item_cors="$(  echo "${item}" | awk -F':' -v OFS=':' '{$1="";$2="";print}' | sed -e 's/^://g' -e 's/^://g' )"
-			alias_block+="    - alias: ${item_alias}\n"
-			alias_block+="      path: ${item_path}\n"
+			alias_allow_block+="    - alias: ${item_alias}\n"
+			alias_allow_block+="      path: ${item_path}\n"
 			if [ -n "${item_cors}" ]; then
-				alias_block+="      xdomain_request:\n"
-				alias_block+="        enable: yes\n"
-				alias_block+="        origin: ${item_cors}\n"
+				alias_allow_block+="      xdomain_request:\n"
+				alias_allow_block+="        enable: yes\n"
+				alias_allow_block+="        origin: ${item_cors}\n"
 			fi
 		done
 	fi
+
+	alias_deny_block="deny: []"
+	if [ -n "${alias_deny}" ]; then
+		alias_deny_block="deny:\n"
+		# Ensure to convert ',' to space, to have items to iterate over
+		for item_alias in ${alias_deny//,/ }; do
+			alias_deny_block+="    - alias: '${item_alias}'\n"
+		done
+	fi
+
 
 	# https://github.com/devilbox/vhost-gen/blob/master/etc/conf.yml
 	OUT=$(cat <<EOF
@@ -89,11 +100,9 @@ vhost:
     address: "${php_fpm_addr}"
     port: ${php_fpm_port}
     timeout: ${timeout}
-  ${alias_block}
+  ${alias_allow_block}
   # Denies locations
-  deny:
-    - alias: '/\.git'
-    - alias: '/\.ht.*'
+  ${alias_deny_block}
   # Enable server status on the following alias
   server_status:
     enable: ${server_status_enable}

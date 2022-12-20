@@ -12,16 +12,17 @@ VHOST_NAME="${1}"             # vhost project directory name (via watcherd: "%n"
 VHOST_PATH="${2}"             # vhost project directory path (via watcherd: "%p")
 VHOST_DOCROOT_NAME="${3}"     # Document root subdir inside VHOST_PATH
 VHOST_TLD_SUFFIX="${4}"       # TLD_SUFFIX to append to VHOST_NAME
-VHOST_ALIASES_ALLOW="${5}"    # Additional aliases to generate (path:, url: cors:)
-VHOST_SSL_TYPE="${6}"         # SSL_TYPE: "plain", "ssl", "both", "redir"
-VHOST_BACKEND="${7}"          # Backend string: file:* or cfg:*
-VHOST_BACKEND_TIMEOUT="${8}"  # Timeout for backend in seconds
-HTTP2_ENABLE="${9}"           # Enable HTTP2?
-DOCKER_LOGS="${10}"           # Enable Docker logs?
-CA_KEY_FILE="${11}"           # Path to CA key file
-CA_CRT_FILE="${12}"           # Path to CA crt file
-VHOSTGEN_TEMPLATE_DIR="${13}" # vhost-gen template dir (via watcherd: "%p/${MASS_VHOST_TPL_DIR}")
-VHOSTGEN_HTTPD_SERVER="${14}" # nginx, apache22 or apache24 (determines the template to choose)
+VHOST_ALIASES_ALLOW="${5}"    # Additional allow aliases to generate (path:, url: cors:)
+VHOST_ALIASES_DENY="${6}"     # Additional deny aliases to generate
+VHOST_SSL_TYPE="${7}"         # SSL_TYPE: "plain", "ssl", "both", "redir"
+VHOST_BACKEND="${8}"          # Backend string: file:* or cfg:*
+VHOST_BACKEND_TIMEOUT="${9}"  # Timeout for backend in seconds
+HTTP2_ENABLE="${10}"          # Enable HTTP2?
+DOCKER_LOGS="${11}"           # Enable Docker logs?
+CA_KEY_FILE="${12}"           # Path to CA key file
+CA_CRT_FILE="${13}"           # Path to CA crt file
+VHOSTGEN_TEMPLATE_DIR="${14}" # vhost-gen template dir (via watcherd: "%p/${MASS_VHOST_TPL_DIR}")
+VHOSTGEN_HTTPD_SERVER="${15}" # nginx, apache22 or apache24 (determines the template to choose)
 
 
 

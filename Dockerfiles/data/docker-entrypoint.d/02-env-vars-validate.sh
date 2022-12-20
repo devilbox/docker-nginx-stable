@@ -124,6 +124,16 @@ validate_main_vhost_aliases_allow() {
 
 
 ###
+### Validate MAIN_VHOST_ALIASES_DENY: <alias>[,<alias>]
+###
+validate_main_vhost_aliases_deny() {
+	local name="${1}"
+	local value="${2}"
+	_validate_vhost_aliases_deny "${name}" "${value}" "${MAIN_VHOST_ENABLE}"
+}
+
+
+###
 ### Validate MAIN_VHOST_BACKEND: <prefix>:<type>:<proto>:<addr>:<port>
 ###
 validate_main_vhost_backend() {
@@ -267,6 +277,16 @@ validate_mass_vhost_aliases_allow() {
 	local name="${1}"
 	local value="${2}"
 	_validate_vhost_aliases_allow "${name}" "${value}" "${MASS_VHOST_ENABLE}"
+}
+
+
+###
+### Validate MASS_VHOST_ALIASES_DENY: <alias>[,<alias>]
+###
+validate_mass_vhost_aliases_deny() {
+	local name="${1}"
+	local value="${2}"
+	_validate_vhost_aliases_deny "${name}" "${value}" "${MASS_VHOST_ENABLE}"
 }
 
 
@@ -510,6 +530,50 @@ _validate_vhost_aliases_allow() {
 
 	# Display settings
 	_log_env_valid "valid" "${name}" "${value}" "Defined Aliases" "${alias_urls}"
+}
+
+
+###
+### Validate *_VHOST_ALIASES_DENY  <alias>[,<alias>]
+###
+_validate_vhost_aliases_deny() {
+	local name="${1}"
+	local value="${2}"
+	local vhost_enabled="${3}"
+
+	# Empty value means no alias configuration
+	if [ -z "${value}" ]; then
+		# Check if vhost is disabled
+		if [ "${vhost_enabled}" = "0" ]; then
+			_log_env_valid "ignore" "${name}" "${value}" "(vhost disabled)"
+			return
+		fi
+		_log_env_valid "valid" "${name}" "${value}" "No Aliases defined"
+		return
+	fi
+
+	# Aliases can be comma separated
+	for item_alias in ${value//,/ }; do
+
+		# Validate <alias> part
+		if ! echo "${item_alias}" | grep -E '^/[^:]*$' >/dev/null; then
+			_log_env_valid "invalid" "${name}" "${value}" "Invalid format"
+			_log_env_valid "invalid" "${name}" "${item_alias}" "Invalid <alias>"
+			log "err" "The <alias> definition is invalid. It must start with a '/'"
+			log "err" "I.e., it must pass the following regex check: ^/[^:]*\$"
+			_log_aliases_deny_examples
+			exit 1
+		fi
+	done
+
+	# Check if vhost is disabled
+	if [ "${vhost_enabled}" = "0" ]; then
+		_log_env_valid "ignore" "${name}" "${value}" "(vhost disabled)"
+		return
+	fi
+
+	# Display settings
+	_log_env_valid "valid" "${name}" "${value}" "Defined Aliases" "${value}"
 }
 
 
@@ -848,6 +912,20 @@ _log_aliases_allow_examples() {
 	log "err" "Example: /my-api-url/:/var/www/default/api:http(s)?://(.*)$"
 	log "err" ""
 	log "err" "Example: /img/:/var/www/img, /css/:/var/www/css, /js/:/var/www/js"
+}
+
+
+###
+### Log aliases examples as error messages
+###
+_log_aliases_deny_examples() {
+	log "err" ""
+	log "err" "Format (single): <alias>"
+	log "err" "Format (multi):  <alias>[,<alias>]"
+
+	log "err" ""
+	log "err" "Example: /secret.*"
+	log "err" "Example: /\\.git, /secret.*"
 }
 
 

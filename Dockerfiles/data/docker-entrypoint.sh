@@ -48,7 +48,7 @@ VHOSTGEN_TEMPLATE_DIR="/etc/vhost-gen/templates"   # vhost-gen default templates
 VHOSTGEN_CUST_TEMPLATE_DIR="/etc/vhost-gen.d"      # vhost-gen custom templates (must be mounted to add)
 
 ###
-### TODO: Hardcoded aliases. They need to be glued into env variables
+### Defailt aliases copied from previous images, just for the record
 ###
 #MAIN_VHOST_ALIASES_ALLOW='/devilbox-api/:/var/www/default/api, /vhost.d/:/etc/httpd'
 #MASS_VHOST_ALIASES_ALLOW='/devilbox-api/:/var/www/default/api:http(s)?://(.*)$'
@@ -113,14 +113,17 @@ log "info" "--------------------------------------------------------------------
 log "info" "Environment Variables (set/default)"
 log "info" "-------------------------------------------------------------------------"
 
+log "info" "Variables: General:"
 env_var_export "NEW_UID"
 env_var_export "NEW_GID"
 env_var_export "TIMEZONE" "UTC"
 
+log "info" "Variables: Main Vhost:"
 env_var_export "MAIN_VHOST_ENABLE" "1"
 env_var_export "MAIN_VHOST_DOCROOT_DIR" "htdocs"
 env_var_export "MAIN_VHOST_TEMPLATE_DIR" "cfg"
 env_var_export "MAIN_VHOST_ALIASES_ALLOW" ""
+env_var_export "MAIN_VHOST_ALIASES_DENY" '/\.git, /\.ht.*'
 env_var_export "MAIN_VHOST_BACKEND"
 env_var_export "MAIN_VHOST_BACKEND_TIMEOUT" "180"
 env_var_export "MAIN_VHOST_SSL_TYPE" "plain"
@@ -128,15 +131,18 @@ env_var_export "MAIN_VHOST_SSL_CN" "localhost"
 env_var_export "MAIN_VHOST_STATUS_ENABLE" "0"
 env_var_export "MAIN_VHOST_STATUS_ALIAS" "/httpd-status"
 
+log "info" "Variables: Mass Vhost:"
 env_var_export "MASS_VHOST_ENABLE" "0"
 env_var_export "MASS_VHOST_DOCROOT_DIR" "htdocs"
 env_var_export "MASS_VHOST_TEMPLATE_DIR" "cfg"
 env_var_export "MASS_VHOST_ALIASES_ALLOW" ""
+env_var_export "MASS_VHOST_ALIASES_DENY" '/\.git, /\.ht.*'
 env_var_export "MASS_VHOST_BACKEND"
 env_var_export "MASS_VHOST_BACKEND_TIMEOUT" "180"
 env_var_export "MASS_VHOST_SSL_TYPE" "plain"
 env_var_export "MASS_VHOST_TLD_SUFFIX" ".loc"
 
+log "info" "Variables: Misc:"
 if [ "${VHOSTGEN_HTTPD_SERVER}" = "nginx" ]; then
 	env_var_export "WORKER_CONNECTIONS" "1024"
 	env_var_export "WORKER_PROCESSES" "auto"
@@ -164,6 +170,7 @@ env_var_validate "MAIN_VHOST_ENABLE"
 env_var_validate "MAIN_VHOST_DOCROOT_DIR"
 env_var_validate "MAIN_VHOST_TEMPLATE_DIR"
 env_var_validate "MAIN_VHOST_ALIASES_ALLOW"
+env_var_validate "MAIN_VHOST_ALIASES_DENY"
 env_var_validate "MAIN_VHOST_BACKEND"
 env_var_validate "MAIN_VHOST_BACKEND_TIMEOUT"
 env_var_validate "MAIN_VHOST_SSL_TYPE"
@@ -176,6 +183,7 @@ env_var_validate "MASS_VHOST_ENABLE"
 env_var_validate "MASS_VHOST_DOCROOT_DIR"
 env_var_validate "MASS_VHOST_TEMPLATE_DIR"
 env_var_validate "MASS_VHOST_ALIASES_ALLOW"
+env_var_validate "MASS_VHOST_ALIASES_DENY"
 env_var_validate "MASS_VHOST_BACKEND"
 env_var_validate "MASS_VHOST_BACKEND_TIMEOUT"
 env_var_validate "MASS_VHOST_SSL_TYPE"
@@ -226,6 +234,7 @@ vhostgen_main_generate_config \
 	"${MAIN_VHOST_BACKEND}" \
 	"${HTTP2_ENABLE}" \
 	"${MAIN_VHOST_ALIASES_ALLOW}" \
+	"${MAIN_VHOST_ALIASES_DENY}" \
 	"${MAIN_VHOST_STATUS_ENABLE}" \
 	"${MAIN_VHOST_STATUS_ALIAS}" \
 	"${DOCKER_LOGS}" \
@@ -320,6 +329,7 @@ if [ "${MASS_VHOST_ENABLE}" -eq "1" ]; then
 	watcherd_add+=" \\\"${MASS_VHOST_DOCROOT_DIR}\\\""
 	watcherd_add+=" \\\"${MASS_VHOST_TLD_SUFFIX}\\\""
 	watcherd_add+=" \\\"${MASS_VHOST_ALIASES_ALLOW}\\\""
+	watcherd_add+=" \\\"${MASS_VHOST_ALIASES_DENY}\\\""
 	watcherd_add+=" \\\"${MASS_VHOST_SSL_TYPE}\\\""
 	watcherd_add+=" \\\"${MASS_VHOST_BACKEND}\\\""
 	watcherd_add+=" \\\"${MASS_VHOST_BACKEND_TIMEOUT}\\\""

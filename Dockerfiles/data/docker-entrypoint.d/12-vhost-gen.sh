@@ -47,11 +47,12 @@ vhostgen_main_generate_config() {
 	local backend_string="${2}"
 	local http2_enable="${3}"
 	local aliases_allow="${4}"
-	local status_enable="${5}"
-	local status_alias="${6}"
-	local docker_logs="${7}"
-	local timeout="${8}"
-	local outpath="${9}"
+	local aliases_deny="${5}"
+	local status_enable="${6}"
+	local status_alias="${7}"
+	local docker_logs="${8}"
+	local timeout="${9}"
+	local outpath="${10}"
 
 	be_conf_type="$( get_backend_conf_type "${backend_string}" )"
 	be_conf_host="$( get_backend_conf_host "${backend_string}" )"
@@ -82,6 +83,7 @@ vhostgen_main_generate_config() {
 		"${be_conf_port}" \
 		"${timeout}" \
 		"${aliases_allow}" \
+		"${aliases_deny}" \
 		"$( to_python_bool "${status_enable}" )" \
 		"${status_alias}"  \
 		> "${outpath}"

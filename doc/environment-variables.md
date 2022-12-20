@@ -34,6 +34,7 @@ The provided Docker images have a lot of injectables in order to customize it to
    <strong>Main Vhost</strong><br/>
    <code><a href="#-main_vhost_enable" >MAIN_VHOST_ENABLE</a></code><br/>
    <code><a href="#-main_vhost_aliases_allow" >MAIN_VHOST_ALIASES_ALLOW</a></code><br/>
+   <code><a href="#-main_vhost_aliases_deny" >MAIN_VHOST_ALIASES_DENY</a></code><br/>
    <code><a href="#-main_vhost_backend" >MAIN_VHOST_BACKEND</a></code><br/>
    <code><a href="#-main_vhost_backend_timeout" >MAIN_VHOST_BACKEND_TIMEOUT</a></code><br/>
    <code><a href="#-main_vhost_docroot_dir" >MAIN_VHOST_DOCROOT_DIR</a></code><br/>
@@ -47,6 +48,7 @@ The provided Docker images have a lot of injectables in order to customize it to
    <strong>Mass Vhost</strong><br/>
    <code><a href="#-mass_vhost_enable" >MASS_VHOST_ENABLE</a></code><br/>
    <code><a href="#-mass_vhost_aliases_allow" >MASS_VHOST_ALIASES_ALLOW</a></code><br/>
+   <code><a href="#-mass_vhost_aliases_deny" >MASS_VHOST_ALIASES_DENY</a></code><br/>
    <code><a href="#-mass_vhost_backend" >MASS_VHOST_BACKEND</a></code><br/>
    <code><a href="#-mass_vhost_backend_timeout" >MASS_VHOST_BACKEND_TIMEOUT</a></code><br/>
    <code><a href="#-mass_vhost_docroot_dir" >MASS_VHOST_DOCROOT_DIR</a></code><br/>
@@ -271,6 +273,69 @@ During docker startup, the entrypoint validator tries the best guess on what has
 
 
 
+## ∑ `MAIN_VHOST_ALIASES_DENY`
+
+This variable defines one or more URL aliases to deny access to.
+
+* **Default:** `/\.git, /\.ht.*`
+* **Allowed:** valid aliases string
+* **Var type:** `string`
+* **Requies:** `MAIN_VHOST_ENABLE=1`
+
+### Format string
+```bash
+# Single alias
+<alias>
+
+# Multiple aliases
+<alias>,<alias>
+```
+### Format string examples
+```bash
+# Single alias
+# Ensures that http://server/url/secret is denied
+/url/secret*
+
+# Mutiple aliases
+# Ensures that http://server/.git is denied
+# Ensures that http://server/.svn is denied
+/\.git, /\.svn
+```
+
+### Generation example
+
+Let's assume you have provided the following environment variable to the docker image:
+```bash
+MAIN_VHOST_ALIASES_DENY='/\.git, /\.ht.*'
+```
+In _Nginx Speak_ it would generate the following configuration block:
+```conf
+# Deny Definition
+location ~ /\.git {
+    deny all;
+}
+# Deny Definition
+location ~ /\.ht.* {
+    deny all;
+}
+```
+In _Apache Speak_ it would generate the following configuration block:
+```conf
+# Deny Definition
+<FilesMatch "/\.git">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Deny Definition
+<FilesMatch "/\.ht.*">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+```
+
+
+
 ## ∑ `MAIN_VHOST_BACKEND`
 
 The given value determines the backend (potentia remote/reveres hosts) for the main (default vhost).
@@ -437,6 +502,12 @@ See [`MAIN_VHOST_TEMPLATE_DIR`](#-main_vhost_template_dir). It is the same conce
 ## ∑ `MASS_VHOST_ALIASES_ALLOW`
 
 See [`MAIN_VHOST_ALIASES_ALLOW`](#-main_vhost_aliases_allow). It is the same concept.
+
+
+
+## ∑ `MASS_VHOST_ALIASES_DENY`
+
+See [`MAIN_VHOST_ALIASES_DENY`](#-main_vhost_aliases_deny). It is the same concept.
 
 
 
