@@ -21,11 +21,11 @@ From a users perspective, you mount your local project directory into the contai
 
 **HTTP/2 is enabled by default for all SSL connections.**
 
-For convenience the entrypoint script during `docker run` provides a pretty decent validation and documentation about wrong user input and suggests steps to fix it.
+For convenience the entrypoint script during `docker run` provides a pretty decent **validation and documentation** about wrong user input and suggests steps to fix it.
 
-| <img style="height: 180px;" height="180" src="doc/img/httpd-backend-invalid-type.png" /> | <img style="height: 180px;" height="180" src="doc/img/httpd-backend-unsupported.png" /> | <img style="height: 180px;" height="180" src="doc/img/httpd-valid.png" /> |
+| <img style="height: 180px;" height="180" src="doc/img/httpd-backend-invalid-type.png" /> | <img style="height: 180px;" height="180" src="doc/img/httpd-backend-unsupported.png" /> | <img style="height: 180px;" height="180" src="doc/img/httpd-alias-validation.png" /> | <img style="height: 180px;" height="180" src="doc/img/httpd-valid.png" /> |
 |:----------------------:|:----------:|:--------:|
-| Invalid backend string | Suggestion | Verified |
+| Invalid backend string | Backend Suggestion | Invalid Alias | Verified |
 
 
 > ##### 🐱 GitHub: [devilbox/docker-nginx-stable](https://github.com/devilbox/docker-nginx-stable)
@@ -220,75 +220,30 @@ When you plan on using `443` you should enable automated SSL certificate generat
 
 ## 💡 Examples
 
-> 🛈 For more Docker Compose examples see **[Examples: Overview](examples/)**
+In order to get you started easily, the documentation provides many examples about common use cases.
 
-### 1. Serve static files
+### Serve static files
 
 This example creates the main (default) vhost, which only serves static files.
 
-* **Vhost:** main (default)
-* **Backend:** none
+> See [**Documentation:** Serve static files](doc/examples.md#-serve-staticfiles)
 
-> 🛈 With no further configuration, the webserver expects files to be served by the main vhost in: `/var/www/default/htdocs`.
 
-1. Create a static page
-   ```bash
-   mkdir -p www/htdocs
-   echo '<h1>It works</h1>' > www/htdocs/index.html
-   ```
-2. Start the webserver
-   ```bash
-   docker run -d -it \
-       -p 9090:80 \
-       -v $(pwd)/www:/var/www/default \
-       devilbox/nginx-stable:alpine
-   ```
-3. Verify
-   ```bash
-   curl http://localhost:9090
-   ```
-
-### 2. Serve PHP files with PHP-FPM
+### Serve PHP files with PHP-FPM
 
 This example creates the main (default) vhost, which contacts a remote PHP-FPM host to serve PHP files.
 
-* **Vhost:** main (default)
-* **Backend:** PHP-FPM
+> See [**Documentation:** Serve PHP files with PHP-FPM](doc/examples.md#-serve-php-files-with-php-fpm)
 
-| PHP-FPM Reference Images |
-|--------------------------|
-| <a title="PHP-FPM Reference Images" href="https://github.com/devilbox/docker-php-fpm" ><img title="Devilbox" height="82px" src="https://raw.githubusercontent.com/devilbox/artwork/master/submissions_banner/cytopia/02/png/banner_256_trans.png" /></a> |
 
-> 🛈 For this to work, the `$(pwd)/www` directory must be mounted into the webserver container as well as into the php-fpm container.<br/>
-> 🛈 With no further configuration, the webserver expects files to be served by the main vhost in: `/var/www/default/htdocs`.
+### Serve PHP files with PHP-FPM and sync local permissions
 
-1. Create a helo world page
-   ```bash
-   mkdir -p www/htdocs
-   echo '<?php echo "hello from php";' > www/htdocs/index.php
-   ````
-2. Start the PHP-FPM container
-   ```bash
-   docker run -d -it \
-       --name php \
-       -v $(pwd)/www:/var/www/default \
-       devilbox/php-fpm:8.2-base
-   ```
-3. Start the webserve, linking it to the PHP-FPM container
-   ```bash
-   docker run -d -it \
-       -p 9090:80 \
-       -v $(pwd)/www:/var/www/default \
-       -e MAIN_VHOST_BACKEND='conf:phpfpm:tcp:php:9000' \
-       --link php \
-       devilbox/nginx-stable:alpine
-   ```
-4. Verify
-   ```bash
-   curl http://localhost:9090
-   ```
+The same as the previous example, but also ensures that you can edit files locally and have file ownerships synced with webserver and PHP-FPM container.
 
-### 3. Serve PHP files with PHP-FPM over HTTPS
+> See [**Documentation**: Serve PHP files with PHP-FPM over HTTPS](doc/examples.md#-serve-php-files-with-php-fpm-over-https)
+
+
+### Serve PHP files with PHP-FPM over HTTPS
 
 The same as the previous example, just with the addition of enabling SSL (HTTPS).
 
@@ -296,154 +251,26 @@ This example shows the SSL type `redir`, which makes the webserver redirect any 
 
 Additionally we are mounting the `./ca` directory into the container under `/ca`. After startup you will find generated Certificate Authority files in there, which you could import into your browser.
 
-* **Vhost:** main (default)
-* **Backend:** Reverse Proxy
-* **Features:** SSL (redirect)
-
-> 🛈 For this to work, the `$(pwd)/www` directory must be mounted into the webserver container as well as into the php-fpm container.<br/>
-> 🛈 With no further configuration, the webserver expects files to be served by the main vhost in: `/var/www/default/htdocs`.
-
-1. Create a helo world page
-   ```bash
-   mkdir -p www/htdocs
-   echo '<?php echo "hello from php";' > www/htdocs/index.php
-   ````
-2. Start the PHP-FPM container
-   ```bash
-   docker run -d -it \
-       --name php \
-       -v $(pwd)/www:/var/www/default \
-       devilbox/php-fpm:8.2-base
-   ```
-3. Start the webserve, linking it to the PHP-FPM container
-   ```bash
-   docker run -d -it \
-       -p 80:80 \
-       -p 443:443 \
-       -v $(pwd)/www:/var/www/default \
-       -v $(pwd)/ca:/ca \
-       -e MAIN_VHOST_BACKEND='conf:phpfpm:tcp:php:9000' \
-       -e MAIN_VHOST_SSL_TYPE='redir' \
-       --link php \
-       devilbox/nginx-stable:alpine
-   ```
-4. Verify redirect
-   ```bash
-   curl -I http://localhost
-   ```
-5. Verify HTTPS
-   ```bash
-   curl -k https://localhost
-   ```
-
-### 4. Act as a Reverse Proxy for NodeJS
-
-The following example proxies all HTTP requests to a NodeJS remote backend. You could also enable SSL on the webserver in order to access NodeJS via HTTPS.
-
-* **Vhost:** main (default)
-* **Backend:** Reverse Proxy
-
-> 🛈 No files need to be mounted into the webserver, as content is coming from the NodeJS server.
-
-1. Create a NodeJS application
-   ```bash
-   mkdir -p src
-   cat << EOF > src/app.js
-   const http = require('http');
-   const server = http.createServer((req, res) => {
-           res.statusCode = 200;
-           res.setHeader('Content-Type', 'text/plain');
-           res.write('[OK]\n');
-           res.write('NodeJS is running\n');
-           res.end();
-   });
-   server.listen(3000, '0.0.0.0');
-   EOF
-   ```
-2. Start the NodeJS container
-   ```bash
-   docker run -d -it \
-       --name nodejs \
-       -v $(pwd)/src:/app \
-       node:19-alpine node /app/app.js
-   ```
-3. Start Reverse Proxy
-   ```bash
-   docker run -d -it \
-       -p 80:80 \
-       -e MAIN_VHOST_BACKEND='conf:rproxy:http:nodejs:3000' \
-       --link nodejs \
-       devilbox/nginx-stable:alpine
-   ```
-4. Verify
-   ```bash
-   curl http://localhost
-   ```
-
-### 5. Fully functional LEMP stack with Mass vhosts
-
-The following example creates a dynamic setup. Each time you create a new project directory below `www/`, a new virtual host is being created.
-Additionally all projects will have the `.com` suffix added to their domain name, which results in `<project>.com` as the final domain.
-
-* **Vhost:** mass (unlimited vhosts)
-* **Backend:** PHP-FPM
-
-> 🛈 For this to work, the `$(pwd)/www` directory must be mounted into the webserver container as well as into the php-fpm container.<br/>
-> 🛈 With no further configuration, the webserver expects files to be served by the **mass** vhost in: **`/shared/httpd/<project>/htdocs`**, where `<project>` is a placeholder for any directory.
-
-1. Create the project base directory
-   ```bash
-   mkdir -p www
-   ```
-2. Start the MySQL container _(only for demonstration purposes)_
-   ```bash
-   docker run -d -it \
-       --name mysql \
-       -e MYSQL_ROOT_PASSWORD=my-secret-pw \
-       devilbox/mysql:mariadb-10.10
-   ```
-3. Start the PHP-FPM container
-   ```bash
-   docker run -d -it \
-       --name php \
-       -v $(pwd)/www:/shared/httpd \
-       devilbox/php-fpm:8.2-base
-   ```
-4. Start the webserver container, linking it to the two above
-   ```bash
-   docker run -d -it \
-       -p 8080:80 \
-       -v $(pwd)/www:/shared/httpd \
-       -e MAIN_VHOST_ENABLE=0 \
-       -e MASS_VHOST_ENABLE=1 \
-       -e MASS_VHOST_TLD_SUFFIX=.com \
-       -e MASS_VHOST_BACKEND='conf:phpfpm:tcp:php:9000' \
-       --link php \
-       --link mysql \
-       devilbox/nginx-stable:alpine
-   ```
-5. Create `project-1`
-   ```bash
-   mkdir -p www/project-1/htdocs
-   echo '<?php echo "hello from project-1";' > www/project-1/htdocs/index.php
-   ```
-6. Verify `project-1`
-   ```bash
-   curl -H 'Host: project-1.com' http://localhost:8080
-   ```
-7. Create `another`
-   ```bash
-   mkdir -p www/another/htdocs
-   echo '<?php echo "hello from another";' > www/another/htdocs/index.php
-   ```
-8. Verify `another`
-   ```bash
-   curl -H 'Host: another.com' http://localhost:8080
-   ```
-9. Add more projects as you wish...
+> See [**Documentation:** Serve PHP files with PHP-FPM over HTTPS](doc/examples.md#-serve-php-files-with-php-fpm-over-https)
 
 
-### 6. Docker Compose
+### Act as a Reverse Proxy for NodeJS
+
+This example creates a NodeJS application running in a Node container and uses the webserver to proxy all requests to the NodeJS application.  You could also enable SSL on the webserver in order to access NodeJS via HTTPS.
+
+> See [**Documentation:** Act as a Reverse Proxy for NodeJS](doc/examples.md#-act-as-a-reverse-proxy-for-nodejs)
+
+
+### Fully functional LEMP stack with Mass vhosts
+
+The following example creates a dynamic setup. Each time you create a new project directory below the `www/` directory, a new virtual host is automatically being created.
+
+Additionally all projects will have the `.com` suffix added to their domain name, which results in `<project>.com` as the final domain _(Where `<project>` is a placeholder for the created project directory)_.
+
+> See [**Documentation:** Fully functional LEMP stack with Mass vhosts](doc/examples.md#-fully-functional-lemp-stack-with-mass-vhosts)
+
+
+### Docker Compose
 
 Have a look at the **[examples](examples/)** directory. It is packed with all kinds of `Docker Compose` examples:
 
@@ -452,7 +279,6 @@ Have a look at the **[examples](examples/)** directory. It is packed with all ki
 * Python and NodeJS Reverse Proxy
 * Mass virtual hosts
 * Mass virtual hosts with PHP-FPM, Python and NodeJS as backends
-
 
 
 

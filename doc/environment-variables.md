@@ -1,4 +1,5 @@
 [Features](features.md) |
+[Examples](examples.md) |
 **Environment variables** |
 [Volumes](volumes.md)
 
