@@ -11,13 +11,13 @@
 
 ## 👷 Tools
 
-The following tools interact with each other and make this project possible:
+This project is using four core tools that interact with each other in order to achieve automated project-based mass virtual hosting with HTTPS support from SSL certificates signed by an internal CA.
 
 | Tool | Usage |
 |------|-------|
-| [`vhost-gen`](https://github.com/devilbox/vhost-gen) | An arbitrary vhost generator for Nginx, Apache 2.2 and Apache 2.4 to ensure one config generates the same vhosts independently of underlying webserver |
+| [`vhost-gen`](https://github.com/devilbox/vhost-gen) | An arbitrary vhost generator for Nginx (mainline and stable), Apache 2.2 and Apache 2.4 to ensure one config generates the same vhost functionality independently of underlying webserver |
 | [`cert-gen`](https://github.com/devilbox/cert-gen)   | A tool to generate and validate Certificate Authorities and SSL certificates which are signed by a Certificate Authority |
-| [`watcherd`](https://github.com/devilbox/watcherd)   | A file system change detecter (`inotify`-based or `bash`-based), which acts on changes (`add` or `delete` of directories) with custom commands and offers a trigger command on change. (in this configuration, it will call `vhost-gen`, when a new directory is added in order to make the mass vhost possible. It will call a generic `rm ...` commad for a `delete` and restarts the webserver as its trigger command. |
+| [`watcherd`](https://github.com/devilbox/watcherd)   | A file system change detecter (`inotify`-based or `bash`-based), which acts on changes (`add` or `delete` of directories in this case) with custom commands and offers a trigger command on change. (in this configuration, it will call `vhost-gen`, when a new directory is added in order to make the mass vhost possible. It will call a generic `rm ...` commad for a `delete` and restarts the webserver as its trigger command. |
 | [`supervisord`](http://supervisord.org/)             | A daemon that manages the run-time of multiple other daemons. In this case it ensures that `watcherd` and the webserver are up and running. |
 
 
@@ -45,6 +45,8 @@ This is the execution chain for how the mass virtual hosting is achieved:
                       cert-gen    vhost-gen ⭢ generate vhost
 ```
 
+### The basics
+
 1. The `docker-entrypoint.sh` script sets and validates given options
 2. It then passes over to `supervisord` via `exec`
 3. `supervisord` ensures the web server is running
@@ -53,7 +55,7 @@ This is the execution chain for how the mass virtual hosting is achieved:
 
 > **\[1\]** A renamed directory is: directory removed and directory created
 
-#### What does `watcherd` do?
+### What does `watcherd` do?
 
 * `watcherd` is setup with two events:
     * event: directory created
@@ -67,7 +69,7 @@ This is the execution chain for how the mass virtual hosting is achieved:
 So in simple terms, when `watcherd` detects that a new directory was created, it calls `create-vhost.sh` and sends a reload or stop signal to the webserver. In case the webserver will shutdown gracefully, it will immediately be started by `supervisord`. In both cases, the new webserver configuration will be applied.<br/>
 When `watcherd` detects that a directory was removed, it will remove the corresponding webserver vhost configuration file and send a reload or stop signal to the webserver (In case of a stop signal, `supervisord` will again ensure the webserver will come up).
 
-#### What does `create-vhost.sh` do?
+### What does `create-vhost.sh` do?
 
 `create-vhost.sh` is a minimalistic run-time version of the entrypoint script and does thorough validation on anything that could not be validated during startup-time. Additionally it does the following:
 
