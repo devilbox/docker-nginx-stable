@@ -69,10 +69,14 @@ When `watcherd` detects that a directory was removed, it will remove the corresp
 
 #### What does `create-vhost.sh` do?
 
-`create-vhost.sh` is a minimalistic run-time version of the entrypoint script and does thorough validation on anything that could not be validated during startup-time.
+`create-vhost.sh` is a minimalistic run-time version of the entrypoint script and does thorough validation on anything that could not be validated during startup-time. Additionally it does the following:
 
 * `create-vhost.sh` will generate SSL certificates (signed by internal CA) via `cert-gen`
-* `create-vhost.sh` passes any customizations over to `vhost-gen`, which will then generate a virtual host configuration file.
+* `create-vhost.sh` will generate a customized `vhost-gen` configuration file
+* `create-vhost.sh` will move any custom `vhost-gen` templates into place
+* `create-vhost.sh` will passes over to `vhost-gen`, which will then generate a virtual host configuration file.
+
+Once `vhost-gen` is done, the execution cycle is returned to `watcherd`, which will apply its trigger.
 
 
 
