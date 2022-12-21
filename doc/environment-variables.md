@@ -41,6 +41,7 @@ The provided Docker images have a lot of injectables in order to customize it to
    <code><a href="#-main_vhost_docroot_dir" >MAIN_VHOST_DOCROOT_DIR</a></code><br/>
    <code><a href="#-main_vhost_template_dir" >MAIN_VHOST_TEMPLATE_DIR</a></code><br/>
    <code><a href="#-main_vhost_ssl_type" >MAIN_VHOST_SSL_TYPE</a></code><br/>
+   <br/>
    <code><a href="#-main_vhost_ssl_cn" >MAIN_VHOST_SSL_CN</a></code><br/>
    <code><a href="#-main_vhost_status_enable" >MAIN_VHOST_STATUS_ENABLE</a></code><br/>
    <code><a href="#-main_vhost_status_alias" >MAIN_VHOST_STATUS_ALIAS</a></code><br/>
@@ -55,6 +56,8 @@ The provided Docker images have a lot of injectables in order to customize it to
    <code><a href="#-mass_vhost_docroot_dir" >MASS_VHOST_DOCROOT_DIR</a></code><br/>
    <code><a href="#-mass_vhost_template_dir" >MASS_VHOST_TEMPLATE_DIR</a></code><br/>
    <code><a href="#-mass_vhost_ssl_type" >MASS_VHOST_SSL_TYPE</a></code><br/>
+   <br/>
+   <code><a href="#-mass_vhost_backend_rewrite" >MASS_VHOST_BACKEND_REWRITE</a></code><br/>
    <code><a href="#-mass_vhost_tld_suffix" >MASS_VHOST_TLD_SUFFIX</a></code><br/>
   </td>
   <td>
@@ -181,7 +184,7 @@ The given directory name (not path) is appended to the vhost base path. This is 
 * **Default:** `cfg`
 * **Allowed:** valid directory name
 * **Var type:** `string`
-* **Requies:** `MAIN_VHOST_ENABLE=1`
+* **Requires:** `MAIN_VHOST_ENABLE=1`
 
 The given directory name will be appended to the current web server base path (`/var/www/default/`) and thus creating the full path in which `vhost-gen` will look for custom templates.
 
@@ -208,7 +211,7 @@ This variable defines one or more URL aliases pointing to a file system path. Op
 * **Default:** `` _(no aliases)_
 * **Allowed:** valid aliases string
 * **Var type:** `string`
-* **Requies:** `MAIN_VHOST_ENABLE=1`
+* **Requires:** `MAIN_VHOST_ENABLE=1`
 
 ### Format string
 ```bash
@@ -281,7 +284,7 @@ This variable defines one or more URL aliases to deny access to.
 * **Default:** `/\.git, /\.ht.*`
 * **Allowed:** valid aliases string
 * **Var type:** `string`
-* **Requies:** `MAIN_VHOST_ENABLE=1`
+* **Requires:** `MAIN_VHOST_ENABLE=1`
 
 ### Format string
 ```bash
@@ -344,7 +347,7 @@ The given value determines the backend (potentia remote/reveres hosts) for the m
 * **Default:** `` _(serving static files only)_
 * **Allowed:** valid backend string
 * **Var type:** `string`
-* **Requies:** `MAIN_VHOST_ENABLE=1`
+* **Requires:** `MAIN_VHOST_ENABLE=1`
 
 You can configure a remote backend via this environment variable. Either a remote PHP-FPM server or any kind of service via `http` or `https` reverse proxy.
 
@@ -418,7 +421,7 @@ Set a timeout for the backend server (if any was specified).
 * **Default:** `180`
 * **Allowed:** valid integer
 * **Var type:** `integer`
-* **Requies:** `MAIN_VHOST_ENABLE=1` and `MAIN_VHOST_BACKEND=...`
+* **Requires:** `MAIN_VHOST_ENABLE=1` and `MAIN_VHOST_BACKEND=...`
 
 The given value determines the timeout (in seconds) for the backend, if a backend was set via `MAIN_VHOST_BACKEND`
 
@@ -431,7 +434,7 @@ The SSL_TYPE determines if HTTPS vhosts are created and how they behave.
 * **Default:** `plain`
 * **Allowed:** `plain`, `ssl`, `both`, `redir`
 * **Var type:** `string`
-* **Requies:** `MAIN_VHOST_ENABLE=1`
+* **Requires:** `MAIN_VHOST_ENABLE=1`
 
 By default only a HTTP vhost is created, you can change this via the SSL type:
 
@@ -449,7 +452,7 @@ Set the Common name for the SSL certificate of the vhost.
 * **Default:** `localhost`
 * **Allowed:** valid common name
 * **Var type:** `string`
-* **Requies:** `MAIN_VHOST_ENABLE=1` and `MAIN_VHOST_SSL_TYPE != plain`
+* **Requires:** `MAIN_VHOST_ENABLE=1` and `MAIN_VHOST_SSL_TYPE != plain`
 
 If you want to set the common name of the SSL certificate for this vhost to something else than `localhost`, then adjust it here.
 
@@ -462,7 +465,7 @@ You can enable the webserver status page with this variable
 * **Default:** `0`
 * **Allowed:** `0` or `1`
 * **Var type:** `bool`
-* **Requies:** `MAIN_VHOST_ENABLE=1`
+* **Requires:** `MAIN_VHOST_ENABLE=1`
 
 When setting to `1`, the webserver status page will be available under the URL specified in `MAIN_VHOST_STATUS_ALIAS`.
 
@@ -475,7 +478,7 @@ Change the location of the webserver status URL.
 * **Default:** `/httpd-status`
 * **Allowed:** valid alias string
 * **Var type:** `string`
-* **Requies:** `MAIN_VHOST_ENABLE=1` and `MAIN_VHOST_STATUS_ENABLE`
+* **Requires:** `MAIN_VHOST_ENABLE=1` and `MAIN_VHOST_STATUS_ENABLE`
 
 By default, you can access the webserver status page via `http(s)?://<HOST>:<PORT>/httpd-status`.
 If you would like a different URL, change it here.
@@ -518,6 +521,34 @@ See [`MAIN_VHOST_BACKEND`](#-main_vhost_backend). It is the same concept.
 
 
 
+## ∑ `MASS_VHOST_BACKEND_REWRITE`
+
+This is a per project backend overwrite that is accomplished through a configuration file inside the project directory.
+
+* **Default:** ``
+* **Allowed:** `file:<file>`
+* **Var type:** `string`
+* **Requires:** `MASS_VHOST_ENABLE=1` and a value in `MASS_VHOST_BACKEND`
+
+This environment variable works in the same way as [`MAIN_VHOST_BACKEND`](#-main_vhost_backend) with the exception that it only supports the `file:<file>` format.
+
+### Why would I use this?
+
+You can first set a generic backend for mass virtual hosting via `MASS_VHOST_BACKEND`. That means that every created mass virtual host will use the defined backend as its default (e.g. PHP-FPM).
+Now if you have a single (or more) project, which requires a different configuration (e.g. needs to be a reverse proxy), then you can place a configuration file (as specified in `MASS_VHOST_BACKEND_REWRITE`) into that project dir and its backend will behave in this way.
+
+You can see an example setup here, with `MASS_VHOST_BACKEND=conf:phpfpm:tcp:10.0.0.1:9000` and `MASS_VHOST_BACKEND_REWRITE=file:config.txt`, where the `config.txt` contains: `conf:rproxy:http:127.0.0.1:300`
+
+<img style="height: 380px;" height="180" src="img/httpd-backend-rewrite.png" />
+
+### What are the limitations?
+
+`MASS_VHOST_BACKEND_REWRITE` only works, if you are also using `MASS_VHOST_BACKEND`. I.e, you must have something that you can rewrite, otherwise there is no sense in using it and you can just fall back to using `MASS_VHOST_BACKEND` alone. Don't worry too much about it, the entrypoint validator will tell you in case you got this wrong.
+
+Additionally there is no such thing as `MAIN_VHOST_BACKEND_REWRITE`, as the main vhost is only a single vhost and therefore has no need to overwrite it, as you can simply use `MAIN_VHOST_BACKEND`.
+
+
+
 ## ∑ `MASS_VHOST_BACKEND_TIMEOUT`
 
 See [`MAIN_VHOST_BACKEND_TIMEOUT`](#-main_vhost_backend-timeout). It is the same concept.
@@ -537,7 +568,7 @@ Set the domain suffix for all virtual hosts created via the `MASS_VHOST_ENABLE`.
 * **Default:** `.loc`
 * **Allowed:** empty or domain with leading dot
 * **Var type:** `str`
-* **Requies:** `MASS_VHOST_ENABLE=1`
+* **Requires:** `MASS_VHOST_ENABLE=1`
 
 
 **Background:** When `MASS_VHOST_ENABLE` is set to `1`. [watcherd](https://github.com/devilbox/watcherd) will listen for directory changes (creations, deletions, renamings) in `/shared/httpd`. As soon as a project directory is created below that path, `watcherd` will trigger [vhost-gen](https://github.com/devilbox/vhost-gen/) to create a new virtual host and reloads the webserver.

@@ -301,6 +301,16 @@ validate_mass_vhost_backend() {
 
 
 ###
+### Validate MASS_VHOST_BACKEND_REWRITE file:<file>
+###
+validate_mass_vhost_backend_rewrite() {
+	local name="${1}"
+	local value="${2}"
+	_validate_vhost_backend_rewrite "${name}" "${value}" "mass" "${MASS_VHOST_ENABLE}"
+}
+
+
+###
 ### Validate MASS_VHOST_BACKEND_TIMEOUT
 ###
 validate_mass_vhost_backend_timeout() {
@@ -737,6 +747,109 @@ _validate_vhost_backend() {
 		elif [ "${backend_conf_type}" = "rproxy" ]; then
 			_log_env_valid "valid" "${name}" "${value}" "Reverse Proxy" "Remote: ${backend_conf_prot}://${backend_conf_host}:${backend_conf_port}"
 		fi
+	fi
+}
+
+
+###
+### Validate *_VHOST_BACKEND
+###     string: file:<file>
+###
+### Only file:<file> is supported
+### Only MASS_VHOST is supported
+### Only applies, whenn MASS_VHOST_BACKEND is set
+### Only applies, whenn MASS_VHOST_BACKEND does not use file:<file>
+###
+_validate_vhost_backend_rewrite() {
+	local name="${1}"
+	local value="${2}"
+	local vhost="${3}"          # either "main" or "mass"
+	local vhost_enabled="${4}"  # either "0" or "1"
+
+	# MASS_VHOST_BACKEND
+	backend_prefix="$( get_backend_prefix "${MASS_VHOST_BACKEND}" )"           # file or conf
+	backend_file_name="$( get_backend_file_file "${MASS_VHOST_BACKEND}" )"     # filename
+
+	# MASS_VHOST_BACKEND_REWRITE
+	backend_rewrite_prefix="$( get_backend_prefix "${value}" )"           # file or conf
+	backend_rewrite_file_name="$( get_backend_file_file "${value}" )"     # filename
+
+	# 1. If no backend is specified
+	if ! backend_has_backend "${value}"; then
+		# Check if vhost is disabled
+		if [ "${vhost_enabled}" = "0" ]; then
+			_log_env_valid "ignore" "${name}" "${value}" "(vhost disabled)"
+		else
+			_log_env_valid "ignore" "${name}" "${value}" "Applying MASS_VHOST_BACKEND settings"
+		fi
+		return
+	fi
+
+	# 1. Only accept if MASS_VHOST_BACKEND was set
+	if [ -z "${MASS_VHOST_BACKEND}" ]; then
+		_log_env_valid "invalid" "${name}" "${value}" "Overwrite makes no sense"
+		log "err" ""
+		log "err" "You can only 'overwrite' a backend that has been set."
+		log "err" "MASS_VHOST_BACKEND is unset, so the overwrite does not make sense."
+		log "err" ""
+		log "err" "Use MASS_VHOST_BACKEND=file:<file> to keep 'serve static files only' and place a config file"
+		log "err" "for specific projects that require a backend."
+		log "err" "This variable is intended to overwrite an already specified backend that applies to all projects."
+		log "err" ""
+		log "err" "A common use case is to specify PHP-FPM backend globally via MASS_VHOST_BACKEND."
+		log "err" "And then use MASS_VHOST_BACKEND_REWRITE to adjust specific projects to Reverse Proxy."
+		exit 1
+	fi
+	# 2. Only accept if MASS_VHOST_BACKEND is not equal to 'file:<file>'
+	if [ "${backend_prefix}" = "file" ]; then
+		_log_env_valid "invalid" "${name}" "${value}" "Overwrite makes no sense"
+		log "err" ""
+		log "err" "You have set MASS_VHOST_BACKEND to 'file:${backend_file_name}'"
+		log "err" "This means you can already set a different value for each project, so no need to overwrite."
+		log "err" ""
+		log "err" "Overwriting a backend makes sense, when you set MASS_VHOST_BACKEND to 'conf:...'"
+		log "err" "Then the 'conf:..' settings are applied to every single project and you can then"
+		log "err" "use a file in MASS_VHOST_BACKEND_REWRITE to overwrite a setting for individual projects."
+		log "err" ""
+		log "err" "A common use case is to specify PHP-FPM backend globally via MASS_VHOST_BACKEND."
+		log "err" "And then use MASS_VHOST_BACKEND_REWRITE to adjust specific projects to Reverse Proxy."
+		exit 1
+	fi
+	# 3. Only allow file:<file> as a prefix
+	if [ "${backend_rewrite_prefix}" != "file" ]; then
+		_log_env_valid "invalid" "${name}" "${backend_rewrite_prefix}" "Invalid type"
+		log "err" ""
+		log "err" "You can only use file:<file> for an individual overwrite."
+		log "err" "How else would you want to overwrite on a per project base?"
+		log "err" "The specified file in 'file:<file>' will be placed in your project dirs conf dir."
+		log "err" "This way you can overwrite that specific project."
+		log "err" ""
+		log "err" "A common use case is to specify PHP-FPM backend globally via MASS_VHOST_BACKEND."
+		log "err" "And then use MASS_VHOST_BACKEND_REWRITE to adjust specific projects to Reverse Proxy."
+		log "err" ""
+		_log_backend_examples "file"
+		exit 1
+	fi
+	# 4. Validate file:<file> - the filename
+	if [ "${backend_rewrite_prefix}" = "file" ]; then
+		if ! backend_is_valid_file_file "${value}"; then
+			_log_env_valid "invalid" "${name}" "${value}" "Invalid format"
+			_log_env_valid "invalid" "${name}" "${backend_rewrite_file_name}" "filename is invalid"
+			_log_backend_examples "file"
+			exit 1
+		fi
+	fi
+	# 5. Check if vhost is disabled
+	if [ "${vhost_enabled}" = "0" ]; then
+		_log_env_valid "ignore" "${name}" "${value}" "(vhost disabled)"
+		return
+	fi
+
+	# 6. Show settings (file)
+	if [ "${vhost}" = "main" ]; then
+		_log_env_valid "valid" "${name}" "${value}" "Backend overwrite" "${MAIN_DOCROOT_BASE}/${MAIN_VHOST_TEMPLATE_DIR}/${backend_rewrite_file_name}"
+	else
+		_log_env_valid "valid" "${name}" "${value}" "Backend overwrite" "${MASS_DOCROOT_BASE}/<project>/${MASS_VHOST_TEMPLATE_DIR}/${backend_rewrite_file_name}"
 	fi
 }
 

@@ -8,6 +8,10 @@
 
 # Documentation: Architecture
 
+1. [Tools](#-tools)
+2. [Execution Chain](#-execution-chain)
+3. [Directories and files](#-directories-and-files)
+
 
 ## 👷 Tools
 
@@ -24,12 +28,13 @@ This project is using four core tools that interact with each other in order to 
 
 ## 👷 Execution Chain
 
-This is the execution chain for how the mass virtual hosting is achieved:
+This is the execution chain for how the mass virtual hosting or single vhost is achieved:
 ```bash
-       docker-entrypoint.sh
-                |
-                ↓
-           supervisord (pid 1)
+       # mass-vhost                                     # main-vhost only
+       docker-entrypoint.sh                             docker-entrypoint.sh
+                |                                                |
+                ↓                                                ↓
+           supervisord (pid 1)                                 httpd (pid 1)
           /     |
          /      |
        ↙        ↓

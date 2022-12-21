@@ -16,13 +16,14 @@ VHOST_ALIASES_ALLOW="${5}"    # Additional allow aliases to generate (path:, url
 VHOST_ALIASES_DENY="${6}"     # Additional deny aliases to generate
 VHOST_SSL_TYPE="${7}"         # SSL_TYPE: "plain", "ssl", "both", "redir"
 VHOST_BACKEND="${8}"          # Backend string: file:* or cfg:*
-VHOST_BACKEND_TIMEOUT="${9}"  # Timeout for backend in seconds
-HTTP2_ENABLE="${10}"          # Enable HTTP2?
-DOCKER_LOGS="${11}"           # Enable Docker logs?
-CA_KEY_FILE="${12}"           # Path to CA key file
-CA_CRT_FILE="${13}"           # Path to CA crt file
-VHOSTGEN_TEMPLATE_DIR="${14}" # vhost-gen template dir (via watcherd: "%p/${MASS_VHOST_TPL_DIR}")
-VHOSTGEN_HTTPD_SERVER="${15}" # nginx, apache22 or apache24 (determines the template to choose)
+VHOST_BACKEND_REWRITE="${9}"  # Backend Rewrite string: file:*
+VHOST_BACKEND_TIMEOUT="${10}" # Timeout for backend in seconds
+HTTP2_ENABLE="${11}"          # Enable HTTP2?
+DOCKER_LOGS="${12}"           # Enable Docker logs?
+CA_KEY_FILE="${13}"           # Path to CA key file
+CA_CRT_FILE="${14}"           # Path to CA crt file
+VHOSTGEN_TEMPLATE_DIR="${15}" # vhost-gen template dir (via watcherd: "%p/${MASS_VHOST_TPL_DIR}")
+VHOSTGEN_HTTPD_SERVER="${16}" # nginx, apache22 or apache24 (determines the template to choose)
 
 
 
@@ -73,7 +74,32 @@ fi
 ###
 if [ -n "${VHOST_BACKEND}" ]; then
 	###
-	### Backend=file:<file>
+	### Check if BACKEND_REWRITE is set
+	###
+	if [ -n "${VHOST_BACKEND_REWRITE}" ]; then
+		# No need to validate backend string, has been done already in entrypoint
+		BACKEND_REWRITE_FILE_NAME="$( echo "${VHOST_BACKEND_REWRITE}" | awk -F':' '{print $2}' )"
+		BACKEND_REWRITE_FILE_PATH="${VHOSTGEN_TEMPLATE_DIR}${BACKEND_REWRITE_FILE_NAME}"
+
+		# Backend file exists
+		if [ -f "${BACKEND_REWRITE_FILE_PATH}" ]; then
+			BACKEND_REWRITE_CONFIG="$( cat "${BACKEND_REWRITE_FILE_PATH}" )"
+			log "info" "[${VHOST_NAME}${VHOST_TLD_SUFFIX}] Backend rewrite found:  ${BACKEND_REWRITE_FILE_PATH}"
+			log "info" "[${VHOST_NAME}${VHOST_TLD_SUFFIX}] Backend rewrite config: ${BACKEND_REWRITE_CONFIG}"
+			# Rewrite config is invalid
+			if ! BACKEND_REWRITE_ERROR="$( backend_conf_is_valid "${BACKEND_REWRITE_CONFIG}" )"; then
+				log "warn" "[${VHOST_NAME}${VHOST_TLD_SUFFIX}] Backend rewrite config is invalid: ${BACKEND_REWRITE_ERROR}"
+				log "warn" "[${VHOST_NAME}${VHOST_TLD_SUFFIX}] Backend rewrite: skipping"
+			else
+				# Apply the overwrite
+				log "info" "[${VHOST_NAME}${VHOST_TLD_SUFFIX}] Overwriting MASS_VHOST_BACKEND config"
+				VHOST_BACKEND="${BACKEND_REWRITE_CONFIG}" # Use config from file
+			fi
+		fi
+	fi
+
+	###
+	### BACKEND=file:<file>
 	###
 	if echo "${VHOST_BACKEND}" | grep -E '^file:' >/dev/null; then
 		# No need to validate backend string, has been done already in entrypoint
@@ -166,6 +192,7 @@ VHOSTGEN_TEMPLATE="$( \
 		"${be_port}" \
 		"${VHOST_BACKEND_TIMEOUT}" \
 		"${VHOST_ALIASES_ALLOW}" \
+		"${VHOST_ALIASES_DENY}" \
 		"no" \
 		"/httpd-status" \
 )"

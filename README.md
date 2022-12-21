@@ -159,6 +159,7 @@ The provided Docker images add a lot of injectables in order to customize it to 
    <code><a href="doc/environment-variables.md#-main_vhost_docroot_dir" >MAIN_VHOST_DOCROOT_DIR</a></code><br/>
    <code><a href="doc/environment-variables.md#-main_vhost_template_dir" >MAIN_VHOST_TEMPLATE_DIR</a></code><br/>
    <code><a href="doc/environment-variables.md#-main_vhost_ssl_type" >MAIN_VHOST_SSL_TYPE</a></code><br/>
+   <br/>
    <code><a href="doc/environment-variables.md#-main_vhost_ssl_cn" >MAIN_VHOST_SSL_CN</a></code><br/>
    <code><a href="doc/environment-variables.md#-main_vhost_status_enable" >MAIN_VHOST_STATUS_ENABLE</a></code><br/>
    <code><a href="doc/environment-variables.md#-main_vhost_status_alias" >MAIN_VHOST_STATUS_ALIAS</a></code><br/>
@@ -173,6 +174,8 @@ The provided Docker images add a lot of injectables in order to customize it to 
    <code><a href="doc/environment-variables.md#-mass_vhost_docroot_dir" >MASS_VHOST_DOCROOT_DIR</a></code><br/>
    <code><a href="doc/environment-variables.md#-mass_vhost_template_dir" >MASS_VHOST_TEMPLATE_DIR</a></code><br/>
    <code><a href="doc/environment-variables.md#-mass_vhost_ssl_type" >MASS_VHOST_SSL_TYPE</a></code><br/>
+   <br/>
+   <code><a href="doc/environment-variables.md#-mass_vhost_backend_rewrite" >MASS_VHOST_BACKEND_REWRITE</a></code><br/>
    <code><a href="doc/environment-variables.md#-mass_vhost_tld_suffix" >MASS_VHOST_TLD_SUFFIX</a></code><br/>
   </td>
   <td>
@@ -283,10 +286,11 @@ The following diagram shows the basic architecture of this docker image.
 > 🛈 For details see **[Documentation: Architecture](doc/architecture.md)**
 
 ```bash
-       docker-entrypoint.sh
-                |
-                ↓
-           supervisord (pid 1)
+       # mass-vhost                                     # main-vhost only
+       docker-entrypoint.sh                             docker-entrypoint.sh
+                |                                                |
+                ↓                                                ↓
+           supervisord (pid 1)                                 httpd (pid 1)
           /     |
          /      |
        ↙        ↓

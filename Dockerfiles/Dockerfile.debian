@@ -65,7 +65,7 @@ RUN set -eux \
 ENV MY_USER=nginx
 ENV MY_GROUP=nginx
 ENV HTTPD_START="/usr/sbin/nginx"
-ENV HTTPD_RELOAD="nginx -s stop 2>/dev/null"
+ENV HTTPD_RELOAD="nginx -s stop"
 ENV HTTPD_VERSION="nginx -V 2>&1 | head -1 | awk '{print $3}'"
 ENV VHOSTGEN_HTTPD_SERVER="nginx"
 
