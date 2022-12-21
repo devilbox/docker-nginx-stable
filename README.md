@@ -282,21 +282,21 @@ The following diagram shows the basic architecture of this docker image.
 ```bash
        docker-entrypoint.sh
                 |
-                ↓
+                ⭣
            supervisord (pid 1)
           /     |
          /      |
-       ↙        ↓
+       ↙        ⭣
   start       start
   httpd      watcherd
             /    |    \
            /     |     \
-          ↓      ↓      ↘
+          ⭣      ⭣      ↘
         sgn     rm      create-vhost.sh
        httpd   vhost     |           |
                          |           |
-                         ↓           ↓
-                      cert-gen    vhost-gen
+                         ⭣           ⭣
+                      cert-gen    vhost-gen ⭢ generate vhost
 ```
 
 

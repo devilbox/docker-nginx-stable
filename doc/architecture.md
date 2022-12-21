@@ -28,21 +28,21 @@ This is the execution chain for how the mass virtual hosting is achieved:
 ```bash
        docker-entrypoint.sh
                 |
-                ↓
+                ⭣
            supervisord (pid 1)
           /     |
          /      |
-       ↙        ↓
+       ↙        ⭣
   start       start
   httpd      watcherd
             /    |    \
            /     |     \
-          ↓      ↓      ↘
+          ⭣      ⭣      ↘
         sgn     rm      create-vhost.sh
        httpd   vhost     |           |
                          |           |
-                         ↓           ↓
-                      cert-gen    vhost-gen
+                         ⭣           ⭣
+                      cert-gen    vhost-gen ⭢ generate vhost
 ```
 
 1. The `docker-entrypoint.sh` script sets and validates given options
