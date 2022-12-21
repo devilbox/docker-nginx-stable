@@ -9,12 +9,7 @@
 # Documentation: Features
 
 
-1. Automated mass Virtual Hosts
-2. Automated PHP-FPM setup
-3. Automated Reverse Proxy setup
-
-
-## ☆ Automated mass Virtual Hosts
+## ☆ Automated mass Virtual hosts
 
 1. Automated virtual hosts can be enabled by providing the following environment variable to the docker container `MASS_VHOST_ENABLE=1`.
 2. You should mount a local project directory into the Docker under `/shared/httpd` (`-v /local/path:/shared/httpd`).
@@ -66,6 +61,7 @@ docker run -it \
 ```
 
 
+
 ## ☆ Automated PHP-FPM setup
 
 PHP-FPM is not included inside this Docker image, but can be enabled to contact a remote PHP-FPM server. To do so, you need to configure one of the two backends (main or mass vhost).
@@ -91,7 +87,14 @@ docker run -it \
 ```
 
 
+
 ## ☆ Automated Reverse Proxy Setup
+
+Reverse Proxies are configured in a similar way to how PHP-FPM is setup as a remote backend. All you have to do is to specify the backend in the following form:
+```bash
+MAIN_VHOST_BACKEND:conf:rproxy:<protocol>:<server-addr>:<server-port>
+```
+Where `<procotol>` can by one of `http` or `https` (depending what your backend provides. `<server-addr>` and `<serer-port>` specify the hostname, IPv4 or IPv6 address of your upstream server, followed by its TCP port.
 
 
 
@@ -111,9 +114,11 @@ Each virtual host is generated from templates by **[vhost-gen](https://github.co
 <sub>(*) This refers to the directory on your host computer</sub>
 
 
+
 ## ☆ Customization for the default virtual host
 
 The default virtual host can also be overwritten with a custom template. Use `MAIN_VHOST_TEMPLATE_DIR` variable in order to set the subdirectory to look for template files.
+
 
 
 ## ☆ Disabling the default virtual host

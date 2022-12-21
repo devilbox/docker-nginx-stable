@@ -83,41 +83,40 @@ The following Docker image tags are built once and can be used for reproducible 
 > ⚠ **Warning:** The latest available git tag is also build every night and considered a rolling tag.
 
 
+
 ## ✰ Features
+
+This repository uses official httpd Docker images and adds a lot of features, logic and autmomation op top. This allows you to feature-toggle certain functionality simply by setting environment variables.
+
+Below is a brief overview about most outstanding features, but I would still advice you to read up on available [environment variables](#-environment-variables), as well as the [architecture](#-architecture) to get the whole picture.
+
 
 > 🛈 For details see **[Documentation: Features](doc/features.md)**
 
-### Automated virtual hosts
+#### Automated mass virtual hosts
+* Virtual hosts are created automatically, simply by creating a new project directory (inside or outside of the container). This allows you to quickly create new projects and work on them in your IDE without the hassle of configuring the web server.
 
-Virtual hosts are created automatically, simply by creating a new project directory (inside or outside of the container). This allows you to quickly create new projects and work on them in your IDE without the hassle of configuring the web server.
+#### Automated PHP-FPM setup
+* PHP is not included in the provided images, but you can enable a remote backend and link it to a PHP-FPM image. This allows you to easily switch PHP versions and choose one which is currently required.
 
-### Automated PHP-FPM setup
+#### Automated Reverse Proxy setup
+* In reverse proxy mode, you can choose any http or https backend of your likings. This way you can proxy NodeJS, Python, etc. and use the webserver to add SSL in front.
 
-PHP is not included in the provided images, but you can link the Docker container to a PHP-FPM image with any PHP version. This allows you to easily switch PHP versions and choose one which is currently required.
+#### Automated SSL certificate generation
+* SSL certificates are generated automatically for each virtual host if you choose to enable it
 
-### Automated Reverse Proxy setup
+#### Trusted HTTPS in all vhosts
+* Virtual host SSL certificates are signed by an internal Certificate Authority (or one you provide to the image). That makes it possible to set the CA to trusted and all generated vhosts will automatically have trusted SSL.
 
-Each virtual host can specify its own custom backend. You could for instance serve two NodeJS applications, one Python service and 4 PHP projects, as well as a few that only provide static files. This configuration is applied automatically based on environment variables.
+#### Customization per virtual host
+* Each virtual host can individually be fully customized via [`vhost-gen`](https://github.com/devilbox/vhost-gen) templates.
 
-### Automated SSL certificate generation
+#### Local file system permission sync
+* File system permission/ownership of files/dirs inside the running container can be synced with the permission on your host system. This is accomplished by specifying a user- and group-id to the `docker run` command.
 
-SSL certificates are generated automatically for each virtual host to allow you to develop over HTTP and HTTPS.
+#### Tested with common Frameworks
+* Wordpress, Drupal, Laravel, CakePHP, PhalconPHP, Magento, Shopware, Typo3, Yii, Zend and many others.
 
-### Automatically trusted HTTPS
-
-SSL certificates are signed by a certificate authority (which is also being generated). The CA file can be mounted locally and imported into your browser, which allows you to automatically treat all generated virtual host certificates as trusted.
-
-### Customization per virtual host
-
-Each virtual host can individually be fully customized via [`vhost-gen`](https://github.com/devilbox/vhost-gen) templates.
-
-### Customization for the default virtual host
-
-The default virtual host is also treated differently from the auto-generated mass virtual hosts. You can choose to disable it or use it for a generic overview page for all of your created projects.
-
-### Local file system permission sync
-
-File system permissions of files/dirs inside the running Docker container are synced with the permission on your host system. This is accomplished by specifying a user- and group-id to the `docker run` command.
 
 
 ## ∑ Environment Variables
@@ -212,9 +211,10 @@ The provided Docker images offer the following internal paths to be mounted to y
 </table>
 
 
+
 ## 🖧 Exposed Ports
 
-When you plan on using `443` you should enable automated SSL certificate generation.
+When you plan on using `443` you must enable SSL via environment variables, otherwise nothing will be listening on that port.
 
 | Docker | Description |
 |--------|-------------|
@@ -222,50 +222,53 @@ When you plan on using `443` you should enable automated SSL certificate generat
 | 443    | HTTPS listening Port |
 
 
+
 ## 💡 Examples
 
-The documentation provides copy/paste examples about common use-cases including dummy projects.
+The documentation provides many copy/paste examples about common use-cases including dummy projects.
 
-### Docker
+The given examples distinguish between two different kinds of setup: The default vhost, which only allows to serve a single project and the mass vhost setup, which allows unlimited vhosts that are created automtically. Both types offer the same set of features and are configured in a similar way, so If you find an example in one kind it is easily applyable to the other kind as well.
 
-> 🛈 For details see **[Documentation: Examples](doc/examples.md)** or click any link below.
+> 🛈 For details see **[Documentation: Examples](doc/examples.md)**<br/>
+> 🛈 For details see **[Docker Compose: Examples](examples/)**
+
+#### Docker
 
 <table>
  <tr valign="top" style="vertical-align:top">
   <td>
    <strong>Default vhost</strong><br/>
-   <a href="doc/examples.md" >Serve static files</a><br/>
-   <a href="doc/examples.md" >Serve PHP files</a><br/>
-   <a href="doc/examples.md" >Sync local filestem permission</a><br/>
-   <a href="doc/examples.md" >Serve PHP files over HTTPS</a><br/>
-   <a href="doc/examples.md" >Reverse Proxy NodeJS</a><br/>
+   &nbsp;&nbsp;&nbsp;💡 <a href="doc/examples.md#-serve-staticfiles" >Serve static files</a><br/>
+   &nbsp;&nbsp;&nbsp;💡 <a href="doc/examples.md#-serve-php-files-with-php-fpm" >Serve PHP files</a><br/>
+   &nbsp;&nbsp;&nbsp;💡 <a href="doc/examples.md#-serve-php-files-with-php-fpm-and-sync-local-permissions" >Sync local filestem permission</a><br/>
+   &nbsp;&nbsp;&nbsp;💡 <a href="doc/examples.md#-serve-php-files-with-php-fpm-over-https" >Serve PHP files over HTTPS</a><br/>
+   &nbsp;&nbsp;&nbsp;💡 <a href="doc/examples.md#-act-as-a-reverse-proxy-for-nodejs" >Reverse Proxy NodeJS</a><br/>
   </td>
   <td>
    <strong>Unlimited vhosts</strong><br/>
-   <a href="doc/examples.md" >LEMP stack</a><br/>
+   &nbsp;&nbsp;&nbsp;💡 <a href="#" >Custom <code>vhost-gen</code> template</a><br/>
+   &nbsp;&nbsp;&nbsp;💡 <a href="doc/examples.md#-fully-functional-lemp-stack-with-mass-vhosts" >LEMP stack with PHP-FPM and MariaDB</a><br/>
+   &nbsp;&nbsp;&nbsp;💡 <a href="#" ><strong>Wordpress</strong> setup</a><br/>
   </td>
  </tr>
 </table>
 
-
-### Docker Compose
-
-> 🛈 For details see **[Docker Compose: Examples](examples/)** or click any link below.
+#### Docker Compose
 
 <table>
  <tr valign="top" style="vertical-align:top">
   <td>
    <strong>Default vhost</strong><br/>
-   <a href="examples/" >Serve static files</a><br/>
-   <a href="examples/" >Serve PHP files</a><br/>
-   <a href="examples/" >Serve PHP files over HTTPS</a><br/>
-   <a href="examples/" >Reverse Proxy NodeJS</a><br/>
-   <a href="examples/" >Reverse Proxy Python</a><br/>
+   &nbsp;&nbsp;&nbsp;💡 <a href="examples/default-vhost__static-files/" >Serve static files</a><br/>
+   &nbsp;&nbsp;&nbsp;💡 <a href="examples/default-vhost__php-fpm/" >Serve PHP files</a><br/>
+   &nbsp;&nbsp;&nbsp;💡 <a href="examples/default-vhost__php-fpm__ssl/" >Serve PHP files over HTTPS</a><br/>
+   &nbsp;&nbsp;&nbsp;💡 <a href="examples/default-vhost__reverse-proxy__node/" >Reverse Proxy NodeJS</a><br/>
+   &nbsp;&nbsp;&nbsp;💡 <a href="examples/default-vhost__reverse-proxy__python/" >Reverse Proxy Python</a><br/>
   </td>
   <td>
    <strong>Unlimited vhosts</strong><br/>
-   <a href="examples/" >Serve PHP files over HTTPS</a><br/>
-   <a href="examples/" >Reverse Proxy <strong>and</strong> PHP-FPM</a><br/>
+   &nbsp;&nbsp;&nbsp;💡 <a href="examples/mass-vhost__php-fpm__ssl/" >Serve PHP files over HTTPS</a><br/>
+   &nbsp;&nbsp;&nbsp;💡 <a href="examples/mass-vhost__reverse-proxy__ssl/" >Reverse Proxy <strong>and</strong> PHP-FPM</a><br/>
   </td>
  </tr>
 </table>
@@ -354,6 +357,7 @@ Show some love for the following sister projects.
 </table>
 
 
+
 ## 👫 Community
 
 In case you seek help, go and visit the community pages.
@@ -393,6 +397,7 @@ In case you seek help, go and visit the community pages.
 </table>
 
 
+
 ## 🧘 Maintainer
 
 **[@cytopia](https://github.com/cytopia)**
@@ -415,83 +420,9 @@ Terraform: [cytopia](https://registry.terraform.io/namespaces/cytopia) **·**
 Ansible: [cytopia](https://galaxy.ansible.com/cytopia)
 
 
+
 ## 🗎 License
 
 **[MIT License](LICENSE)**
 
 Copyright (c) 2016 [cytopia](https://github.com/cytopia)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### Serve static files
-
-This example creates the main (default) vhost, which only serves static files.
-
-> See [**Documentation:** Serve static files](doc/examples.md#-serve-staticfiles)
-
-
-### Serve PHP files with PHP-FPM
-
-This example creates the main (default) vhost, which contacts a remote PHP-FPM host to serve PHP files.
-
-> See [**Documentation:** Serve PHP files with PHP-FPM](doc/examples.md#-serve-php-files-with-php-fpm)
-
-
-### Serve PHP files with PHP-FPM and sync local permissions
-
-The same as the previous example, but also ensures that you can edit files locally and have file ownerships synced with webserver and PHP-FPM container.
-
-> See [**Documentation**: Serve PHP files with PHP-FPM over HTTPS](doc/examples.md#-serve-php-files-with-php-fpm-over-https)
-
-
-### Serve PHP files with PHP-FPM over HTTPS
-
-The same as the previous example, just with the addition of enabling SSL (HTTPS).
-
-This example shows the SSL type `redir`, which makes the webserver redirect any HTTP requests to HTTPS.
-
-Additionally we are mounting the `./ca` directory into the container under `/ca`. After startup you will find generated Certificate Authority files in there, which you could import into your browser.
-
-> See [**Documentation:** Serve PHP files with PHP-FPM over HTTPS](doc/examples.md#-serve-php-files-with-php-fpm-over-https)
-
-
-### Act as a Reverse Proxy for NodeJS
-
-This example creates a NodeJS application running in a Node container and uses the webserver to proxy all requests to the NodeJS application.  You could also enable SSL on the webserver in order to access NodeJS via HTTPS.
-
-> See [**Documentation:** Act as a Reverse Proxy for NodeJS](doc/examples.md#-act-as-a-reverse-proxy-for-nodejs)
-
-
-### Fully functional LEMP stack with Mass vhosts
-
-The following example creates a dynamic setup. Each time you create a new project directory below the `www/` directory, a new virtual host is automatically being created.
-
-Additionally all projects will have the `.com` suffix added to their domain name, which results in `<project>.com` as the final domain _(Where `<project>` is a placeholder for the created project directory)_.
-
-> See [**Documentation:** Fully functional LEMP stack with Mass vhosts](doc/examples.md#-fully-functional-lemp-stack-with-mass-vhosts)
-
-
-
