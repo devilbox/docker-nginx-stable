@@ -11,7 +11,7 @@ while_retry() {
 	local output
 
 	count=0
-	retry=30
+	retry=60
 	while ! output="$( curl --fail -sS -k -L "${url}" -H "${header}" 2>/dev/null | grep -A 10 "${expect}" )"; do
 		if [ "${count}" = "${retry}" ]; then
 			echo "[FAILED] curl --fail -sS -k -L \"${url}\" -H \"${header}\" | grep \"${expect}\""
