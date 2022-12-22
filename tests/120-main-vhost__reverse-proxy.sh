@@ -10,6 +10,11 @@ IMAGE="${1}"
 TAG="${2}"
 ARCH="${3}"
 
+if [ "${ARCH}" = "linux/386" ]; then
+	echo "Skipping, no Node image available for i386"
+	exit 0
+fi
+
 
 ###
 ### Load Library
