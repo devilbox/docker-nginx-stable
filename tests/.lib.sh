@@ -154,10 +154,10 @@ test_vhost_response() {
 test_docker_logs_err() {
 	local container_name="${1}"
 
-	local re_internal_upper='(\[FAILURE|FAILED|FAIL|FATAL|ERROR|ERR|WARNING|WARN\])'
-	local re_internal_lower='(\[failure|failed|fail|fatal|error|err|warning|warn\])'
-	local re_upper='(FAULT|FAIL|FATAL|ERR|WARN)'
-	local re_lower='(segfault|fail|fatal|warn)'
+	local re_internal_upper='(\[(FAILURE|FAILED|FAIL|FATAL|ERROR|ERR|WARNING|WARN)\])'
+	local re_internal_lower='(\[(failure|failed|fail|fatal|error|err|warning|warn)\])'
+	local re_upper='(FAULT|FAIL|FATAL|ERROR|WARN)'
+	local re_lower='(segfault|fail|fatal|error|warn)'
 	local re_mixed='([Ss]egfault|[Ff]ail|[Ff]atal|[Ww]arn)'
 	local regex="${re_internal_upper}|${re_internal_lower}|${re_upper}|${re_lower}|${re_mixed}"
 
@@ -165,11 +165,12 @@ test_docker_logs_err() {
 	local ignore1='creating Certificate Authority'
 	local ignore2='error_log'            # nginx error log directive
 	local ignore3='LogLevel'             # Apache logging directive
-	local ignore4='# Possible values'    # Apache httpd.conf contains a comment with verbosity levels
-	local ignore5='# consult the online' # Apache httpd.conf contains a comment with warning
-	local ignore6='stackoverflow'        # contains a link comment with 'error' in url
-	local ignore7='\[warn\] NameVirtualHost'  # Apache specific, when massvhost projects are not yet loaded
-	local ignore="${ignore1}|${ignore2}|${ignore3}|${ignore4}|${ignore5}|${ignore6}|${ignore7}"
+	local ignore4='ErrorLog'             # Apache error log directive
+	local ignore5='# Possible values'    # Apache httpd.conf contains a comment with verbosity levels
+	local ignore6='# consult the online' # Apache httpd.conf contains a comment with warning
+	local ignore7='stackoverflow'        # contains a link comment with 'error' in url
+	local ignore8='\[warn\] NameVirtualHost'  # Apache specific, when massvhost projects are not yet loaded
+	local ignore="${ignore1}|${ignore2}|${ignore3}|${ignore4}|${ignore5}|${ignore6}|${ignore7}|${ignore8}"
 
 	#local clr_gray="\033[38;5;244m"
 	local clr_test="\033[0;34m"  # blue
