@@ -117,9 +117,9 @@ ${IMAGE}:${TAG} >/dev/null"
 ### Test: APP1
 ###
 if ! test_vhost_response "${APP1_TXT}" "${APP1_URL}" "${APP1_HDR}"; then
-	docker_logs "${NAME_PHPFPM}"
+	docker_logs "${NAME_RPROXY}"
 	docker_logs "${NAME_HTTPD}"
-	docker_stop "${NAME_PHPFPM}"
+	docker_stop "${NAME_RPROXY}"
 	docker_stop "${NAME_HTTPD}"
 	log "fail" "'${APP1_TXT}' not found in ${APP1_URL}"
 	exit 1
@@ -135,9 +135,9 @@ fi
 ### Test: Errors
 ###
 if ! test_docker_logs_err "${NAME_HTTPD}"; then
-	docker_logs "${NAME_PHPFPM}"
+	docker_logs "${NAME_RPROXY}"
 	docker_logs "${NAME_HTTPD}"
-	docker_stop "${NAME_PHPFPM}"
+	docker_stop "${NAME_RPROXY}"
 	docker_stop "${NAME_HTTPD}"
 	log "fail" "Found errors in docker logs"
 	exit 1
@@ -147,6 +147,6 @@ fi
 ###
 ### Cleanup
 ###
-docker_stop "${NAME_PHPFPM}"
+docker_stop "${NAME_RPROXY}"
 docker_stop "${NAME_HTTPD}"
 log "ok" "Test succeeded"

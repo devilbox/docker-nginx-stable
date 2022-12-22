@@ -154,11 +154,12 @@ test_vhost_response() {
 test_docker_logs_err() {
 	local container_name="${1}"
 
-	local re_internal='(\[FAILURE|FAILED|FAIL|FATAL|ERROR|ERR|WARNING|WARN\])'
+	local re_internal_upper='(\[FAILURE|FAILED|FAIL|FATAL|ERROR|ERR|WARNING|WARN\])'
+	local re_internal_lower='(\[failure|failed|fail|fatal|error|err|warning|warn\])'
 	local re_upper='(FAULT|FAIL|FATAL|ERR|WARN)'
 	local re_lower='(segfault|fail|fatal|warn)'
 	local re_mixed='([Ss]egfault|[Ff]ail|[Ff]atal|[Ww]arn)'
-	local regex="${re_internal}|${re_upper}|${re_lower}|${re_mixed}"
+	local regex="${re_internal_upper}|${re_internal_lower}|${re_upper}|${re_lower}|${re_mixed}"
 
 	# Ignore this pattern
 	local ignore1='creating Certificate Authority'
