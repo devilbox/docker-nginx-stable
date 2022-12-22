@@ -1,0 +1,31 @@
+---
+
+# -------------------------------------------------------------------------------------------------
+# Job Name
+# -------------------------------------------------------------------------------------------------
+name: docker-compose
+
+
+# -------------------------------------------------------------------------------------------------
+# When to run
+# -------------------------------------------------------------------------------------------------
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/docker-compose.yml'
+      - 'Dockerfiles/**'
+      - 'examples/**/docker-compose.yml'
+      - 'examples/**/integration-test.sh'
+      - 'examples/integration-test.sh'
+
+
+jobs:
+  docker-compose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Run docker-compose integration tests
+        run: |
+          ./examples/integration-test.sh
