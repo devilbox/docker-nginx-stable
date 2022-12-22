@@ -97,14 +97,6 @@ create_app "${MOUNT_HOST}" "${DOCROOT}" "${APP2_NAME}" "index.${APP2_EXT}" "${AP
 #---------------------------------------------------------------------------------------------------
 
 ###
-### Start PHP Container
-###
-run "docker run -d --platform ${ARCH} --name ${NAME_PHPFPM} \
--v ${MOUNT_HOST}:${MOUNT_CONT} \
-devilbox/php-fpm-8.1 >/dev/null"
-
-
-###
 ### Start HTTPD Container
 ###
 run "docker run -d --platform ${ARCH} --name ${NAME_HTTPD} \
@@ -115,7 +107,6 @@ run "docker run -d --platform ${ARCH} --name ${NAME_HTTPD} \
 -e DEBUG_RUNTIME=2 \
 -e MAIN_VHOST_ENABLE=0 \
 -e MASS_VHOST_ENABLE=1 \
---link ${NAME_PHPFPM} \
 ${IMAGE}:${TAG} >/dev/null"
 
 

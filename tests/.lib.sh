@@ -162,9 +162,13 @@ test_docker_logs_err() {
 
 	# Ignore this pattern
 	local ignore1='creating Certificate Authority'
-	local ignore2='error_log'       # nginx error log directive
-	local ignore3='stackoverflow'   # contains a link comment with 'error' in url
-	local ignore="${ignore1}|${ignore2}|${ignore3}"
+	local ignore2='error_log'            # nginx error log directive
+	local ignore3='LogLevel'             # Apache logging directive
+	local ignore4='# Possible values'    # Apache httpd.conf contains a comment with verbosity levels
+	local ignore5='# consult the online' # Apache httpd.conf contains a comment with warning
+	local ignore6='stackoverflow'        # contains a link comment with 'error' in url
+	local ignore7='\[warn\] NameVirtualHost'  # Apache specific, when massvhost projects are not yet loaded
+	local ignore="${ignore1}|${ignore2}|${ignore3}|${ignore4}|${ignore5}|${ignore6}|${ignore7}"
 
 	#local clr_gray="\033[38;5;244m"
 	local clr_test="\033[0;34m"  # blue
