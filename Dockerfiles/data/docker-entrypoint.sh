@@ -258,6 +258,18 @@ if [ "${VHOSTGEN_HTTPD_SERVER}" = "nginx" ]; then
 		"${MAIN_DOCROOT_BASE}/${MAIN_VHOST_TEMPLATE_DIR}" \
 		"${MAIN_VHOST_SSL_TYPE}" \
 		"/etc/vhost-gen/templates-main/"
+elif [ "${VHOSTGEN_HTTPD_SERVER}" = "apache22" ]; then
+	# Adding custom nginx vhost template to ensure Reverse Proxy works.
+	# Module ProxyHTMLURLMap does not seet to exist in Apache 2.2 modules directory.
+	# The modified template has this outcommented
+	vhostgen_main_generate \
+		"${MAIN_VHOST_ENABLE}" \
+		"${MAIN_DOCROOT_BASE}/${MAIN_VHOST_DOCROOT_DIR}" \
+		"${MAIN_VHOST_BACKEND}" \
+		"/etc/vhost-gen/main.yml" \
+		"${MAIN_DOCROOT_BASE}/${MAIN_VHOST_TEMPLATE_DIR}" \
+		"${MAIN_VHOST_SSL_TYPE}" \
+		"/etc/vhost-gen/templates-main/"
 else
 	vhostgen_main_generate \
 		"${MAIN_VHOST_ENABLE}" \
