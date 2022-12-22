@@ -313,7 +313,7 @@ fi
 # -------------------------------------------------------------------------------------------------
 
 # shellcheck disable=SC2153
-_HTTPD_VERSION="$( eval "${HTTPD_VERSION}" )"  # Set via Dockerfile
+_HTTPD_VERSION="$( eval "${HTTPD_VERSION}" || true )"  # Set via Dockerfile
 _SUPVD_VERSION="$( supervisord -v )"
 
 log "info" "-------------------------------------------------------------------------"

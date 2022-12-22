@@ -100,7 +100,7 @@ vhostgen_main_generate() {
 	local config="${4}"
 	local template="${5}"
 	local ssl_type="${6}"
-	local custom_template_dir="${7}"  # Specifies a different vhost-gen template dir (Dockerfile might copy custom vhost-gen templates)
+	local custom_template_dir="${7:-}"  # Specifies a different vhost-gen template dir (Dockerfile might copy custom vhost-gen templates)
 
 	# Not using main virtual host, so no need to generate it
 	if [ "${enable}" -eq "0" ]; then
