@@ -160,6 +160,7 @@ validate_main_vhost_docroot_dir() {
 	local name="${1}"
 	local value="${2}"
 	local base_path="${MAIN_DOCROOT_BASE}"
+	# shellcheck disable=SC2153
 	_validate_vhost_docroot_dir "${name}" "${value}" "${MAIN_VHOST_ENABLE}" "${MAIN_VHOST_BACKEND}" "${base_path}/${value}"
 }
 

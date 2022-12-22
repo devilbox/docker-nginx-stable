@@ -90,4 +90,4 @@ manifest-push: docker-manifest-push
 # -------------------------------------------------------------------------------------------------
 .PHONY: test
 test:
-	./tests/start-ci.sh $(IMAGE) $(NAME) $(VERSION) $(DOCKER_TAG) $(ARCH)
+	./tests/start-ci.sh $(IMAGE) $(DOCKER_TAG) $(ARCH)
