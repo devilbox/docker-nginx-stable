@@ -102,8 +102,8 @@ vhost_type:
     # end of CHANGED:
     <location __LOCATION__>
         ProxyPassReverse /
-        SetOutputFilter  proxy-html
         # CHANGED:
+        #SetOutputFilter  proxy-html
         #ProxyHTMLURLMap  /      __LOCATION__
         #ProxyHTMLURLMap  __LOCATION__  __LOCATION__
         # end of CHANGED:
