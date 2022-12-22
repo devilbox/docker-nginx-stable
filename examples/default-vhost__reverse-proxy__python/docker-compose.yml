@@ -13,6 +13,7 @@ services:
     environment:
       - MAIN_VHOST_BACKEND=conf:rproxy:http:python:3000
       - MAIN_VHOST_SSL_TYPE=both
+      - DEBUG_ENTRYPOINT=4
     ports:
       - "8000:80"
       - "8443:443"
