@@ -12,12 +12,13 @@ run() {
 	_cmd="${1}"
 
 	#_red="\033[0;31m"
-	_green="\033[0;32m"
+	_gray="\033[38;5;244m"
+	#_green="\033[0;32m"
 	#_yellow="\033[0;33m"
 	_reset="\033[0m"
 	#_user="$(whoami)"
 
-	printf "${_green}%s${_cmd}${_reset}\n" "\$ "
+	printf "${_gray}%s${_cmd}${_reset}\n" "\$ "
 	sh -c "LANG=C LC_ALL=C ${_cmd}"
 }
 
@@ -36,9 +37,9 @@ log() {
 		printf "${clr_red}[FAIL] %s${clr_rst}\n" "${message}" 1>&2
 		printf "${clr_red}%s${clr_rst}\n" "--------------------------------------------------------------------------------" 1>&2
 	elif [ "${type}" = "ok" ]; then
-		printf "${clr_green}%s${clr_rst}\n" "--------------------------------------------------------------------------------" 1>&2
+		#printf "${clr_green}%s${clr_rst}\n" "--------------------------------------------------------------------------------" 1>&2
 		printf "${clr_green}[SUCC] %s${clr_rst}\n" "${message}"
-		printf "${clr_green}%s${clr_rst}\n" "--------------------------------------------------------------------------------" 1>&2
+		#printf "${clr_green}%s${clr_rst}\n" "--------------------------------------------------------------------------------" 1>&2
 	elif [ "${type}" = "loop" ]; then
 		printf "${clr_gray}%s${clr_rst}\n" "--------------------------------------------------------------------------------" 1>&2
 		printf "${clr_gray}[LOOP] %s${clr_rst}\n" "${message}"
@@ -77,22 +78,108 @@ tmp_dir() {
 }
 
 
-while_retry() {
-	local cmd_condition="${1}"   # while loop condition
-	local retries="${2:-30}"     # how many times to loop
+docker_logs() {
+	local container_name="${1}"
+	docker logs "${container_name}" || true
+}
+
+docker_stop() {
+	local container_name="${1}"
+	docker stop "${container_name}"  >/dev/null 2>&1 || true
+	docker rm -f "${container_name}" >/dev/null 2>&1 || true
+}
+
+
+# --------------------------------------------------------------------------------------------------
+# TESTS
+# --------------------------------------------------------------------------------------------------
+
+###
+### Application 1
+###
+create_app() {
+	local path="${1}"
+	local docr="${2}"
+	local name="${3}"
+	local file="${4}"
+	local cont="${5}"
+
+	run "mkdir -p ${path}/${name}/${docr}"
+	run "echo \"${cont}\" > ${path}/${name}/${docr}/${file}"
+}
+
+
+
+###
+### Find expected string in URL
+###
+test_vhost_response() {
+	local expect="${1}"
+	local url="${2}"
+	local header="${3:-}"
+
+	#local clr_gray="\033[38;5;244m"
+	local clr_rst="\033[0m"
+	local clr_test="\033[0;34m"  # blue
+
+
+	printf "${clr_test}%s${clr_rst}\n" "--------------------------------------------------------------------------------" 1>&2
+	printf "${clr_test}[TEST] %s${clr_rst}\n" "Exec: curl -sS -k -L '${url}' -H '${header}'"
+	printf "${clr_test}[TEST] %s${clr_rst}" "Find: '${expect}' "
 
 	count=0
+	retry=30
 	output=""
-	log "loop" "${cmd_condition}"
-	while ! output="$( sh -c "LANG=C LC_ALL=C ${cmd_condition}" )"; do
+	while ! output="$( sh -c "LANG=C LC_ALL=C curl --fail -sS -k -L '${url}' -H '${header}' 2>/dev/null | grep '^${expect}$'" )"; do
 		printf "."
-		if [ "${count}" = "${retries}" ]; then
+		if [ "${count}" = "${retry}" ]; then
 			printf "\\n"
+			sh -c "LANG=C LC_ALL=C curl -v --fail -sS -k -L '${url}' -H '${header}'" || true
 			return 1
 		fi
 		count=$(( count + 1 ))
 		sleep 1
 	done
+
+	# Print success
 	printf "\\n"
-	echo "${output}"
+	log "ok" "Resp: '${output}'"
+	echo
+}
+
+
+###
+### Check docker logs for Errors
+###
+test_docker_logs_err() {
+	local container_name="${1}"
+
+	local re_internal='(\[FAILURE|FAILED|FAIL|FATAL|ERROR|ERR|WARNING|WARN\])'
+	local re_upper='(FAULT|FAIL|FATAL|ERR|WARN)'
+	local re_lower='(segfault|fail|fatal|warn)'
+	local re_mixed='([Ss]egfault|[Ff]ail|[Ff]atal|[Ww]arn)'
+	local regex="${re_internal}|${re_upper}|${re_lower}|${re_mixed}"
+
+	# Ignore this pattern
+	local ignore1='creating Certificate Authority'
+	local ignore2='error_log'       # nginx error log directive
+	local ignore3='stackoverflow'   # contains a link comment with 'error' in url
+	local ignore="${ignore1}|${ignore2}|${ignore3}"
+
+	#local clr_gray="\033[38;5;244m"
+	local clr_test="\033[0;34m"  # blue
+	local clr_rst="\033[0m"
+
+	printf "${clr_test}%s${clr_rst}\n" "--------------------------------------------------------------------------------" 1>&2
+	printf "${clr_test}[TEST] %s${clr_rst}\n" "Exec: docker logs ${container_name}"
+	printf "${clr_test}[TEST] %s${clr_rst}\n" "Find: '${regex}'"
+
+	if docker logs "${container_name}" 2>&1 | grep -Ev "${ignore}" | grep -E "${regex}" >/dev/null; then
+		log "fail" "Found: $( docker logs "${container_name}" 2>&1 | grep -Ev "${ignore}" | grep -E "${regex}" )"
+		return 1
+	fi
+
+	# Print success
+	log "ok" "Resp: Nothing found in docker logs"
+	echo
 }

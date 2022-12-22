@@ -24,21 +24,21 @@ ARCH="${3}"
 #---------------------------------------------------------------------------------------------------
 
 ###
-### Setup
+### Globals
 ###
-RAND_NAME="$( get_random_name )"
+NAME_HTTPD="$( get_random_name )"
+
 
 ###
-### Startup container
+### Start HTTPD Container
 ###
-if ! run "docker run --platform ${ARCH} --name ${RAND_NAME} \
+if ! run "docker run --platform ${ARCH} --name ${NAME_HTTPD} \
 -e DEBUG_ENTRYPOINT=4 \
 -e DEBUG_RUNTIME=1 \
 --entrypoint=bash \
 ${IMAGE}:${TAG} -c 'command -v xargs >/dev/null'"; then
-	docker logs "${RAND_NAME}" || true
-	docker stop "${RAND_NAME}"  >/dev/null 2>&1 || true
-	docker rm -f "${RAND_NAME}" >/dev/null 2>&1 || true
+	docker_logs "${NAME_HTTPD}"
+	docker_stop "${NAME_HTTPD}"
 	log "fail" "command 'xargs' not found inside image, but required"
 	exit 1
 fi
@@ -48,7 +48,5 @@ echo "command 'xargs' found"
 ###
 ### Cleanup
 ###
-docker stop "${RAND_NAME}"  >/dev/null 2>&1
-docker rm -f "${RAND_NAME}" >/dev/null 2>&1
-
+docker_stop "${NAME_HTTPD}"
 log "ok" "Test succeeded"
