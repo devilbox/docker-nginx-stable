@@ -95,6 +95,11 @@ APP2_HDR="Host: ${APP2_NAME}${TLD}"
 #---------------------------------------------------------------------------------------------------
 
 ###
+### Pull node image
+###
+run "docker pull --platform linux/amd64 node:19-alpine"
+
+###
 ### Start Node-1 Container
 ###
 run "docker run -d --name ${NAME_RPROXY1} \
@@ -107,7 +112,7 @@ node:19-alpine node ${MOUNT_CONT}/${APP1_NAME}/${DOCROOT}/app.js >/dev/null"
 ###
 run "docker run -d --name ${NAME_RPROXY2} \
 -v ${MOUNT_HOST}:${MOUNT_CONT} \
-node:19-alpine sh -c 'sleep 15; node ${MOUNT_CONT}/${APP2_NAME}/${DOCROOT}/app.js' >/dev/null"
+node:19-alpine sh -c 'sleep 10; node ${MOUNT_CONT}/${APP2_NAME}/${DOCROOT}/app.js' >/dev/null"
 
 
 ###
