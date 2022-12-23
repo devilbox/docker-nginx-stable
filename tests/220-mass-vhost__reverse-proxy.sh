@@ -32,9 +32,10 @@ HOST_PORT_HTTPS="8493"
 # shellcheck disable=SC2034
 NAME_HTTPD="$( get_random_name )"
 # shellcheck disable=SC2034
-NAME_PHPFPM="$( get_random_name )"
+#NAME_PHPFPM="$( get_random_name )"
 # shellcheck disable=SC2034
-NAME_RPROXY="$( get_random_name )"
+NAME_RPROXY1="$( get_random_name )"
+NAME_RPROXY2="$( get_random_name )"
 
 
 
@@ -45,8 +46,9 @@ NAME_RPROXY="$( get_random_name )"
 ###
 ### GLOBALS
 ###
-#DOCROOT="htdocs"
-MOUNT_CONT="/var/www/default"
+DOCROOT="htdocs"
+TLD=".loc"
+MOUNT_CONT="/shared/httpd"
 MOUNT_HOST="$( tmp_dir )"
 
 
@@ -58,12 +60,15 @@ MOUNT_HOST="$( tmp_dir )"
 ###
 ### Application 1
 ###
+APP1_NAME="my-project-1"
+APP1_TXT="hello from ${APP1_NAME} via httpd with NodeJS"
 APP1_URL="http://localhost:${HOST_PORT_HTTP}"
-#APP1_EXT="nodejs"
-APP1_HDR=""
-APP1_TXT="hello via httpd with NodeJS"
-#create_app "${MOUNT_HOST}" "${DOCROOT}" "" "index.${APP1_EXT}" "<?php echo '${APP1_TXT}';"
-cat << EOF > "${MOUNT_HOST}/app.js"
+APP1_HDR="Host: ${APP1_NAME}${TLD}"
+
+mkdir -p "${MOUNT_HOST}/${APP1_NAME}/cfg"
+echo "conf:rproxy:http:${NAME_RPROXY1}:3000" > "${MOUNT_HOST}/${APP1_NAME}/cfg/backend.txt"
+mkdir -p "${MOUNT_HOST}/${APP1_NAME}/${DOCROOT}"
+cat << EOF > "${MOUNT_HOST}/${APP1_NAME}/${DOCROOT}/app.js"
 const http = require('http');
 const server = http.createServer((req, res) => {
         res.statusCode = 200;
@@ -75,6 +80,14 @@ const server = http.createServer((req, res) => {
 server.listen(3000, '0.0.0.0');
 EOF
 
+###
+### Application 2
+###
+APP2_NAME="another-nodejs-app"
+APP2_TXT="hello hello from ${APP2_NAME} via httpd with NodeJS"
+APP2_URL="http://localhost:${HOST_PORT_HTTP}"
+APP2_HDR="Host: ${APP2_NAME}${TLD}"
+
 
 
 #---------------------------------------------------------------------------------------------------
@@ -82,11 +95,19 @@ EOF
 #---------------------------------------------------------------------------------------------------
 
 ###
-### Start NodeJS Container
+### Start Node-1 Container
 ###
-run "docker run -d --name ${NAME_RPROXY} \
+run "docker run -d --name ${NAME_RPROXY1} \
 -v ${MOUNT_HOST}:${MOUNT_CONT} \
-node:19-alpine node /var/www/default/app.js >/dev/null"
+node:19-alpine node ${MOUNT_CONT}/${APP1_NAME}/${DOCROOT}/app.js >/dev/null"
+
+
+###
+### Start Node-2 Container
+###
+run "docker run -d --name ${NAME_RPROXY2} \
+-v ${MOUNT_HOST}:${MOUNT_CONT} \
+node:19-alpine sh -c 'sleep 15; node ${MOUNT_CONT}/${APP2_NAME}/${DOCROOT}/app.js' >/dev/null"
 
 
 ###
@@ -97,9 +118,13 @@ run "docker run -d --platform ${ARCH} --name ${NAME_HTTPD} \
 -p 127.0.0.1:${HOST_PORT_HTTP}:80 \
 -p 127.0.0.1:${HOST_PORT_HTTPS}:443 \
 -e DEBUG_ENTRYPOINT=3 \
--e DEBUG_RUNTIME=2 \
--e MAIN_VHOST_BACKEND=conf:rproxy:http:${NAME_RPROXY}:3000 \
---link ${NAME_RPROXY} \
+-e DEBUG_RUNTIME=1 \
+-e MAIN_VHOST_ENABLE=0 \
+-e MASS_VHOST_ENABLE=1 \
+-e MASS_VHOST_BACKEND=file:backend.txt \
+-e DOCKER_LOGS=0 \
+--link ${NAME_RPROXY1} \
+--link ${NAME_RPROXY2} \
 ${IMAGE}:${TAG} >/dev/null"
 
 
@@ -112,11 +137,43 @@ ${IMAGE}:${TAG} >/dev/null"
 ### Test: APP1
 ###
 if ! test_vhost_response "${APP1_TXT}" "${APP1_URL}" "${APP1_HDR}"; then
-	docker_logs "${NAME_RPROXY}"
+	docker_logs "${NAME_RPROXY1}"
 	docker_logs "${NAME_HTTPD}"
-	docker_stop "${NAME_RPROXY}"
+
+	docker_stop "${NAME_RPROXY2}"
+	docker_stop "${NAME_RPROXY1}"
 	docker_stop "${NAME_HTTPD}"
 	log "fail" "'${APP1_TXT}' not found in ${APP1_URL}"
+	exit 1
+fi
+
+
+###
+### Test: APP2
+###
+mkdir -p "${MOUNT_HOST}/${APP2_NAME}/cfg"
+echo "conf:rproxy:http:${NAME_RPROXY2}:4000" > "${MOUNT_HOST}/${APP2_NAME}/cfg/backend.txt"
+mkdir -p "${MOUNT_HOST}/${APP2_NAME}/${DOCROOT}"
+cat << EOF > "${MOUNT_HOST}/${APP2_NAME}/${DOCROOT}/app.js"
+const http = require('http');
+const server = http.createServer((req, res) => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'text/plain');
+        res.write('[OK]\n');
+        res.write('${APP2_TXT}\n');
+        res.end();
+});
+server.listen(4000, '0.0.0.0');
+EOF
+
+if ! test_vhost_response "${APP2_TXT}" "${APP2_URL}" "${APP2_HDR}"; then
+	docker_logs "${NAME_RPROXY2}"
+	docker_logs "${NAME_HTTPD}"
+
+	docker_stop "${NAME_RPROXY2}"
+	docker_stop "${NAME_RPROXY1}"
+	docker_stop "${NAME_HTTPD}"
+	log "fail" "'${APP2_TXT}' not found in ${APP2_URL}"
 	exit 1
 fi
 
@@ -130,9 +187,12 @@ fi
 ### Test: Errors
 ###
 if ! test_docker_logs_err "${NAME_HTTPD}"; then
-	docker_logs "${NAME_RPROXY}"
+	docker_logs "${NAME_RPROXY2}"
+	docker_logs "${NAME_RPROXY1}"
 	docker_logs "${NAME_HTTPD}"
-	docker_stop "${NAME_RPROXY}"
+
+	docker_stop "${NAME_RPROXY2}"
+	docker_stop "${NAME_RPROXY1}"
 	docker_stop "${NAME_HTTPD}"
 	log "fail" "Found errors in docker logs"
 	exit 1
@@ -142,6 +202,7 @@ fi
 ###
 ### Cleanup
 ###
-docker_stop "${NAME_RPROXY}"
+docker_stop "${NAME_RPROXY2}"
+docker_stop "${NAME_RPROXY1}"
 docker_stop "${NAME_HTTPD}"
 log "ok" "Test succeeded"

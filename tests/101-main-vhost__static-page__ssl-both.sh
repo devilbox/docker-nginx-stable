@@ -85,7 +85,7 @@ run "docker run -d --platform ${ARCH} --name ${NAME_HTTPD} \
 -v ${MOUNT_HOST}:${MOUNT_CONT} \
 -p 127.0.0.1:${HOST_PORT_HTTP}:80 \
 -p 127.0.0.1:${HOST_PORT_HTTPS}:443 \
--e DEBUG_ENTRYPOINT=4 \
+-e DEBUG_ENTRYPOINT=3 \
 -e DEBUG_RUNTIME=2 \
 -e MAIN_VHOST_SSL_TYPE=both \
 ${IMAGE}:${TAG} >/dev/null"
