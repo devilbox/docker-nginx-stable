@@ -151,6 +151,7 @@ fi
 # Apache 2.2 does not have HTTP/2 support
 if [ "${VHOSTGEN_HTTPD_SERVER}" != "apache22" ]; then
 	env_var_export "HTTP2_ENABLE" "1"
+else
 	export HTTP2_ENABLE=0
 fi
 env_var_export "DOCKER_LOGS" "1"
