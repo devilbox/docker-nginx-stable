@@ -1,0 +1,57 @@
+---
+
+# -------------------------------------------------------------------------------------------------
+# Job Name
+# -------------------------------------------------------------------------------------------------
+name: docker-compose
+
+
+# -------------------------------------------------------------------------------------------------
+# When to run
+# -------------------------------------------------------------------------------------------------
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/docker-compose.yml'
+      - 'Dockerfiles/**'
+      - 'examples/**/docker-compose.yml'
+      - 'examples/**/integration-test.sh'
+      - 'examples/integration-test.sh'
+
+
+jobs:
+  docker-compose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 'docker-compose: main-vhost Static Files'
+        run: |
+          cd ./examples/default-vhost__static-files/
+          ./integration-test.sh
+
+      - name: 'docker-compose: main-vhost PHP-FPM'
+        run: |
+          cd ./examples/default-vhost__php-fpm/
+          ./integration-test.sh
+
+      - name: 'docker-compose: main-vhost PHP-FPM (SSL)'
+        run: |
+          cd ./examples/default-vhost__php-fpm__ssl/
+          ./integration-test.sh
+
+      - name: 'docker-compose: main-vhost Reverse Proxy (NodeJS)'
+        run: |
+          cd ./examples/default-vhost__reverse-proxy__node/
+          ./integration-test.sh
+
+      - name: 'docker-compose: mass-vhost PHP-FPM (SSL)'
+        run: |
+          cd ./examples/mass-vhost__php-fpm__ssl/
+          ./integration-test.sh
+
+      - name: 'docker-compose: mass-vhost Reverse Proxy (SSL)'
+        run: |
+          cd ./examples/mass-vhost__reverse-proxy__ssl/
+          ./integration-test.sh

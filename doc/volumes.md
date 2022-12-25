@@ -1,4 +1,6 @@
+[Architecture](architecture.md) |
 [Features](features.md) |
+[Examples](examples.md) |
 [Environment variables](environment-variables.md) |
 **Volumes**
 
@@ -7,7 +9,7 @@
 # Documentation: Volumes
 
 
-## `/var/www/default/`
+## 📂 `/var/www/default/`
 
 * **type:** data directory
 * **purpose:** website files for the default virtual host
@@ -26,7 +28,7 @@ docker run -d -it \
 ```
 
 
-## `/shared/httpd/`
+## 📂 `/shared/httpd/`
 
 * **type:** data directory
 * **purpose:** website files for the mass virtual hosts (your projects)
@@ -45,7 +47,17 @@ docker run -d -it \
 ```
 
 
-## `/etc/httpd-custom.d/`
+## 📂 `/ca/`
+
+* **type:** data directory
+* **purpose:** populated with CA certificate files
+
+This directory will be populated by a Certificate Authority, which signs every vhost SSL certificate. If you want to have valid SSL in your browser for every current and future project, simply import the CA files into your browser and/or system.
+
+**Note:** CA files are not being regenerated if they already exist. You could also place your own CA files in here.
+
+
+## 📂 `/etc/httpd-custom.d/`
 
 * **type:** config directory
 * **purpose:** Add `*.conf` files to alter the webserver behaviour
@@ -53,7 +65,7 @@ docker run -d -it \
 Mount this directory to your local file system and add any valid `*.conf` files to alter the web server behaviour.
 
 
-## `/etc/vhost-gen.d/`
+## 📂 `/etc/vhost-gen.d/`
 
 * **type:** config directory
 * **purpose:** Add [vhost-gen](https://github.com/devilbox/vhost-gen) templates to alter the webserver behaviour

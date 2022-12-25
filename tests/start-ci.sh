@@ -13,10 +13,8 @@ IFS=$'\n'
 # Current directory
 CWD="$( dirname "${0}" )"
 IMAGE="${1}"
-NAME="${2}"
-VERSION="${3}"
-TAG="${4}"
-ARCH="${5}"
+TAG="${2}"
+ARCH="${3}"
 
 declare -a TESTS=()
 
@@ -33,18 +31,22 @@ for f in ${FILES}; do
 	TESTS+=("${f}")
 done
 
-# Start a single test
-if [ "${#}" -eq "3" ]; then
-	sh -c "${TESTS[${2}]} ${IMAGE} ${NAME} ${VERSION} ${TAG} ${ARCH}"
-
-# Run all tests
-else
-	for i in "${TESTS[@]}"; do
-		echo "################################################################################"
-		echo "# [${CWD}/${i}] ${IMAGE}:${TAG} ${NAME}-${VERSION} (${ARCH})"
-		echo "################################################################################"
-		if ! sh -c "${i} ${IMAGE} ${NAME} ${VERSION} ${TAG} ${ARCH}"; then
-			exit 1
-		fi
-	done
-fi
+for i in "${TESTS[@]}"; do
+	FILE="$( basename "${i}" | sed 's/.sh$//g' )"
+	NUMBER="${FILE/[-_a-z]*/}"
+	VHOST="$(   echo "${FILE}" | sed 's/[0-9]*-//' | awk -F'__' '{print $1}' )"
+	TYPE="$(    echo "${FILE}" | sed 's/[0-9]*-//' | awk -F'__' '{print $2}' )"
+	FEATURE="$( echo "${FILE}" | sed 's/[0-9]*-//' | awk -F'__' '{print $3}' )"
+	echo "####################################################################################################"
+	echo "####################################################################################################"
+	echo "###"
+	echo "### [${NUMBER}] ${VHOST} (${TYPE} - ${FEATURE})   ${IMAGE}:${TAG} (${ARCH})"
+	echo "###"
+	echo "####################################################################################################"
+	echo "####################################################################################################"
+	if ! sh -c "${i} ${IMAGE} ${TAG} ${ARCH}"; then
+		exit 1
+	fi
+	echo
+	echo
+done

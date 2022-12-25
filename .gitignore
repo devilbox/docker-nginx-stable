@@ -1,2 +1,5 @@
 Makefile.docker
 Makefile.lint
+devilbox-ca.crt
+devilbox-ca.key
+devilbox-ca.srl
