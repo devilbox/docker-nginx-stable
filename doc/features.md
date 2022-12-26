@@ -94,7 +94,9 @@ Reverse Proxies are configured in a similar way to how PHP-FPM is setup as a rem
 ```bash
 MAIN_VHOST_BACKEND:conf:rproxy:<protocol>:<server-addr>:<server-port>
 ```
-Where `<procotol>` can by one of `http` or `https` (depending what your backend provides. `<server-addr>` and `<serer-port>` specify the hostname, IPv4 or IPv6 address of your upstream server, followed by its TCP port.
+Where `<procotol>` can by one of `http`, `https`, `ws` or `wss` (depending what your backend provides. `<server-addr>` and `<serer-port>` specify the hostname, IPv4 or IPv6 address of your upstream server, followed by its TCP port.
+
+**Note:** When specifying `ws` or `wss`, the webserver will automatically be configured to be capable of communicating with web sockets.
 
 
 
