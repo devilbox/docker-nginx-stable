@@ -12,7 +12,7 @@ LABEL \
 ###
 ### Build arguments
 ###
-ARG VHOST_GEN_GIT_REF=1.0.8
+ARG VHOST_GEN_GIT_REF=release-1.0.9
 ARG WATCHERD_GIT_REF=v1.0.7
 ARG CERT_GEN_GIT_REF=0.10
 
@@ -36,7 +36,7 @@ RUN set -eux \
 		${RUN_DEPS} \
 	\
 	# Install vhost-gen
-	&& wget --no-check-certificate -O vhost-gen.tar.gz "https://github.com/devilbox/vhost-gen/archive/refs/tags/${VHOST_GEN_GIT_REF}.tar.gz" \
+	&& wget --no-check-certificate -O vhost-gen.tar.gz "https://github.com/devilbox/vhost-gen/archive/${VHOST_GEN_GIT_REF}.tar.gz" \
 	&& tar xvfz vhost-gen.tar.gz \
 	&& cd "vhost-gen-${VHOST_GEN_GIT_REF}" \
 	&& make install \
