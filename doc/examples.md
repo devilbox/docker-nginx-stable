@@ -14,8 +14,9 @@
 3. [Serve PHP files with PHP-FPM and sync local permissions](#-serve-php-files-with-php-fpm-and-sync-local-permissions)
 4. [Serve PHP files with PHP-FPM over HTTPS](#-serve-php-files-with-php-fpm-over-https)
 5. [Act as a Reverse Proxy for NodeJS](#-act-as-a-reverse-proxy-for-nodejs)
-6. [Fully functional LEMP stack with Mass vhosts](#-fully-functional-lemp-stack-with-mass-vhosts)
-7. [Docker Compose](#-docker-compose)
+6. [Act as a Reverse Proxy for Websocket](#-act-as-a-reverse-proxy-for-websocket)
+7. [Fully functional LEMP stack with Mass vhosts](#-fully-functional-lemp-stack-with-mass-vhosts)
+8. [Docker Compose](#-docker-compose)
 
 
 
@@ -233,6 +234,89 @@ The following example proxies all HTTP requests to a NodeJS remote backend. You 
 4. Verify
    ```bash
    curl http://localhost
+   ```
+
+
+
+## 💡 Act as a Reverse Proxy for Websocket
+
+The following example proxies all HTTP requests to a Websocket remote backend. You could also enable SSL on the webserver in order to access the websocket backend via HTTPS.
+
+* **Vhost:** main (default)
+* **Backend:** Reverse Proxy (with websocket support)
+
+> 🛈 No files need to be mounted into the webserver, as content is coming from the websocket server.
+
+1. Create a websocket server application
+   ```bash
+   # Create source directory
+   mkdir -p src
+
+   # websocket server application
+   cat << EOF > src/index.js
+   const WebSocket = require("ws");
+   const wss = new WebSocket.Server({ port: 3000 });
+   wss.on("connection", (ws) => {
+     ws.send("hello client, you are connected to me");
+     ws.on("message", (message) => {
+       console.log("New message from client: %s", message);
+     });
+   });
+   console.log("WebSocket server ready at localhost:3000");
+   EOF
+
+   # package.json
+   cat << EOF > src/package.json
+   {
+     "name": "node-websocket-example",
+     "version": "1.0.0",
+     "main": "index.js",
+     "devDependencies": {},
+     "scripts": {
+       "test": "echo \"Error: no test specified\" && exit 1"
+     },
+     "keywords": [],
+     "author": "",
+     "license": "ISC",
+     "description": "",
+     "dependencies": {
+       "ws": "^7.5.1"
+     }
+   }
+   EOF
+
+   # Startup script
+   cat << EOF > src/start.sh
+   #!/bin/sh
+   npm install
+   node index.js
+   EOF
+   ```
+2. Start the Websocket server container
+   ```bash
+   docker run -d -it \
+       --name websocket \
+       -v $(pwd)/src:/app \
+	   -w /app \
+       node:19-alpine sh start.sh
+   ```
+3. Start Reverse Proxy
+   ```bash
+   docker run -d -it \
+       -p 80:80 \
+       -e MAIN_VHOST_BACKEND='conf:rproxy:ws:websocket:3000' \
+       --link websocket \
+       devilbox/nginx-stable
+   ```
+4. Verify
+   ```bash
+   # On your host system
+   npm install -g wscat
+   wscat --connect localhost
+
+   Connected (press CTRL+C to quit)
+   < hello client, you are connected to me
+   >
    ```
 
 
