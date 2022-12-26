@@ -22,6 +22,8 @@ set -o pipefail
 ###       conf:phpfpm:tcp:<host>:<port>    # Remote PHP-FPM server at <host>:<port>
 ###       conf:rproxy:http:<host>:<port>   # Reverse Proxy server at http://<host>:<port>
 ###       conf:rproxy:https:<host>:<port>  # Reverse Proxy server at https://<host>:<port>
+###       conf:rproxy:ws:<host>:<port>     # Reverse Proxy (websocket) at ws://<host>:<port>
+###       conf:rproxy:wss:<host>:<port>    # Reverse Proxy (websocket) at wss://<host>:<port>
 ###
 ###
 ### Format-2: file:<file>
@@ -40,6 +42,8 @@ set -o pipefail
 ###   Examples:
 ###       conf:rproxy:http:10.0.0.1:3000
 ###       conf:rproxy:https:mydomain.com:8080
+###       conf:rproxy:ws:10.0.0.1:3000
+###       conf:rproxy:wss:10.0.0.1:3000
 ###
 ###   Note: If no file is found, a warning will be logged and no Reverse proxy will be created.
 ###
@@ -90,7 +94,13 @@ backend_conf_is_valid() {
 	fi
 	# 3. Protocol: 'tcp', 'http' or 'https'
 	if ! backend_is_valid_conf_prot "${1}"; then
-		echo "Invalid backend conf:<prot> in: '${1}'. It must be 'tcp', 'http' or 'https'"
+		# Apache 2.2 does not have websocket support
+		if [ "${VHOSTGEN_HTTPD_SERVER}" = "apache22" ]; then
+			echo "Invalid backend conf:<prot> in: '${1}'. It must be 'tcp', 'http' or 'https'."
+		# All other webserver have websocket support
+		else
+			echo "Invalid backend conf:<prot> in: '${1}'. It must be 'tcp', 'http', 'https', 'ws' or 'wss'."
+		fi
 		return 1
 	fi
 	# 4. Host
@@ -116,9 +126,22 @@ backend_conf_is_valid() {
 	fi
 	# 7. Validate conf <protocol> rproxy == http(s)?
 	if [ "${backend_conf_type}" = "rproxy" ]; then
-		if [ "${backend_conf_prot}" != "http" ] && [ "${backend_conf_prot}" != "https" ]; then
-			echo "Invalid backend conf:<prot> in: '${1}'. 'rproxy' only supports 'http' or 'https'"
-			return 1
+		# Apache 2.2 does not have websocket support
+		if [ "${VHOSTGEN_HTTPD_SERVER}" = "apache22" ]; then
+			if [ "${backend_conf_prot}" != "http" ] \
+			&& [ "${backend_conf_prot}" != "https" ]; then
+				echo "Invalid backend conf:<prot> in: '${1}'. 'rproxy' only supports 'http' and 'https'"
+				return 1
+			fi
+		# All other webserver have websocket support
+		else
+			if [ "${backend_conf_prot}" != "http" ] \
+			&& [ "${backend_conf_prot}" != "https" ] \
+			&& [ "${backend_conf_prot}" != "ws" ] \
+			&& [ "${backend_conf_prot}" != "wss" ]; then
+				echo "Invalid backend conf:<prot> in: '${1}'. 'rproxy' only supports 'http', 'https', 'ws' and 'wss'"
+				return 1
+			fi
 		fi
 	fi
 }
@@ -181,8 +204,14 @@ backend_is_valid_conf_prot() {
 	local value
 	value="$( get_backend_conf_prot "${1}" )"
 
-	if [ "${value}" != "tcp" ] && [ "${value}" != "http" ] && [ "${value}" != "https" ]; then
-		return 1
+	if [ "${VHOSTGEN_HTTPD_SERVER}" = "apache22" ];then
+		if [ "${value}" != "tcp" ] && [ "${value}" != "http" ] && [ "${value}" != "https" ]; then
+			return 1
+		fi
+	else
+		if [ "${value}" != "tcp" ] && [ "${value}" != "http" ] && [ "${value}" != "https" ] && [ "${value}" != "ws" ] && [ "${value}" != "wss" ]; then
+			return 1
+		fi
 	fi
 	return 0
 }
