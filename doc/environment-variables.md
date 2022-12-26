@@ -349,7 +349,7 @@ The given value determines the backend (potentia remote/reveres hosts) for the m
 * **Var type:** `string`
 * **Requires:** `MAIN_VHOST_ENABLE=1`
 
-You can configure a remote backend via this environment variable. Either a remote PHP-FPM server or any kind of service via `http` or `https` reverse proxy.
+You can configure a remote backend via this environment variable. Either a remote PHP-FPM server or any kind of service via `http`, `https`, `ws`, or `wss` reverse proxy (where `ws` and `wss` are for websocket backends).
 
 ### String format
 
@@ -369,7 +369,7 @@ The backend environment variable supports two different formats.
 With the direct configuration you set everything explicitly via this environment variable and nothing else is required.
 
 * **`<type>`**: `phpfpm` or `rproxy`
-* **`<protocol>`**: `tcp`, `http` or `https`
+* **`<protocol>`**: `tcp`, `http`, `https`, `ws` or `wss`
 * **`<host>`**: the address of upstream host to send requests to (`hostname`, `IPv4` or `IPv6`).
 * **`<port>`**: the port of the upstream host to send requests to
 
@@ -378,6 +378,8 @@ With the direct configuration you set everything explicitly via this environment
 MAIN_VHOST_BACKEND=conf:phpfpm:tcp:10.0.0.1:9000
 MAIN_VHOST_BACKEND=conf:rproxy:http:10.0.0.1:3000
 MAIN_VHOST_BACKEND=conf:rproxy:https:10.0.0.1:3000
+MAIN_VHOST_BACKEND=conf:rproxy:ws:10.0.0.1:3000
+MAIN_VHOST_BACKEND=conf:rproxy:wss:10.0.0.1:3000
 ```
 
 When specifying `phpfpm`, the vhost will also automatically be configured for serving PHP files. (including `index.php` for its directory index).
