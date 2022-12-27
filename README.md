@@ -17,7 +17,7 @@
 
 This image is based on the official **[Nginx](https://hub.docker.com/_/nginx)** Docker image and extends it with the ability to have **virtual hosts created automatically**, as well as **adding SSL certificates** when creating new directories. For that to work, it integrates two tools that will take care about the whole process: **[watcherd](https://github.com/devilbox/watcherd)** and **[vhost-gen](https://github.com/devilbox/vhost-gen)**.
 
-From a users perspective, you mount your local project directory into the container under `/shared/httpd`. Any directory then created in your local project directory wil spawn a new virtual host by the same name. Each virtual host optionally supports a generic or custom backend configuration (**static files**, **PHP-FPM** or **reverse proxy**).
+From a users perspective, you mount your local project directory into the container under `/shared/httpd`. Any directory then created in your local project directory wil spawn a new virtual host by the same name. Each virtual host optionally supports a generic or custom backend configuration: **static files**, **PHP-FPM**, **reverse proxy** (with or without **websocket** support)..
 
 **HTTP/2 is enabled by default for all SSL connections.**
 
@@ -100,7 +100,7 @@ Below is a brief overview about most outstanding features, but I would still adv
 * PHP is not included in the provided images, but you can enable a remote backend and link it to a PHP-FPM image. This allows you to easily switch PHP versions and choose one which is currently required.
 
 #### Automated Reverse Proxy setup
-* In reverse proxy mode, you can choose any http or https backend of your likings. This way you can proxy NodeJS, Python, etc. and use the webserver to add SSL in front.
+* In reverse proxy mode, you can choose any http or https backend of your likings. This way you can proxy NodeJS, Python, etc. and use the webserver to add SSL in front. It distinguishes between HTTP backends (`http://`, `https://`) and Websocket backends (`ws://`, `wss://`) automatically and configures accordingly.
 
 #### Automated SSL certificate generation
 * SSL certificates are generated automatically for each virtual host if you choose to enable it
@@ -246,6 +246,7 @@ The given examples distinguish between two different kinds of setup: The default
    &nbsp;&nbsp;&nbsp;💡 <a href="doc/examples.md#-serve-php-files-with-php-fpm-and-sync-local-permissions" >Sync local filestem permission</a><br/>
    &nbsp;&nbsp;&nbsp;💡 <a href="doc/examples.md#-serve-php-files-with-php-fpm-over-https" >Serve PHP files over HTTPS</a><br/>
    &nbsp;&nbsp;&nbsp;💡 <a href="doc/examples.md#-act-as-a-reverse-proxy-for-nodejs" >Reverse Proxy NodeJS</a><br/>
+   &nbsp;&nbsp;&nbsp;💡 <a href="doc/examples.md#-act-as-a-reverse-proxy-websockets" >Reverse Proxy Websocket</a><br/>
   </td>
   <td>
    <strong>Unlimited vhosts</strong><br/>

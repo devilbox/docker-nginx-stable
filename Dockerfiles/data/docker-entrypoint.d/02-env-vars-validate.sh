@@ -647,7 +647,12 @@ _validate_vhost_backend() {
 		# 5. Validate conf <protocol>
 		if ! backend_is_valid_conf_prot "${value}"; then
 			_log_env_valid "invalid" "${name}" "${value}" "Invalid format"
-			_log_env_valid "invalid" "${name}" "${backend_conf_prot}" "<proto> is invalid. Must be: " "'tcp', 'http' or 'https'"
+			# Apache 2.2 does not have websocket support
+			if [ "${VHOSTGEN_HTTPD_SERVER}" = "apache22" ];then
+				_log_env_valid "invalid" "${name}" "${backend_conf_prot}" "<proto> is invalid. Must be: " "'tcp', 'http' or 'https'"
+			else
+				_log_env_valid "invalid" "${name}" "${backend_conf_prot}" "<proto> is invalid. Must be: " "'tcp', 'http', 'https', 'ws' or 'wss'"
+			fi
 			_log_backend_examples "conf"
 			exit 1
 		fi
@@ -662,11 +667,21 @@ _validate_vhost_backend() {
 		fi
 		# 7. Validate conf <protocol> rproxy == http(s)?
 		if [ "${backend_conf_type}" = "rproxy" ]; then
-			if [ "${backend_conf_prot}" != "http" ] && [ "${backend_conf_prot}" != "https" ]; then
-				_log_env_valid "invalid" "${name}" "${value}" "Invalid format"
-				_log_env_valid "invalid" "${name}" "${backend_conf_prot}" "rproxy only supports protocol " "'http' or 'https'"
-				_log_backend_examples "conf"
-				exit 1
+			# Apache 2.2 does not have websocket support
+			if [ "${VHOSTGEN_HTTPD_SERVER}" = "apache22" ];then
+				if [ "${backend_conf_prot}" != "http" ] && [ "${backend_conf_prot}" != "https" ]; then
+					_log_env_valid "invalid" "${name}" "${value}" "Invalid format"
+					_log_env_valid "invalid" "${name}" "${backend_conf_prot}" "rproxy only supports protocol " "'http' and 'https'"
+					_log_backend_examples "conf"
+					exit 1
+				fi
+			else
+				if [ "${backend_conf_prot}" != "http" ] && [ "${backend_conf_prot}" != "https" ] && [ "${backend_conf_prot}" != "ws" ] && [ "${backend_conf_prot}" != "wss" ]; then
+					_log_env_valid "invalid" "${name}" "${value}" "Invalid format"
+					_log_env_valid "invalid" "${name}" "${backend_conf_prot}" "rproxy only supports protocol " "'http', 'https', 'ws' and 'wss'"
+					_log_backend_examples "conf"
+					exit 1
+				fi
 			fi
 		fi
 		# 8. Validate conf <host>
@@ -1062,11 +1077,13 @@ _log_backend_examples() {
 		log "err" "Example: conf:phpfpm:tcp:10.0.0.100:9000"
 		log "err" "Example: conf:phpfpm:tcp:domain.com:9000"
 		log "err" ""
-		log "err" "Example: conf:rproxy:http:10.0.0.100:3000"
-		log "err" "Example: conf:rproxy:http:domain.com:443"
-		log "err" ""
-		log "err" "Example: conf:rproxy:https:10.0.0.100:8080"
+		log "err" "Example: conf:rproxy:http:10.0.0.100:8080"
 		log "err" "Example: conf:rproxy:https:domain.com:8443"
+		if [ "${VHOSTGEN_HTTPD_SERVER}" != "apache22" ]; then
+		log "err" ""
+		log "err" "Example: conf:rproxy:ws:10.0.0.100:8080"
+		log "err" "Example: conf:rproxy:wss:domain.com:8443"
+		fi
 	fi
 	if [ "${show}" = "all" ] || [ "${show}" = "file" ]; then
 		log "err" ""
