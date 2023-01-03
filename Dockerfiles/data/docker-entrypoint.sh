@@ -356,7 +356,7 @@ if [ "${MASS_VHOST_ENABLE}" -eq "1" ]; then
 
 	supervisord_create \
 		"${HTTPD_START}" \
-		"bash -c 'sleep ${WATCHERD_STARTUP_DELAY} && exec watcherd -c -v -p ${MASS_DOCROOT_BASE} -a \"${watcherd_add}\" -d \"${watcherd_del}\" -t \"${watcherd_tri}\"'" \
+		"bash -c 'sleep ${WATCHERD_STARTUP_DELAY} && exec watcherd -e \"^\\.\" -c -v -p ${MASS_DOCROOT_BASE} -a \"${watcherd_add}\" -d \"${watcherd_del}\" -t \"${watcherd_tri}\"'" \
 		"/etc/supervisord.conf"
 
 	log "done" "Starting supervisord: ${_SUPVD_VERSION} [HTTPD: ${_HTTPD_VERSION}]"
