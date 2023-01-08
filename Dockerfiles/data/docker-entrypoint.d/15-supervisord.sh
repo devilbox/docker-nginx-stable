@@ -80,13 +80,8 @@ supervisord_create() {
 		echo "startretries=100"
 		echo "startsecs=1"
 		echo "autorestart=true"
-		if [ "${SVCTL_REMOTE_LOGS_ENABLE}" = "1" ]; then
-			echo "stdout_logfile=/var/log/supervisord-httpd.log"
-			echo "stderr_logfile=/var/log/supervisord-httpd.err"
-		else
-			echo "stdout_logfile=/dev/stdout"
-			echo "stderr_logfile=/dev/stderr"
-		fi
+		echo "stdout_logfile=/dev/stdout"
+		echo "stderr_logfile=/dev/stderr"
 		echo "stdout_logfile_maxbytes=0"
 		echo "stderr_logfile_maxbytes=0"
 		echo "stdout_events_enabled=true"
